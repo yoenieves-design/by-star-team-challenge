@@ -75,7 +75,8 @@
               "type": "object", "additionalProperties": false, "required": ["title", "instruction"],
               "properties": {
                 "title": { "$ref": "#/$defs/text" }, "instruction": { "$ref": "#/$defs/text" },
-                "requiresAssignee": { "type": "boolean" }
+                "requiresAssignee": { "type": "boolean" },
+                "requiresCheckIn": { "type": "boolean" }
               }
             }
           },

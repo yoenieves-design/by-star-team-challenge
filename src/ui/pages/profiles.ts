@@ -1,4 +1,5 @@
 import { html } from 'lit-html';
+import { isWorkPending } from '../../services/follow-up.ts';
 import { deviceReadings, metrics } from '../../domain/metrics.ts';
 import { bodyTelemetry } from '../components/body-telemetry.ts';
 import { avatar, deviceReadingTag, tag, workTag } from '../components/common.ts';
@@ -13,7 +14,7 @@ function crewOverview(vm: ViewModel) {
     const air = breathingReadings(vm, vm.snapshot.context[person.id].breathingZoneId);
     return [...bodyReadings(vm, person), ...air].every(({ current }) => current.status === 'fresh');
   }).length;
-  const alerts = vm.work.filter(item => item.alert && item.progress.status !== 'complete');
+  const alerts = vm.work.filter(item => item.alert && isWorkPending(item));
   return html`<section aria-labelledby="bs-crew-overview">
     <div class="bs-card-heading bs-wrap">
       <div><h2 id="bs-crew-overview">Crew overview</h2><p>Select a body marker to see its source and measurement time.</p></div>
@@ -131,7 +132,8 @@ function missionProfile(vm: ViewModel) {
         </th><td>${personName(vm, item.task!.crewId)}</td>
           <td>${clock(vm.mission, item.task!.opensAtS)}</td><td>${clock(vm.mission, item.task!.dueAtS)}</td>
           <td>${!item.available && item.progress.status === 'new'
-            ? tag(vm.snapshot.atS < item.task!.opensAtS ? 'Upcoming' : 'Outside activity window') : workTag(item.progress.status)}</td>
+            ? tag(vm.snapshot.atS < item.task!.opensAtS ? 'Upcoming' : 'Outside activity window')
+            : item.progress.status === 'complete' && isWorkPending(item) ? tag('Follow-up pending', 'amber') : workTag(item.progress.status)}</td>
         </tr>`)}</tbody>
       </table></div>
     </section>

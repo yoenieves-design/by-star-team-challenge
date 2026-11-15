@@ -4,6 +4,24 @@ import type { Metric, Reading, Subject } from '../../domain/types.ts';
 import { clock, type ViewModel } from '../view-model.ts';
 
 type Point = Reading & { value: number };
+type ChartEvent = { atS: number; kind: 'activity' | 'review'; label: string };
+
+function contextEvents(vm: ViewModel, crewId: string, zoneId: string, metric: Metric, from: number, to: number): ChartEvent[] {
+  const personal = metrics[metric].subjectType === 'crew';
+  const activity: ChartEvent[] = personal ? vm.scenario.events.flatMap(event => event.type === 'context' && event.crewId === crewId
+    ? [{ atS: event.atS, kind: 'activity' as const, label: event.context.activity }] : []) : [];
+  const reviews: ChartEvent[] = vm.work.flatMap(item => {
+    const alert = item.alert;
+    if (!alert || (personal ? !alert.crewIds.includes(crewId) : alert.zoneId !== zoneId)) return [];
+    const relevant = alert.evidence.some(reading => reading.metric === metric)
+      || alert.kind === 'personal' && metric === 'heart_rate'
+      || alert.kind === 'sensor' && vm.mission.devices.some(device => device.id === alert.deviceId && device.metrics.includes(metric));
+    return relevant ? [{ atS: alert.atS, kind: 'review' as const, label: 'Review opened · ' + alert.title }] : [];
+  });
+  // Bound the marker count so a long incident history does not obscure the trend.
+  return [...activity, ...reviews].filter(event => event.atS >= from && event.atS <= to)
+    .sort((a, b) => a.atS - b.atS).slice(-5);
+}
 
 function groups(readings: Reading[], maxAgeS: number) {
   const segments: Point[][] = [];
@@ -22,7 +40,7 @@ function groups(readings: Reading[], maxAgeS: number) {
   return segments;
 }
 
-function plot(vm: ViewModel, readings: Reading[], metric: Metric, from: number, to: number) {
+function plot(vm: ViewModel, readings: Reading[], metric: Metric, from: number, to: number, events: ChartEvent[]) {
   const device = vm.mission.devices.find(item => item.id === readings.at(-1)?.deviceId);
   const segments = groups(readings, device?.maxAgeS || 18);
   const values = segments.flat().map(point => point.value);
@@ -56,6 +74,11 @@ function plot(vm: ViewModel, readings: Reading[], metric: Metric, from: number, 
         <circle class="bs-chart-point" cx=${end} cy=${y(last.value)} r="4"/>
       </g>`;
     })}
+    ${events.map(event => svg`<g>
+      <title>${clock(vm.mission, event.atS)} UTC · ${event.label}</title>
+      <line class="bs-chart-event-line" data-kind=${event.kind} x1=${x(event.atS)} x2=${x(event.atS)} y1=${top} y2=${bottom}/>
+      <path d=${`M${x(event.atS) - 3} ${top}h6l-3 5z`} fill=${event.kind === 'review' ? '#8a5a18' : '#647b70'}/>
+    </g>`)}
   </svg>`;
 }
 
@@ -66,6 +89,11 @@ export function trendChart(vm: ViewModel, crewId: string, zoneId: string) {
   const to = vm.snapshot.atS;
   const from = vm.state.trendWindow === 'recent' ? Math.max(0, to - 60) : 0;
   const readings = (vm.snapshot.readings.get(subjectKey(subject, metric)) ?? []).filter(item => item.measuredAtS >= from);
+  const events = contextEvents(vm, crewId, zoneId, metric, from, to);
+  let startingContext = vm.scenario.initialContext[crewId];
+  for (const event of vm.scenario.events.filter(event => event.atS <= from).sort((a, b) => a.atS - b.atS)) {
+    if (event.type === 'context' && event.crewId === crewId) startingContext = event.context;
+  }
   return html`<section class="bs-card bs-chart-card" aria-labelledby="bs-trend-title">
     <div class="bs-card-heading bs-wrap">
       <div><h3 id="bs-trend-title">Indicator trend</h3><p>Measured time · UTC</p></div>
@@ -80,16 +108,24 @@ export function trendChart(vm: ViewModel, crewId: string, zoneId: string) {
       </div>
     </div>
     <figure>
-      ${plot(vm, readings, metric, from, to)}
+      ${plot(vm, readings, metric, from, to, events)}
       <figcaption>${metrics[metric].explanation} Gaps indicate missing or unreliable data.</figcaption>
     </figure>
+    ${subjectType === 'crew' ? html`<p class="bs-muted">Activity at window start: ${startingContext.activity}.</p>` : ''}
+    ${events.length ? html`<details class="bs-details" open>
+      <summary>Context markers · latest ${events.length}</summary>
+      <ol class="bs-chart-events">${events.map(event => html`<li>
+        <time>${clock(vm.mission, event.atS)} UTC</time><span>${event.label}</span>
+      </li>`)}</ol>
+    </details>` : ''}
     ${readings.length ? html`<details class="bs-details">
       <summary>View readings as a table</summary>
       <div class="bs-table-wrap"><table>
         <caption>${metrics[metric].label} · ${metrics[metric].unit}</caption>
-        <thead><tr><th scope="col">Measured UTC</th><th scope="col">Value</th><th scope="col">Quality</th></tr></thead>
+        <thead><tr><th scope="col">Measured UTC</th><th scope="col">Value</th><th scope="col">Quality</th>${subjectType === 'crew' ? html`<th scope="col">Activity when measured</th>` : ''}</tr></thead>
         <tbody>${[...readings].reverse().map(item => html`<tr><td>${clock(vm.mission, item.measuredAtS)}</td>
-          <td>${item.value === null ? '—' : numberLabel(item.value, metric)}</td><td>${item.quality}</td></tr>`)}</tbody>
+          <td>${item.value === null ? '—' : numberLabel(item.value, metric)}</td><td>${item.quality}</td>
+          ${subjectType === 'crew' ? html`<td>${item.context?.activity ?? 'Context unavailable'}</td>` : ''}</tr>`)}</tbody>
       </table></div>
     </details>` : ''}
   </section>`;

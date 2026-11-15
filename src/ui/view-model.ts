@@ -1,5 +1,7 @@
 import type { Metric, Mission, Scenario, Session, Snapshot } from '../domain/types.ts';
 import type { WorkItem } from '../services/follow-up.ts';
+import type { ClinicalData } from '../domain/clinical.ts';
+import type { VoiceState } from '../adapters/voice.ts';
 
 export const pageNames = { health: 'Health', assist: 'Assist', profiles: 'Profiles' };
 export type Page = keyof typeof pageNames;
@@ -22,6 +24,7 @@ export interface ViewState {
   notice: string;
   error: string;
   saving: boolean;
+  voice: VoiceState;
 }
 
 export interface ViewModel {
@@ -34,6 +37,10 @@ export interface ViewModel {
   work: WorkItem[];
   playing: boolean;
   persistent: boolean;
+  clinical: ClinicalData | null;
+  clinicalError: string;
+  guided: boolean;
+  tourStep: number;
   nextEvent?: Scenario['milestones'][number];
   href: (page: Page, workId?: string) => string;
   asset: (path: string) => string;
@@ -55,6 +62,13 @@ export function sensorsHref(vm: ViewModel) {
 
 export function missionScheduleHref(vm: ViewModel) {
   return profileHref(vm, 'mission');
+}
+
+export function checkInHref(vm: ViewModel) {
+  const url = new URL(vm.href('health'));
+  url.searchParams.set('by_star_health', 'personal');
+  url.searchParams.set('by_star_checkin', '1');
+  return url.href;
 }
 
 export function personName(vm: ViewModel, id: string | undefined) {

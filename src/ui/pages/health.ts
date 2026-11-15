@@ -1,7 +1,9 @@
 import { html } from 'lit-html';
 import { repeat } from 'lit-html/directives/repeat.js';
 import { metrics } from '../../domain/metrics.ts';
-import type { WorkItem } from '../../services/follow-up.ts';
+import { isWorkPending, type WorkItem } from '../../services/follow-up.ts';
+import { clinicalChecks, clinicalNextTask } from '../components/clinical-checks.ts';
+import { quickCheckIn } from '../components/quick-check-in.ts';
 import { alertLabels, avatar, localLinkTag, measurementDetail, measurementValue, readingTag, tag, workTag } from '../components/common.ts';
 import { bodyTelemetry } from '../components/body-telemetry.ts';
 import { icon } from '../components/icons.ts';
@@ -31,7 +33,7 @@ function crewCards(vm: ViewModel) {
       const context = vm.snapshot.context[person.id];
       const readings = bodyReadings(vm, person);
       const current = readings.filter(({ current }) => current.status === 'fresh').length;
-      const open = vm.work.filter(work => work.alert && work.crewIds.includes(person.id) && work.progress.status !== 'complete').length;
+      const open = vm.work.filter(work => work.alert && work.crewIds.includes(person.id) && isWorkPending(work)).length;
       return html`<button type="button" class="bs-crew-card" data-action="select-crew" data-crew=${person.id}
         aria-pressed=${selected ? 'true' : 'false'} ?disabled=${vm.state.saving}>
         <span class="bs-crew-card-top">${avatar(person)}
@@ -66,22 +68,23 @@ function environment(vm: ViewModel, zoneId: string) {
 
 function nextTask(vm: ViewModel) {
   const tasks = vm.work.filter(item => item.task && item.crewIds.includes(vm.session.crewId));
-  const pending = tasks.filter(task => task.progress.status !== 'complete' && (task.available || task.progress.status !== 'new'))
+  const pending = tasks.filter(task => isWorkPending(task) && (task.available || task.progress.status !== 'new'))
     .sort((a, b) => a.task!.dueAtS - b.task!.dueAtS);
   const next = pending.find(task => task.progress.status !== 'new') ?? pending[0];
-  const completed = tasks.filter(task => task.progress.status === 'complete').length;
+  const completed = tasks.filter(task => !isWorkPending(task)).length;
   return html`<section class="bs-card bs-task-card" aria-labelledby="bs-next-task">
     <div class="bs-card-heading"><div><h2 id="bs-next-task">Next health task</h2><p>Assigned mission routine</p></div>
       <span class="bs-card-icon">${icon('calendar', 21)}</span>
     </div>
     ${next ? html`<strong>${next.title}</strong><p>${next.detail}</p>
       <p class="bs-task-time bs-wrap">${icon('clock', 16)} ${vm.snapshot.atS > next.task!.dueAtS ? 'Past due' : 'Due'} · ${clock(vm.mission, next.task!.dueAtS)} UTC
-        ${next.progress.status !== 'new' ? workTag(next.progress.status) : ''}</p>
+        ${next.progress.status === 'complete' && isWorkPending(next) ? tag('Follow-up pending', 'amber') : next.progress.status !== 'new' ? workTag(next.progress.status) : ''}</p>
       <a class="bs-button bs-button-line" href=${vm.href('assist', next.id)}>${next.progress.status === 'new' ? 'Open check-in' : 'Continue check-in'} ${icon('arrow', 16)}</a>`
       : html`<p>No check available for the current activity.</p>`}
     ${tasks.length ? html`<div class="bs-routine"><span>Scheduled checks</span><strong>${completed} of ${tasks.length} complete</strong>
       <progress value=${completed} max=${tasks.length} aria-label="Routine tasks completed"></progress></div>` : ''}
     <a class="bs-button bs-button-plain bs-schedule-link" href=${missionScheduleHref(vm)}>View mission schedule ${icon('arrow', 15)}</a>
+    ${vm.clinical ? clinicalNextTask(vm, vm.clinical) : ''}
   </section>`;
 }
 
@@ -99,7 +102,7 @@ function alertsList(vm: ViewModel, alerts: WorkItem[], openCount: number) {
       return html`<a href=${vm.href('assist', item.id)} class="bs-alert-row">
         ${icon(alert.kind === 'sensor' ? 'sensor' : alert.kind === 'environment' ? 'wind' : 'assist', 18)}
         <span><strong>${concern ? item.detail : item.title}</strong><small>${context} · ${clock(vm.mission, alert.atS)} UTC</small></span>
-        ${workTag(item.progress.status)}
+        ${item.progress.status === 'complete' && isWorkPending(item) ? tag('Follow-up pending', 'amber', 'warning') : workTag(item.progress.status)}
       </a>`;
     }) : html`<p>No alerts have been recorded for this view.</p>`}
   </section>`;
@@ -110,9 +113,11 @@ export function healthPage(vm: ViewModel) {
   const context = vm.snapshot.context[person.id];
   const personal = vm.state.healthMode === 'personal';
   const related = vm.work.filter(item => item.alert && (!personal || item.crewIds.includes(person.id)))
-    .sort((a, b) => Number(a.progress.status === 'complete') - Number(b.progress.status === 'complete')
+    .sort((a, b) => Number(!isWorkPending(a)) - Number(!isWorkPending(b))
       || b.alert!.atS - a.alert!.atS);
-  const open = related.filter(item => item.progress.status !== 'complete');
+  const open = related.filter(isWorkPending);
+  const assigned = vm.work.filter(item => item.progress.assigneeId === person.id
+    && (isWorkPending(item) || item.progress.receipt === 'requested'));
   const lead = open.find(item => item.alert?.kind === 'environment') ?? open[0];
   const leadContext = lead?.crewIds.length ? lead.crewIds.length + (lead.crewIds.length === 1 ? ' crew member' : ' crew members')
     : zoneName(vm, lead?.alert?.zoneId);
@@ -122,7 +127,7 @@ export function healthPage(vm: ViewModel) {
     ${lead ? html`<section class="bs-incident" aria-labelledby="bs-incident-title">
       <span class="bs-incident-icon">${icon('warning', 23)}</span>
       <div>
-        <p class="bs-incident-meta">${alertLabels[lead.alert!.kind]} · ${leadContext} · ${workTag(lead.progress.status)}</p>
+        <p class="bs-incident-meta">${alertLabels[lead.alert!.kind]} · ${leadContext} · ${lead.progress.status === 'complete' ? tag('Follow-up pending', 'amber', 'warning') : workTag(lead.progress.status)}</p>
         <h2 id="bs-incident-title">${lead.title}</h2>
         <p>${lead.detail}</p>
       </div>
@@ -131,6 +136,8 @@ export function healthPage(vm: ViewModel) {
       </a>
     </section>` : ''}
     ${replayControls(vm)}
+    ${assigned.length ? html`<div class="bs-assigned-notice"><strong>${assigned.length} assigned to ${person.name}</strong>
+      <a href=${vm.href('assist', assigned[0].id)}>Review assigned requests ${icon('arrow', 15)}</a></div>` : ''}
     <div class="bs-section-heading bs-wrap">
       <div><h2>${personal ? 'My health' : 'Crew overview'}</h2><p>${personal ? 'Current readings and follow-up for ' + person.name + '.' : 'Select a crew member to view their readings and surroundings.'}</p></div>
       <div class="bs-segments" role="group" aria-label="Health view">
@@ -140,18 +147,21 @@ export function healthPage(vm: ViewModel) {
     </div>
     <div class="bs-dashboard-grid">
       <div class="bs-column">
-        ${personal ? '' : crewCards(vm)}
+        ${personal ? '' : html`<div class="bs-health-crew-cards">${crewCards(vm)}</div>`}
         <section class="bs-person-heading" aria-labelledby="bs-telemetry-title">
           ${avatar(person)}
           <div><h2 id="bs-telemetry-title">${person.name}</h2><p>${zoneName(vm, context.zoneId)} · ${context.activity}</p></div>
         </section>
         <section class="bs-card" aria-label="Body readings">${bodyTelemetry(vm, person)}</section>
         ${vm.session.simple ? '' : trendChart(vm, person.id, context.breathingZoneId)}
+        ${personal ? vm.clinical ? clinicalChecks(vm, vm.clinical) : html`<section class="bs-card"><h2>Clinical checks</h2><p role="status">${vm.clinicalError || 'Clinical reports are unavailable.'}</p></section>`
+          : html`<button type="button" class="bs-button bs-button-line" data-action="open-clinical-checks">View clinical checks for ${person.name}</button>`}
       </div>
       <div class="bs-column">
         ${alertsList(vm, related, open.length)}
         ${environment(vm, context.breathingZoneId)}
         ${nextTask(vm)}
+        ${quickCheckIn(vm)}
       </div>
     </div>
   `;

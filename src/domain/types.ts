@@ -64,7 +64,7 @@ export interface Procedure {
   title: string;
   purpose: string;
   requiredEquipment: string[];
-  steps: { title: string; instruction: string; requiresAssignee?: boolean }[];
+  steps: { title: string; instruction: string; requiresAssignee?: boolean; requiresCheckIn?: boolean }[];
   sourceIds: string[];
 }
 
@@ -140,6 +140,18 @@ export interface Alert {
   evidence: Reading[];
   procedureId: string;
   reason: string;
+  /** Stable rule key; later occurrences retain their own incident identifier. */
+  episodeKey?: string;
+  /** Time when new, usable observations confirmed that this episode ended. */
+  conditionEndedAtS?: number;
+}
+
+export type ReviewOutcome = 'verified' | 'unable-to-verify' | 'further-review';
+
+export interface AlertCondition {
+  status: 'active' | 'no-longer-detected' | 'unknown' | 'reported';
+  label: string;
+  detail: string;
 }
 
 export interface Snapshot {
@@ -156,8 +168,12 @@ export type FollowUpEvent =
   | { type: 'assign'; targetId: string; assigneeId: string }
   | { type: 'open'; targetId: string }
   | { type: 'step'; targetId: string; step: number }
+  | { type: 'outcome'; targetId: string; outcome: ReviewOutcome }
+  | { type: 'reopen'; targetId: string }
   | { type: 'pause' | 'resume' | 'request-support' | 'receipt'; targetId: string }
-  | { type: 'report'; targetId: string; category: string };
+  | { type: 'report'; targetId: string; category: string }
+  | { type: 'check-in'; targetId: string; sleep: 'rested' | 'mixed' | 'poor'; fatigue: 'low' | 'moderate' | 'high';
+      concern: string; onset: 'now' | 'earlier' | 'unsure' };
 
 export type OperatorEvent = FollowUpEvent & { atS: number; actorId: string; zoneId?: string };
 

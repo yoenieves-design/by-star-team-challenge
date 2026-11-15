@@ -5,6 +5,9 @@ import { icon } from './components/icons.ts';
 import { assistPage } from './pages/assist.ts';
 import { healthPage } from './pages/health.ts';
 import { profilesPage } from './pages/profiles.ts';
+import { voiceControls } from './components/voice-controls.ts';
+import { walkthrough } from './components/walkthrough.ts';
+import './styles/review-tools.css';
 import { clock, currentPerson, pageNames, type Page, type ViewModel } from './view-model.ts';
 
 const views = { health: healthPage, assist: assistPage, profiles: profilesPage };
@@ -53,10 +56,12 @@ export function shell(vm: ViewModel) {
           ${appGuideButton()}
         </div>
       </header>
+      ${voiceControls(vm.state.voice)}
       <div id="bs-content" class="bs-content" role="region" aria-label="Mission content" tabindex="-1">
         <p class="bs-visually-hidden" role="status">${vm.state.notice}</p>
         ${vm.state.error ? html`<p class="bs-error-note" role="alert">${vm.state.error}</p>` : ''}
         ${!vm.persistent ? html`<p class="bs-warning-note">${icon('info', 18)} Browser storage is unavailable. Progress will reset on navigation.</p>` : ''}
+        ${walkthrough(vm)}
         ${views[vm.page](vm)}
         <footer class="bs-footer">BY STAR · Fictional mission simulation</footer>
       </div>

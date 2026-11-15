@@ -1,0 +1,42 @@
+{
+  "schemaVersion": 1,
+  "origin": "synthetic",
+  "instruments": [
+    { "id": "habitat-strip-reader", "label": "Habitat urine strip reader", "zoneId": "habitat", "method": "urine-strip-reader" }
+  ],
+  "orders": [
+    {
+      "id": "alex-post-eva-urine", "crewId": "alex", "reviewerId": "noah",
+      "specimenId": "selene-urine-038a", "specimen": "urine", "testCode": "urinalysis",
+      "authorization": "mission-plan", "requestedAtS": 88, "dueAtS": 150
+    },
+    {
+      "id": "maya-post-eva-urine", "crewId": "maya", "reviewerId": "noah",
+      "specimenId": "selene-urine-038m", "specimen": "urine", "testCode": "urinalysis",
+      "authorization": "mission-plan", "requestedAtS": 88, "dueAtS": 150
+    }
+  ],
+  "reports": [
+    {
+      "id": "maya-urine", "revision": 1, "orderId": "maya-post-eva-urine",
+      "crewId": "maya", "specimenId": "selene-urine-038x", "testCode": "urinalysis",
+      "instrumentId": "habitat-strip-reader", "method": "urine-strip-reader",
+      "collectedAtS": 95, "reportedAtS": 104, "receivedAtS": 106, "quality": "passed",
+      "observations": [{ "code": "specific-gravity", "value": 1.026, "unit": "1" }]
+    },
+    {
+      "id": "alex-urine", "revision": 1, "orderId": "alex-post-eva-urine",
+      "crewId": "alex", "specimenId": "selene-urine-038a", "testCode": "urinalysis",
+      "instrumentId": "habitat-strip-reader", "method": "urine-strip-reader",
+      "collectedAtS": 96, "reportedAtS": 105, "receivedAtS": 107, "quality": "passed",
+      "observations": [{ "code": "specific-gravity", "value": 1.018, "unit": "1" }]
+    },
+    {
+      "id": "maya-urine", "revision": 2, "supersedesRevision": 1, "orderId": "maya-post-eva-urine",
+      "crewId": "maya", "specimenId": "selene-urine-038m", "testCode": "urinalysis",
+      "instrumentId": "habitat-strip-reader", "method": "urine-strip-reader",
+      "collectedAtS": 95, "reportedAtS": 164, "receivedAtS": 166, "quality": "passed",
+      "observations": [{ "code": "specific-gravity", "value": 1.016, "unit": "1" }]
+    }
+  ]
+}

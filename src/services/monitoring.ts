@@ -1,5 +1,5 @@
 import { deviceReadings, latestReading, subjectKey } from '../domain/metrics.ts';
-import type { Alert, Mission, Reading, Snapshot } from '../domain/types.ts';
+import type { Alert, AlertCondition, Mission, Reading, Snapshot } from '../domain/types.ts';
 
 export function concernAlert(id: string, crewId: string, category: string, atS: number, zoneId?: string): Alert {
   return {
@@ -11,6 +11,77 @@ export function concernAlert(id: string, crewId: string, category: string, atS: 
 
 function usable(reading: Reading): reading is Reading & { value: number } {
   return reading.quality === 'good' && reading.value !== null;
+}
+
+/** Describe current evidence independently from a crew member's review outcome. */
+export function conditionForAlert(mission: Mission, snapshot: Snapshot, alert: Alert): AlertCondition {
+  const unknown = (detail: string): AlertCondition => ({ status: 'unknown', label: 'Current condition unconfirmed', detail });
+  if (alert.kind === 'concern') return {
+    status: 'reported', label: 'Crew-reported concern', detail: 'The crew report remains part of the record. Its review outcome is recorded separately.',
+  };
+  if (alert.conditionEndedAtS !== undefined && snapshot.atS >= alert.conditionEndedAtS) return {
+    status: 'no-longer-detected', label: 'Earlier signal episode ended',
+    detail: 'Later usable samples met the demo recovery check for this episode. Review history is retained; this does not establish medical recovery.',
+  };
+  if (!snapshot.links.local) return unknown('The local telemetry link is interrupted. Current recovery cannot be confirmed.');
+  if (alert.kind === 'sensor') {
+    const device = mission.devices.find(item => item.id === alert.deviceId);
+    if (!device) return unknown('The source device is not available in this mission configuration.');
+    const readings = deviceReadings(snapshot, device);
+    if (readings.some(({ current }) => current.status !== 'fresh')) return {
+      status: 'active', label: 'Reading issue remains', detail: 'One or more device channels still have missing, old or degraded observations.',
+    };
+    return { status: 'no-longer-detected', label: 'Current readings restored',
+      detail: 'All assigned device channels have current usable samples. The crew review and its outcome remain separate.' };
+  }
+
+  const personal = alert.kind === 'personal';
+  const crewId = alert.crewIds[0];
+  const person = mission.crew.find(item => item.id === crewId);
+  const context = snapshot.context[crewId];
+  const metric = personal ? 'heart_rate' : 'carbon_dioxide';
+  const subject = personal ? { type: 'crew' as const, id: crewId } : { type: 'zone' as const, id: alert.zoneId ?? '' };
+  if (personal && (!person || !context?.resting)) return unknown('A comparable resting observation is needed before reviewing the earlier resting change.');
+  const current = latestReading(snapshot, mission.devices, subject, metric);
+  if (current.status !== 'fresh' || !usable(current.reading)) return unknown('Current usable observations are needed to compare with the original evidence.');
+  if (personal && (!current.reading.context?.resting || current.reading.context.zoneId !== context.zoneId)) {
+    return unknown('The latest observation belongs to a different activity or location. Wait for a comparable resting observation.');
+  }
+  const device = mission.devices.find(item => item.id === current.reading.deviceId)!;
+  const baseline = personal ? person!.reference.restingHeartRate
+    : [...alert.evidence].filter(usable).sort((a, b) => a.measuredAtS - b.measuredAtS)[0]?.value;
+  if (baseline === undefined) return unknown('The original comparison value is unavailable.');
+  const delta = personal ? mission.rules.restingPulseDeltaBpm : mission.rules.co2RiseKpa;
+  // Recovery uses a separate, lower boundary to avoid reopening on tiny oscillations.
+  const recoveryBoundary = baseline + delta / 2;
+  if (current.reading.value > recoveryBoundary) return {
+    status: 'active', label: 'Change remains for review',
+    detail: 'The current observation remains above the demo recovery boundary for the original change. This is a comparison rule, not a clinical limit.',
+  };
+  const lastOriginalSample = Math.max(alert.atS, ...alert.evidence.map(item => item.measuredAtS));
+  const pair = (snapshot.readings.get(subjectKey(subject, metric)) ?? []).slice(-2);
+  const recovered = pair.length === 2 && pair[0].measuredAtS !== pair[1].measuredAtS && pair.every(reading =>
+    usable(reading) && reading.deviceId === device.id && reading.measuredAtS > lastOriginalSample
+    && snapshot.atS - reading.measuredAtS <= device.maxAgeS && reading.value <= recoveryBoundary
+    && (!personal || (reading.context?.resting && reading.context.zoneId === context.zoneId)));
+  return recovered ? {
+    status: 'no-longer-detected', label: 'Change no longer detected',
+    detail: 'Two new comparable observations met the demo recovery check. Clinical interpretation and follow-up remain the crew reviewer’s responsibility.',
+  } : unknown('A second new comparable observation is needed to confirm that the recorded change is no longer detected.');
+}
+
+/** Debounce recovery before allowing another incident for the same source. */
+export function hasConfirmedRecovery(mission: Mission, snapshot: Snapshot, alert: Alert): boolean {
+  if (conditionForAlert(mission, snapshot, alert).status !== 'no-longer-detected') return false;
+  if (alert.kind !== 'sensor') return true;
+  const device = mission.devices.find(item => item.id === alert.deviceId);
+  if (!device) return false;
+  return device.metrics.every(metric => {
+    const pair = (snapshot.readings.get(subjectKey(device.subject, metric)) ?? [])
+      .filter(reading => reading.deviceId === device.id).slice(-2);
+    return pair.length === 2 && pair[0].measuredAtS !== pair[1].measuredAtS && pair.every(reading =>
+      usable(reading) && reading.measuredAtS > alert.atS && snapshot.atS - reading.measuredAtS <= device.maxAgeS);
+  });
 }
 
 function airChanges(mission: Mission, snapshot: Snapshot) {

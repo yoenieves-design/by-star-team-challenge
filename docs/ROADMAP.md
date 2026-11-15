@@ -1,17 +1,37 @@
 # Demonstration and follow-on work
 
-Open Health in a fresh browser profile. The replay opens at 01:48, shortly after the fictional crew returns to the habitat. Use the following sequence to demonstrate the decisions available to the crew.
+Open **App guide → Explore the post-EVA case**. This starts a separate practice replay at 01:48 (06:41:48 UTC), with Maya selected shortly after the return to the habitat. The five stages guide visitors through the inputs, clinical report and crew handoff. **Return to my replay** restores access to the original saved session. The default Health replay remains available for independent exploration.
+
+## Guided case
 
 | Action | Expected result |
 | --- | --- |
-| Select Alex, then Samira in Crew overview | Body readings follow the selected person. Environmental readings move from the habitat to the rover cabin. |
-| Open the highlighted cabin incident | Assist shows one shared incident and identifies the affected zone. The separate crew concern appears alongside the evidence as related context. |
-| Start a check and advance one step | The recorded step appears in the follow-up history. Pause the guide and revisit it after opening Profiles. |
-| Assign Noah and request support | The request shows awaiting receipt. Select Noah in the active crew control and confirm receipt. |
-| Select Maya on Health and step through the replay | The old wrist reading is marked out of date. The link recovery changes the state as new packets arrive. The Earth relay has its own status. |
-| Restart and advance through the early checkpoints | The selected crew member moves from the descent cabin to a suit breathing loop, through the airlock and into the habitat. |
-| Open I need help | A few explicit choices let the active crew member file a concern without typing a profile. |
-| Open Sensors in Profiles | Maya’s wrist monitor shows out-of-date readings and links to its sensor alert. Two presses of **Next event** from the briefing show the signal returning. |
-| Open NASA data & references in Mission & schedule | The historical ISS sample and research references inform the mission proposal. |
+| Meet the returning crew | Maya's concern and old wrist samples are separate pieces of evidence. Body markers expose measurement quality and time. |
+| Verify the input | Profiles → Sensors shows the wrist source, individual channels and measured versus received times. Local-link availability is separate from the Earth relay. |
+| Inspect the clinical check | Health → My health → Clinical checks shows Maya's held report. Advance the replay past 06:42:46 UTC to see the corrected accepted revision and retained history. |
+| Review and request support | Assist opens Maya's reported concern. Start the review, assign Noah and request support. Choose a Review outcome before completing the procedure. |
+| Confirm the handoff | Select Noah, open Assigned to me and confirm receipt when the local link is available. Review summary shows the outcome, current condition and remaining work. |
 
-Future integration work includes device authentication, continuous onboard processing, role-based access, operational protocol validation, multi-location synchronization, outcomes for multi-crew incident review and hands-free voice input.
+The stages explain where to go; they do not perform medical actions or automatically mark a procedure complete. Replay time can be paused while inspecting a report or completing a review.
+
+## Additional checks to demonstrate
+
+| Action | Expected result |
+| --- | --- |
+| Select Alex, then Samira in Health | Body readings follow the selected person. The breathing environment changes from habitat to rover. |
+| Open a body marker and inspect its trend | Signal state and review need are distinct. A resting comparison appears only with suitable current context. Activity and review markers explain changes in the trend window. |
+| Save a Quick check-in with a concern | The response is labeled Crew-reported with its time. A separate Assist concern carries the stated category, rest, fatigue and onset. |
+| Open a post-EVA check-in in Next health task | The routine requires a check-in for its assigned crew member during the activity window before that step can be confirmed. |
+| Complete a sensor review with Unable to verify | The steps are recorded, and follow-up remains pending. Start another review retains the earlier actions. |
+| Complete a review while support receipt is pending | The requested handoff stays visible to the assigned recipient until receipt is confirmed. |
+| Inspect Alex's accepted clinical report as Alex, then as Noah | The report is visible to both fictional profiles; the assigned medical reviewer can perform the clinical review. This demonstrates role behavior in a public demo. |
+| Open Review summary and Download review JSON | The local file preserves dated evidence, review outcome, actions and current context. No external message is sent. |
+| Open Voice controls | Activate the microphone, speak one of the three supported English queries, inspect Heard and choose Run command. If the browser cannot provide recognition, use the ordinary controls. |
+| Restart an independent replay and advance through early checkpoints | The selected crew member moves from the descent cabin to the suit breathing loop, airlock and habitat. Restart asks before clearing recorded work. |
+| Open Profiles → Mission & schedule → NASA data & references | The historical ISS radiation sample has its own source and dates, separate from synthetic mission readings. |
+
+## Follow-on work
+
+Operational integration would require device authentication, continuous onboard processing, authenticated roles, protected medical records, mission-approved clinical procedures, and communication delivery across real endpoints. A flight-ready voice interface would need validation for noise, recognition accuracy, accessibility and offline operation on the selected hardware. Additional clinical tests would require their own instruments, specimen contracts, authorized orders and review procedures.
+
+The final project submission narrative, repository cleanup and README packaging remain a separate closeout task. Keep the in-app guide synchronized whenever a crew-facing label, workflow or input changes.

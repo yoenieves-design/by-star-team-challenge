@@ -1,11 +1,13 @@
 import { html } from 'lit-html';
 import { repeat } from 'lit-html/directives/repeat.js';
 import { deviceReadings, metrics, numberLabel } from '../../domain/metrics.ts';
-import type { WorkItem } from '../../services/follow-up.ts';
+import { isWorkPending, type WorkItem } from '../../services/follow-up.ts';
+import { clinicalEvidence } from '../components/clinical-checks.ts';
+import { outcomeLabels, reviewSummary } from '../components/review-summary.ts';
 import { canSpeak } from '../../adapters/voice.ts';
-import { alertLabels, deviceReadingTag, workTag } from '../components/common.ts';
+import { alertLabels, deviceReadingTag, tag, workTag } from '../components/common.ts';
 import { icon } from '../components/icons.ts';
-import { clock, concerns, currentPerson, personName, sensorsHref, zoneName, type ViewModel } from '../view-model.ts';
+import { checkInHref, clock, concerns, currentPerson, personName, sensorsHref, zoneName, type ViewModel } from '../view-model.ts';
 
 function reportForm(vm: ViewModel) {
   const person = currentPerson(vm);
@@ -26,7 +28,11 @@ function queue(vm: ViewModel, selected: WorkItem | undefined) {
   const alerts = vm.work.filter(item => item.alert);
   const tasks = vm.work.filter(item => item.task && item.crewIds.includes(vm.session.crewId)
     && (item.available || item.progress.status !== 'new'));
-  const groups = [{ work: alerts, label: 'Crew alerts' }, { work: tasks, label: 'My scheduled checks' }];
+  const assigned = vm.work.filter(item => item.progress.assigneeId === vm.session.crewId
+    && (isWorkPending(item) || item.progress.receipt === 'requested'));
+  const clinical = vm.work.filter(item => item.clinical && (item.crewIds.includes(vm.session.crewId) || item.requiredReviewerId === vm.session.crewId));
+  const groups = [{ work: assigned, label: 'Assigned to me' }, { work: alerts, label: 'Crew alerts' },
+    { work: tasks, label: 'My scheduled checks' }, { work: clinical, label: 'Clinical reports' }];
   return html`<aside class="bs-card bs-assist-queue" aria-label="Assist queue">
     <div class="bs-card-heading"><div><h2>Follow-up queue</h2><p>Choose an alert or scheduled check.</p></div></div>
     <button type="button" data-action="report-form" class="bs-button bs-button-line" aria-pressed=${vm.state.reportOpen}
@@ -36,7 +42,9 @@ function queue(vm: ViewModel, selected: WorkItem | undefined) {
         data-work=${item.id} aria-pressed=${selected?.id === item.id && !vm.state.reportOpen} ?disabled=${vm.state.saving}>
         <span><strong>${item.alert?.kind === 'concern' ? item.detail : item.title}</strong>
           <small>${item.alert?.zoneId && item.alert.kind !== 'concern' ? zoneName(vm, item.alert.zoneId) : item.crewIds.map(id => personName(vm, id)).join(', ')}</small>
-        </span>${workTag(item.progress.status)}
+        </span>${item.progress.receipt === 'requested' && item.progress.assigneeId === vm.session.crewId
+          ? tag(vm.snapshot.links.local ? 'Receipt pending' : 'Local link interrupted', 'amber')
+          : item.progress.status === 'complete' && isWorkPending(item) ? tag('Follow-up pending', 'amber') : workTag(item.progress.status)}
       </button>`) : html`<p class="bs-muted">No items in this view.</p>`}`)}
   </aside>`;
 }
@@ -54,6 +62,8 @@ function evidence(vm: ViewModel, item: WorkItem) {
     ${device ? html`<p class="bs-inline bs-wrap"><strong>${device.name}</strong> ${deviceReadingTag(deviceReadings(vm.snapshot, device))}
       <a href=${sensorsHref(vm)}>View sensors</a></p>` : ''}
     <p>${alert.reason}</p>
+    ${vm.session.activity.filter(event => event.type === 'check-in' && event.targetId === item.id && event.atS <= vm.snapshot.atS)
+      .map(event => event.type === 'check-in' ? html`<p><strong>Crew-reported check-in</strong> · Rest: ${event.sleep} · Fatigue: ${event.fatigue} · Concern began: ${event.onset}.</p>` : '')}
     ${alert.evidence.length ? html`<div class="bs-table-wrap"><table>
       <caption>Observations attached when the alert opened</caption>
       <thead><tr><th scope="col">Indicator</th><th scope="col">Reading</th><th scope="col">Measured UTC</th><th scope="col">Received UTC</th><th scope="col">Source</th><th scope="col">Quality</th></tr></thead>
@@ -110,44 +120,63 @@ function procedure(vm: ViewModel, item: WorkItem) {
   const started = active || progress.status === 'complete';
   const finalStep = progress.step + 1 === guide.steps.length;
   const assignFirst = !!step?.requiresAssignee && !progress.assigneeId;
+  const restricted = !!item.requiredReviewerId && item.requiredReviewerId !== vm.session.crewId;
+  const needsCheckIn = !!step?.requiresCheckIn && !vm.session.activity.some(event => event.type === 'check-in'
+    && item.crewIds.includes(event.actorId) && event.atS >= (item.task?.opensAtS ?? 0) && event.atS <= vm.snapshot.atS);
   const handoffInStep = active && !!step && (progress.status === 'paused' || step.requiresAssignee || (finalStep && !!item.alert));
   const subject = item.crewIds.length ? item.crewIds.map(id => personName(vm, id)).join(', ') : zoneName(vm, item.alert?.zoneId);
 
   return html`<section class="bs-card bs-assist-work" aria-labelledby="bs-work-title">
     <div class="bs-card-heading">
-      <div><p>${item.alert ? alertLabels[item.alert.kind] : 'Scheduled check'} · ${subject}</p>
+      <div><p>${item.alert ? alertLabels[item.alert.kind] : item.clinical ? 'Clinical report' : 'Scheduled check'} · ${subject}</p>
         <h2 id="bs-work-title" tabindex="-1">${item.title}</h2></div>
       ${workTag(progress.status)}
     </div>
     <p>${item.detail}</p>
     ${evidence(vm, item)}
+    ${item.clinical && vm.clinical ? clinicalEvidence(vm, item.id, vm.clinical) : ''}
+    ${item.condition ? html`<div class="bs-condition"><strong>${item.condition.label}</strong><p>${item.condition.detail}</p></div>` : ''}
+    ${restricted ? html`<p class="bs-warning-note">Review is assigned to ${personName(vm, item.requiredReviewerId)}. Switch to that active crew profile to record the clinical review. Profile selection simulates a role in this public demo.</p>` : ''}
     <div class="bs-procedure">
       <p class="bs-procedure-label">${icon('book', 17)} ${guide.version} procedure</p>
       <h3>${guide.title}</h3>
       <p>${guide.purpose}</p>
       ${missing.length ? html`<p class="bs-warning-note">${icon('warning', 17)} Equipment unavailable in ${zone.name}: ${missing.join(', ')}.</p>` : ''}
+      ${active && !item.available ? html`<p class="bs-warning-note">${item.clinical ? 'This report is held or superseded.' : 'Outside the planned activity window. Progress is preserved; check the mission schedule before continuing.'}</p>` : ''}
       ${progress.status === 'complete' ? html`<div class="bs-inline bs-wrap bs-positive-note">
         <p id="bs-work-complete" tabindex="-1">${icon('check', 18)} Follow-up recorded as complete.</p>
+        <p>Outcome: ${progress.outcome ? outcomeLabels[progress.outcome] : 'Not recorded in this earlier review'}.</p>
+        ${isWorkPending(item) ? html`<p>Further follow-up remains pending. Review the current condition and assigned support.</p>` : ''}
+        ${item.available && !restricted ? action(vm, 'reopen', 'Start another review', item.id) : ''}
         <a href=${vm.href('health')}>Back to Health</a>
       </div>` : ''}
       ${!started ? html`<div class="bs-inline bs-wrap">
         <button type="button" class="bs-button bs-button-primary" data-action="open" data-work=${item.id}
-          ?disabled=${!item.available || vm.state.saving}>Start guided check ${icon('arrow', 16)}</button>
+          ?disabled=${!item.available || restricted || vm.state.saving}>Start guided check ${icon('arrow', 16)}</button>
         ${progress.status === 'new' && item.alert ? action(vm, 'acknowledge', 'Acknowledge alert', item.id) : ''}
-        ${!item.available ? html`<p class="bs-muted">Outside the planned activity window.</p>` : ''}
+        ${!item.available ? html`<p class="bs-muted">${item.clinical ? 'This report is held or superseded. Inspect the report history and request a corrected source report.' : 'Outside the planned activity window.'}</p>` : ''}
       </div>` : ''}
       ${active && step ? html`<div class="bs-step">
         <div class="bs-step-counter"><span>Step ${progress.step + 1} of ${guide.steps.length}</span>
           <progress aria-label="Procedure progress" value=${progress.step} max=${guide.steps.length}></progress></div>
         <h4 id="bs-step-title" tabindex="-1">${step.title}</h4>
         <p>${step.instruction}</p>
+        ${item.procedure.id === 'recovery-check' && progress.step === 1 ? html`<p><a href=${checkInHref(vm)}>Open Health to record a Quick check-in</a>. The response remains available in Review summary.</p>` : ''}
+        ${needsCheckIn ? html`<p class="bs-warning-note">A check-in for the returning crew member is needed before this step can be recorded.</p>` : ''}
         ${assignFirst ? html`<p class="bs-muted">Choose a crew member to unlock this step.</p>` : ''}
         ${progress.status === 'paused' ? html`<p class="bs-muted">Progress saved. You can assign support before resuming.</p>` : ''}
         ${handoffInStep ? handoff(vm, item) : ''}
+        ${finalStep && progress.status !== 'paused' ? html`<fieldset class="bs-review-outcome" ?disabled=${restricted || vm.state.saving}>
+          <legend>Review outcome</legend>
+          ${Object.entries(outcomeLabels).map(([value, label]) => html`<label><input type="radio" name="review-outcome" value=${value}
+            data-select="outcome" data-work=${item.id} .checked=${progress.outcome === value}>${label}</label>`)}
+          <p class="bs-muted">Record what you could establish. Verified means the review was performed; clinical clearance remains a separate decision.</p>
+        </fieldset>` : ''}
         <div class="bs-inline bs-wrap">
-          ${progress.status === 'paused' ? action(vm, 'resume', 'Resume check', item.id, true) : html`
+          ${progress.status === 'paused' ? html`<button type="button" class="bs-button bs-button-primary" data-action="resume" data-work=${item.id}
+            ?disabled=${!item.available || restricted || vm.state.saving}>Resume check</button>` : html`
             <button type="button" class="bs-button bs-button-primary" data-action="step" data-work=${item.id} data-step=${progress.step}
-              ?disabled=${!!missing.length || assignFirst || vm.state.saving}>${finalStep ? 'Complete follow-up' : 'Done · next step'} ${icon(finalStep ? 'check' : 'arrow', 16)}</button>
+              ?disabled=${!item.available || !!missing.length || assignFirst || restricted || needsCheckIn || (finalStep && !progress.outcome) || vm.state.saving}>${finalStep ? 'Complete follow-up' : 'Done · next step'} ${icon(finalStep ? 'check' : 'arrow', 16)}</button>
             ${action(vm, 'pause', 'I can’t do this now', item.id)}`}
           ${canSpeak() ? html`<button type="button" class="bs-button bs-button-plain" data-action="listen" data-work=${item.id}>${icon('volume', 18)} Listen</button>
             <button type="button" class="bs-button bs-button-plain" data-action="stop-reading">Stop audio</button>` : ''}
@@ -160,10 +189,13 @@ function procedure(vm: ViewModel, item: WorkItem) {
       </details>
     </div>
     ${handoffInStep ? '' : handoff(vm, item)}
+    ${reviewSummary(vm, item)}
     ${progress.log.length ? html`<details class="bs-details"><summary>Follow-up history</summary>
       <ol class="bs-history">${progress.log.map(event => html`<li><time>${clock(vm.mission, event.atS)} UTC</time>
         <span>${personName(vm, event.actorId)} · ${event.type === 'step' ? 'Step ' + (event.step + 1) + ' recorded'
-      : event.type === 'assign' ? 'Assigned ' + personName(vm, event.assigneeId) : event.type.replaceAll('-', ' ')}</span></li>`)}</ol>
+      : event.type === 'assign' ? 'Assigned ' + personName(vm, event.assigneeId)
+      : event.type === 'outcome' ? outcomeLabels[event.outcome]
+      : event.type === 'reopen' ? 'Started another review' : event.type.replaceAll('-', ' ')}</span></li>`)}</ol>
     </details>` : ''}
   </section>`;
 }

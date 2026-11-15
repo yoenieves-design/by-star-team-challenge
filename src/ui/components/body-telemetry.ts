@@ -1,9 +1,10 @@
 import { html } from 'lit-html';
 import { canSpeak } from '../../adapters/voice.ts';
-import { metrics } from '../../domain/metrics.ts';
+import { metrics, numberLabel } from '../../domain/metrics.ts';
 import type { CrewMember, ReadingState } from '../../domain/types.ts';
+import { isWorkPending } from '../../services/follow-up.ts';
 import type { ViewModel } from '../view-model.ts';
-import { measurementDetail, measurementValue, readingLabels } from './common.ts';
+import { measurementDetail, measurementValue, readingLabels, tag } from './common.ts';
 import { icon, type Icon } from './icons.ts';
 import { bodyReadings } from './telemetry-readings.ts';
 import '../styles/body-telemetry.css';
@@ -15,7 +16,9 @@ const statusIcons: Record<ReadingState['status'], Icon> = {
 
 export function bodyTelemetry(vm: ViewModel, person: CrewMember, compact = false) {
   const readings = bodyReadings(vm, person);
+  const context = vm.snapshot.context[person.id];
   const group = 'bs-body-reading-' + person.id;
+  const pending = vm.work.filter(item => item.crewIds.includes(person.id) && isWorkPending(item));
   return html`<fieldset class="bs-body-telemetry ${compact ? 'bs-body-telemetry-compact' : ''}">
     <legend class="bs-visually-hidden">Body readings for ${person.name}</legend>
     <div class="bs-body-layout">
@@ -40,7 +43,20 @@ export function bodyTelemetry(vm: ViewModel, person: CrewMember, compact = false
             </strong>
           </label>
           <div class="bs-body-detail">
+            <div class="bs-inline bs-wrap bs-body-statuses">
+              ${tag(current.status === 'fresh' ? 'Signal current' : readingLabels[current.status], current.status === 'fresh' ? 'green' : 'amber', statusIcons[current.status])}
+              ${pending.some(item => item.alert?.kind === 'personal' && metric === 'heart_rate'
+                || item.alert?.kind === 'sensor' && item.alert.deviceId === current.reading?.deviceId)
+                ? tag('Review requested', 'amber', 'warning') : ''}
+            </div>
             <p>${measurementDetail(vm, current)}</p>
+            ${metric === 'heart_rate' ? html`<p class="bs-body-reference">
+              <strong>Personal reference</strong> ${person.reference.restingHeartRate} bpm · fictional preflight seated reading.
+              ${!compact ? html`<br>Current activity: ${context.activity}. ${context.resting && current.status === 'fresh'
+                && current.reading.value !== null && current.reading.context?.resting && current.reading.context.zoneId === context.zoneId
+                ? html`Resting difference: ${current.reading.value >= person.reference.restingHeartRate ? '+' : ''}${numberLabel(current.reading.value - person.reference.restingHeartRate, 'heart_rate')} bpm.`
+                : 'Comparison waits for a current reading in a comparable resting context.'}` : ''}
+            </p>` : ''}
             ${compact ? '' : html`<p>${metrics[metric].explanation}</p>`}
             ${!compact && metric === 'heart_rate' && person.id === vm.session.crewId && canSpeak() ? html`
               <button type="button" class="bs-button bs-button-plain" data-action="listen-pulse">
@@ -50,5 +66,6 @@ export function bodyTelemetry(vm: ViewModel, person: CrewMember, compact = false
         </div>`)}
       </div>
     </div>
+    ${!compact ? html`<p class="bs-body-key">Signal status describes the measurement. A review request describes follow-up that is still needed.</p>` : ''}
   </fieldset>`;
 }

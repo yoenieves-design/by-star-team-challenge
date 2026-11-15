@@ -53,6 +53,7 @@ test('The lunar replay changes context, distinguishes stale data and preserves a
   await expect(page.getByText('Receipt confirmed by Noah Chen.')).toBeVisible();
   await page.getByRole('button', { name: 'Resume check' }).click();
   await page.getByRole('button', { name: 'Done · next step' }).click();
+  await page.getByRole('radio', { name: 'Verified', exact: true }).check();
   await page.getByRole('button', { name: 'Complete follow-up' }).click();
   await expect(page.getByText('Follow-up recorded as complete.')).toBeVisible();
 
@@ -97,6 +98,7 @@ test('Keyboard path, narrow layout and simplified mode keep controls usable', as
   await page.getByRole('button', { name: 'Done · next step' }).click();
   await expect(page.getByRole('heading', { name: 'Arrange follow-up' })).toBeVisible();
   await expect(page.getByLabel('Assigned crew member', { exact: true })).toHaveValue('');
+  await page.getByRole('radio', { name: 'Verified', exact: true }).check();
   await page.getByRole('button', { name: 'Complete follow-up' }).click();
   await expect(page.getByText('Follow-up recorded as complete.')).toBeFocused();
   await page.getByRole('link', { name: 'Back to Health' }).click();

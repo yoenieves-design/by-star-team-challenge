@@ -1,6 +1,7 @@
 import { html } from 'lit-html';
 import { deviceReadings } from '../../domain/metrics.ts';
 import type { Device } from '../../domain/types.ts';
+import { isWorkPending } from '../../services/follow-up.ts';
 import { clock, personName, zoneName, type ViewModel } from '../view-model.ts';
 import { deviceReadingTag, localLinkTag, tag } from './common.ts';
 import { icon } from './icons.ts';
@@ -11,7 +12,7 @@ function sensorCard(vm: ViewModel, device: Device, readings: ReturnType<typeof d
   const packet = vm.snapshot.latestPackets.get(device.id);
   const newest = Math.max(...readings.map(({ current }) => current.reading?.measuredAtS ?? -1));
   const subject = device.subject.type === 'crew' ? personName(vm, device.subject.id) : zoneName(vm, device.subject.id);
-  const alert = vm.work.find(item => item.alert?.kind === 'sensor' && item.alert.deviceId === device.id);
+  const alert = vm.work.findLast(item => item.alert?.kind === 'sensor' && item.alert.deviceId === device.id);
 
   return html`<article class="bs-card bs-sensor-card" aria-label=${device.name}>
     <div class="bs-card-heading bs-wrap">
@@ -24,7 +25,7 @@ function sensorCard(vm: ViewModel, device: Device, readings: ReturnType<typeof d
     </dl>` : html`<p class="bs-muted">No packet received yet.</p>`}
     ${telemetryReadings(vm, readings, true)}
     ${alert ? html`<a class="bs-sensor-alert" href=${vm.href('assist', alert.id)}>
-      ${alert.progress.status === 'complete' ? 'View completed review' : 'Review sensor alert'} ${icon('arrow', 15)}
+      ${isWorkPending(alert) ? 'Review sensor alert' : 'View completed review'} ${icon('arrow', 15)}
     </a>` : ''}
   </article>`;
 }

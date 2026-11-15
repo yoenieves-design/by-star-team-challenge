@@ -21,6 +21,7 @@
     { "atS": 105, "label": "Cabin review and crew concern" },
     { "atS": 120, "label": "Earth relay unavailable" },
     { "atS": 157, "label": "Wrist monitor reconnects" },
+    { "atS": 166, "label": "Corrected clinical report received" },
     { "atS": 174, "label": "Earth relay restored" },
     { "atS": 240, "label": "End of replay" }
   ],

@@ -90,7 +90,7 @@
       "requiredEquipment": [], "sourceIds": ["eva", "medical-operations"],
       "steps": [
         { "title": "Confirm return context", "instruction": "Review the updated location and breathing environment for the returning crew member." },
-        { "title": "Check in with the crew member", "instruction": "Ask if there is a concern. Use Report a concern to record it alongside the telemetry." },
+        { "title": "Check in with the crew member", "instruction": "Record a Quick check-in in Health using the returning crew member’s active profile. Save their rest, fatigue and any concern alongside the telemetry.", "requiresCheckIn": true },
         { "title": "Record the check-in", "instruction": "Complete the task after the check-in. Leave any concern open for its own review." }
       ]
     }
@@ -103,6 +103,7 @@
     { "id": "wireless-wearables", "title": "NASA · Crew Active Dosimeters", "description": "An example of personal equipment sending timestamped readings via Bluetooth to an onboard computer.", "url": "https://srag.jsc.nasa.gov/spaceradiation/how/how.cfm" },
     { "id": "eva-telemetry", "title": "NASA · Advanced suit communications design", "description": "An engineering reference on suit telemetry and a proposed redundant wireless path.", "url": "https://ntrs.nasa.gov/citations/20150008350" },
     { "id": "medical-operations", "title": "NASA · Medical operations", "description": "Mission planning, crew medical roles and phase-specific medical operations.", "url": "https://www.nasa.gov/reference/6-0-medical-operations/" },
+    { "id": "medical-evaluations", "title": "NASA · Astronaut medical evaluation requirements", "description": "Section 6.5.1 includes urinalysis in ISS medical evaluation around EVA. The lunar demo uses fictional reports and procedures.", "url": "https://www.nasa.gov/wp-content/uploads/2024/09/ochmo-std-100-1a-rev-a-signed.pdf#page=52" },
     { "id": "regolith", "title": "NASA · Lunar regolith hazards", "description": "Context for environmental review after returning from surface work.", "url": "https://science.nasa.gov/biological-physical/what-hazards-are-caused-by-lunar-regolith/" },
     { "id": "relay", "title": "NASA · Lunar communications relays", "description": "Basis for representing Earth relay availability separately from local links.", "url": "https://www.nasa.gov/goddard/esc/lcrns/" },
     { "id": "interfaces", "title": "NASA · Crew interfaces", "description": "Design reference for readable displays and redundant status cues.", "url": "https://www.nasa.gov/reference/10-0-crew-interfaces-vol-2/" },

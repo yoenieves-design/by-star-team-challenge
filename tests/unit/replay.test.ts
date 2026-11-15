@@ -126,6 +126,7 @@ test('A handoff retains ownership, progress and confirmation across events', () 
   session = { ...session, crewId: 'noah' };
   assert.throws(() => apply({ type: 'receipt', targetId }, 140), /local link/);
   apply({ type: 'receipt', targetId }, 155);
+  apply({ type: 'outcome', targetId, outcome: 'verified' }, 155);
   apply({ type: 'step', targetId, step: 2 }, 155);
   assert.equal(work(155).progress.status, 'complete');
   assert.equal(work(155).progress.receipt, 'confirmed');

@@ -1,11 +1,12 @@
 import type { Alert, Link, ReplayData, Snapshot } from '../domain/types.ts';
-import { concernAlert, detectAlerts } from './monitoring.ts';
+import { concernAlert, detectAlerts, hasConfirmedRecovery } from './monitoring.ts';
 import { normalizeTelemetry } from './telemetry.ts';
 
 export function createReplay(data: ReplayData) {
   const { mission, scenario } = data;
   const telemetry = normalizeTelemetry(data);
   const recorded = new Map<string, Alert>();
+  const episodes = new Map<string, Alert>();
   const linkEvents = scenario.events.filter(event => event.type === 'link').sort((a, b) => a.atS - b.atS);
 
   function snapshot(atS: number): Snapshot {
@@ -26,7 +27,9 @@ export function createReplay(data: ReplayData) {
     }
     return {
       atS: time, context: telemetry.contextAt(time), links, readings, latestPackets,
-      alerts: [...recorded.values()].filter(item => item.atS <= time).sort((a, b) => a.atS - b.atS),
+      alerts: [...recorded.values()].filter(item => item.atS <= time).sort((a, b) => a.atS - b.atS)
+        .map(item => ({ ...item, conditionEndedAtS: item.conditionEndedAtS !== undefined && item.conditionEndedAtS <= time
+          ? item.conditionEndedAtS : undefined })),
     };
   }
 
@@ -36,8 +39,15 @@ export function createReplay(data: ReplayData) {
   for (const device of mission.devices) times.add(device.maxAgeS + 1);
   for (const atS of [...times].filter(time => time <= scenario.durationS).sort((a, b) => a - b)) {
     const frame = snapshot(atS);
+    for (const alert of episodes.values()) {
+      if (alert.conditionEndedAtS === undefined && hasConfirmedRecovery(mission, frame, alert)) alert.conditionEndedAtS = atS;
+    }
     for (const alert of detectAlerts(mission, frame)) {
-      if (!recorded.has(alert.id)) recorded.set(alert.id, alert);
+      const previous = episodes.get(alert.id);
+      if (previous && (previous.conditionEndedAtS === undefined || previous.conditionEndedAtS >= atS)) continue;
+      const episode = { ...alert, episodeKey: alert.id, id: previous ? alert.id + '-episode-' + atS : alert.id };
+      recorded.set(episode.id, episode);
+      episodes.set(alert.id, episode);
     }
     for (const event of scenario.events) {
       if (event.type !== 'concern' || event.atS !== atS) continue;
