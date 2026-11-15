@@ -1,0 +1,63 @@
+{
+  "$id": "scenario",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "id", "title", "durationS", "briefingAtS", "defaultCrewId", "initialContext", "milestones", "events"],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "id": { "type": "string", "pattern": "^[a-z0-9][a-z0-9-]*$" },
+    "title": { "$ref": "#/$defs/text" },
+    "durationS": { "type": "integer", "minimum": 1, "maximum": 86400 },
+    "briefingAtS": { "$ref": "#/$defs/time" },
+    "defaultCrewId": { "$ref": "#/$defs/text" },
+    "initialContext": { "type": "object", "additionalProperties": { "$ref": "#/$defs/context" } },
+    "milestones": {
+      "type": "array", "minItems": 1,
+      "items": {
+        "type": "object", "additionalProperties": false, "required": ["atS", "label"],
+        "properties": { "atS": { "$ref": "#/$defs/time" }, "label": { "$ref": "#/$defs/text" } }
+      }
+    },
+    "events": {
+      "type": "array",
+      "items": {
+        "oneOf": [
+          {
+            "type": "object", "additionalProperties": false, "required": ["type", "atS", "crewId", "context"],
+            "properties": {
+              "type": { "const": "context" }, "atS": { "$ref": "#/$defs/time" }, "crewId": { "$ref": "#/$defs/text" },
+              "context": { "$ref": "#/$defs/context" }
+            }
+          },
+          {
+            "type": "object", "additionalProperties": false, "required": ["type", "atS", "link", "available"],
+            "properties": {
+              "type": { "const": "link" }, "atS": { "$ref": "#/$defs/time" },
+              "link": { "enum": ["local", "earth"] }, "available": { "type": "boolean" }
+            }
+          },
+          {
+            "type": "object", "additionalProperties": false, "required": ["type", "atS", "crewId", "category"],
+            "properties": {
+              "type": { "const": "concern" }, "atS": { "$ref": "#/$defs/time" },
+              "crewId": { "$ref": "#/$defs/text" }, "category": { "$ref": "#/$defs/text" }
+            }
+          }
+        ]
+      }
+    }
+  },
+  "$defs": {
+    "text": { "type": "string", "minLength": 1 },
+    "time": { "type": "integer", "minimum": 0 },
+    "phase": { "enum": ["preparation", "eva", "return", "recovery", "routine"] },
+    "context": {
+      "type": "object", "additionalProperties": false,
+      "required": ["zoneId", "breathingZoneId", "phase", "activity", "resting"],
+      "properties": {
+        "zoneId": { "$ref": "#/$defs/text" }, "breathingZoneId": { "$ref": "#/$defs/text" },
+        "phase": { "$ref": "#/$defs/phase" }, "activity": { "$ref": "#/$defs/text" }, "resting": { "type": "boolean" }
+      }
+    }
+  }
+}

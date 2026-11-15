@@ -1,69 +1,45 @@
-# Architecture and boundaries
+# Architecture
 
-## Initial decision
+The TypeScript app runs in the browser. A small WordPress adapter provides page routes and enqueues the generated JavaScript and CSS. The standalone preview loads the same assets and data.
 
-Use WordPress for page delivery and a shared generated shortcode snippet for the demo application.
-Use pure JavaScript for the small, transparent demonstration calculations. No Cloudflare deployment
-is needed for this release. All interface copy, source comments and documentation are in English.
+| Path | Responsibility |
+| --- | --- |
+| `src/domain/` | Crew, zones, devices, observations, alerts, tasks and procedure types. Metric definitions name units and presentation precision. |
+| `src/services/` | Telemetry normalization, replay, monitoring, task applicability and follow-up state. These functions do not depend on the DOM. |
+| `src/adapters/` | Fetching and validating JSON, IndexedDB persistence and optional browser speech. |
+| `src/app/` | Compose adapters and services, handle commands and share a single snapshot with the UI. |
+| `src/ui/` | Three page views, charts, shared controls and scoped styles. Lit templates update readings without replacing the surrounding controls. |
+| `public/data/` | Versioned mission configuration and a separate historical reference dataset. |
+| `public/simulation/` | Scenario timeline and packet streams, emitted by a replaceable source. |
+| `schemas/` | JSON Schema contracts. Ajv compiles runtime validators at build time. |
+| `wordpress/snippets/` | Copyable PHP adapter for Code Snippets. |
+| `dist/` | Published static output. Edit the source and build again to update it. |
 
-```text
-WordPress page + shortcode
-         |
-Shared shell / module view / scoped CSS
-         |
-Pure validation and rule functions
-         |
-Browser storage adapter (fictional data only)
-```
+## Telemetry flow
 
-Module views return markup; the shell handles events and persistence. Escape user strings at the
-HTML boundary. Native form validation is backed by explicit model validation. Writes complete
-before success is shown. Storage failures are visible and corrupt data is never silently replaced.
-This separation allows replacing browser persistence with an authenticated repository later.
+**JSON packets → validation → normalized readings → replay snapshot → monitoring → UI and Assist**
 
-## Data contract
+A version 1 packet supplies an ID, device sequence, assigned crew member or zone, measurement and reception offsets, and a list of metrics with units and quality. Positions are seconds from the fictional UTC start in `public/data/mission.json`. The adapter checks the JSON contracts before the services read them. The normalizer rejects mismatched device assignments and units and removes retransmissions by packet ID or device plus sequence. Valid late readings add to history. Current readings use the newest measured timestamp available at the replay position and expire by the device's age limit.
 
-- State: `version`, `profile`, `records`, `completed`.
-- Profile: fictional `name`, `mission`, local-calendar mission `start`.
-- Record: local calendar `date`, nullable numeric `sleep`, `fatigue`, `mood`, `exercise`, `pulse`,
-  free-text `notes`, `source` (`synthetic` or `manual-demo`), UTC `updatedAt`.
-- One record per day; saving that date replaces it. Null means unmeasured. Zero is a value.
-- Completed actions map stable action IDs to UTC completion timestamps. Rule IDs include the
-  observation update timestamp and rule version so editing an observation requires fresh review.
-- Plan checklist IDs contain the local calendar date.
+The scenario timeline supplies observed location and activity. A person's physical location and breathing zone can differ during a transition. The planned schedule stays in mission configuration. An upcoming task opens when both its time and required phase apply. The demo keeps a guide already in progress available for explicit continuation.
 
-Numeric bounds are input plausibility constraints, not normal ranges or treatment guidance.
-Sleep below 6 hours and fatigue of 4 or 5 are **illustrative demonstration rules**, not NASA rules.
-No clinical diagnosis, immune score, bone-loss estimate or overall health score is produced.
-Missing and stale data are explicitly distinguished from an untriggered rule.
+## Monitoring and follow-up
 
-## Design system
+The environmental rule compares good readings from an occupied breathing environment and preserves the two records that opened the review. It produces one review item for that zone in the replay. Separate records cover a stale wrist signal and an astronaut's reported concern. The resting pulse rule considers only comparable resting observations. The numeric settings in the mission file illustrate the logic and carry a demo version.
 
-Dark navy surfaces, mint interaction accents, warm review markers, text labels for every status,
-visible focus rings, responsive navigation, native form controls and a scrollable observation table.
-CSS is scoped under `.star-app` to reduce theme collisions. No external fonts, trackers or CDNs.
+Follow-up is an append-only list within a replay. Acknowledgement, assignment, recorded support requests, receipt and step completion are separate events. A recipient confirms the handoff while the local link is available. The authority in the prototype is the selected fictional crew member. A real deployment would derive that identity and its permissions from the mission's access system.
 
-## Storage and offline limitations
+## Playback and persistence
 
-Local storage is origin-scoped, unencrypted application data accessible to scripts on the site.
-It is not isolated by WordPress user. It must contain fictional records only.
-Loaded-page interactions can continue offline, but opening another WordPress page still requires
-network access. The online indicator reflects the browser's connectivity flag, not a server health
-check. No service worker, sync queue, conflict handling or multi-device persistence is implemented.
-Concurrent tabs use last-write-wins; this is acceptable only for the demonstration.
+The browser stores the replay position, speed, active crew member, view preference and follow-up events in IndexedDB. A saved wall-clock anchor advances a running replay between navigations. Packet timestamps stay fixed and the view reconstructs missed scripted events on return. A paused replay stays at the saved position. When IndexedDB is unavailable, the demo explains that its temporary session resets on navigation.
 
-## Future server boundary
+The onboard proposal would receive telemetry through authorized read-only gateways for personal devices, suit systems and habitat systems. A local mission service would run continuously, maintain history, deliver assignments and keep procedures available during loss of Earth relay. The browser replay illustrates those flows while open. Deployment on WordPress uses static assets and does not require a Worker.
 
-Before real records: authenticate users, authorize ownership on every request, validate on the
-server, add nonce/CSRF protection where applicable, define retention and deletion, protect backups,
-and audit sensitive operations. WordPress REST endpoints are the first candidate; add Workers only
-when integrations or independent server execution justify the operational complexity.
+## Updating data and procedures
 
-## Scientific context
+- Edit `public/data/mission.json` to change crew assignments, equipment, rules or guidance.
+- Edit `public/simulation/eva-return.json` for locations, activities, link events and checkpoints.
+- Run `npm run fixtures` to regenerate the packet streams after adjusting `scripts/create-telemetry.mjs`. This command overwrites the generated sample streams.
+- Run `npm test` and `npm run build` to validate and package the result.
 
-The interface covers observations relevant to mission health awareness, not all spaceflight risks.
-Environment remains an explicit integration placeholder until actual instrument data is available.
-
-- [NASA hazards](https://www.nasa.gov/hrp/hazards/)
-- [NASA human system risks](https://www.nasa.gov/hhp/human-system-risks/)
-- [Cloudflare Workers documentation](https://developers.cloudflare.com/workers/)
+The historical RadLab sample is available separately in Profiles. The replay loader reads only the synthetic streams specified in its adapter.

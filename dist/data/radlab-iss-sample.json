@@ -1,0 +1,25 @@
+{
+  "source": "NASA OSDR RadLab",
+  "url": "https://visualization.osdr.nasa.gov/radlab/api/?query=%28spacecraft%3DISS%29AND%28instrument%3DDosTel%29AND%28timestamp%3E%3D2022-04-01T23%3A00%29AND%28timestamp%3C2022-04-01T23%3A10%29&fields=absorbed_dose_rate&format=json",
+  "unit": "µGy/h",
+  "notes": "Historical ISS instrument measurements. Timestamps match the API response. This reference sample is excluded from the fictional lunar replay and its rules.",
+  "columns": ["timestamp", "instrumentId", "absorbedDoseRate"],
+  "rows": [
+    ["2022-04-01T23:00:00", "DosTel2", 10.2160856666667],
+    ["2022-04-01T23:00:00", "DosTel1", 9.815504],
+    ["2022-04-01T23:00:33", "DosTel1", 9.835079],
+    ["2022-04-01T23:00:35", "DosTel2", 11.088263],
+    ["2022-04-01T23:02:13", "DosTel1", 7.949537],
+    ["2022-04-01T23:02:15", "DosTel2", 8.210985],
+    ["2022-04-01T23:03:53", "DosTel1", 6.228811],
+    ["2022-04-01T23:03:55", "DosTel2", 6.067535],
+    ["2022-04-01T23:05:00", "DosTel2", 4.72532794871795],
+    ["2022-04-01T23:05:00", "DosTel1", 5.26644315384615],
+    ["2022-04-01T23:05:33", "DosTel1", 5.935572],
+    ["2022-04-01T23:05:47", "DosTel2", 4.441754],
+    ["2022-04-01T23:07:25", "DosTel1", 3.554651],
+    ["2022-04-01T23:07:27", "DosTel2", 3.50563],
+    ["2022-04-01T23:09:05", "DosTel1", 2.907824],
+    ["2022-04-01T23:09:07", "DosTel2", 2.458224]
+  ]
+}

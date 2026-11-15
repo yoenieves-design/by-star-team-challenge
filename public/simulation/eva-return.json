@@ -1,0 +1,40 @@
+{
+  "schemaVersion": 1,
+  "id": "eva-return",
+  "title": "Return from the surface",
+  "durationS": 240,
+  "briefingAtS": 108,
+  "defaultCrewId": "alex",
+  "initialContext": {
+    "alex": { "zoneId": "lander", "breathingZoneId": "lander", "phase": "preparation", "activity": "Preparing for EVA", "resting": false },
+    "maya": { "zoneId": "lander", "breathingZoneId": "lander", "phase": "preparation", "activity": "Preparing for EVA", "resting": false },
+    "noah": { "zoneId": "habitat", "breathingZoneId": "habitat", "phase": "routine", "activity": "Habitat watch", "resting": true },
+    "yoe": { "zoneId": "orbiter", "breathingZoneId": "orbiter", "phase": "routine", "activity": "Orbit operations", "resting": true },
+    "samira": { "zoneId": "rover", "breathingZoneId": "rover", "phase": "routine", "activity": "Rover support", "resting": false },
+    "leila": { "zoneId": "orbiter", "breathingZoneId": "orbiter", "phase": "routine", "activity": "Flight systems watch", "resting": true }
+  },
+  "milestones": [
+    { "atS": 0, "label": "Pre-EVA checks" },
+    { "atS": 34, "label": "Surface construction" },
+    { "atS": 76, "label": "Airlock return" },
+    { "atS": 88, "label": "Habitat recovery" },
+    { "atS": 105, "label": "Cabin review and crew concern" },
+    { "atS": 120, "label": "Earth relay unavailable" },
+    { "atS": 157, "label": "Wrist monitor reconnects" },
+    { "atS": 174, "label": "Earth relay restored" },
+    { "atS": 240, "label": "End of replay" }
+  ],
+  "events": [
+    { "type": "context", "atS": 34, "crewId": "alex", "context": { "zoneId": "worksite", "breathingZoneId": "suit-alex", "phase": "eva", "activity": "Surface construction", "resting": false } },
+    { "type": "context", "atS": 34, "crewId": "maya", "context": { "zoneId": "worksite", "breathingZoneId": "suit-maya", "phase": "eva", "activity": "Surface construction", "resting": false } },
+    { "type": "context", "atS": 76, "crewId": "alex", "context": { "zoneId": "airlock", "breathingZoneId": "suit-alex", "phase": "return", "activity": "Airlock return", "resting": false } },
+    { "type": "context", "atS": 76, "crewId": "maya", "context": { "zoneId": "airlock", "breathingZoneId": "suit-maya", "phase": "return", "activity": "Airlock return", "resting": false } },
+    { "type": "context", "atS": 88, "crewId": "alex", "context": { "zoneId": "habitat", "breathingZoneId": "habitat", "phase": "recovery", "activity": "Post-EVA recovery", "resting": false } },
+    { "type": "context", "atS": 88, "crewId": "maya", "context": { "zoneId": "habitat", "breathingZoneId": "habitat", "phase": "recovery", "activity": "Post-EVA recovery", "resting": false } },
+    { "type": "concern", "atS": 104, "crewId": "maya", "category": "Dizziness reported after return" },
+    { "type": "link", "atS": 120, "link": "earth", "available": false },
+    { "type": "link", "atS": 134, "link": "local", "available": false },
+    { "type": "link", "atS": 154, "link": "local", "available": true },
+    { "type": "link", "atS": 174, "link": "earth", "available": true }
+  ]
+}

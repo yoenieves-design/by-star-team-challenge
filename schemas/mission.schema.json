@@ -1,0 +1,109 @@
+{
+  "$id": "mission",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "code", "name", "location", "missionDay", "startUtc", "crew", "zones", "devices", "tasks", "procedures", "rules", "sources"],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "code": { "$ref": "#/$defs/text" },
+    "name": { "$ref": "#/$defs/text" },
+    "location": { "$ref": "#/$defs/text" },
+    "missionDay": { "type": "integer", "minimum": 1 },
+    "startUtc": { "type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}Z$" },
+    "crew": {
+      "type": "array", "minItems": 1,
+      "items": {
+        "type": "object", "additionalProperties": false,
+        "required": ["id", "name", "role", "tone", "buddyId", "reference"],
+        "properties": {
+          "id": { "$ref": "#/$defs/id" },
+          "name": { "$ref": "#/$defs/text" },
+          "role": { "$ref": "#/$defs/text" },
+          "tone": { "enum": ["gold", "fern", "sage", "violet", "sky", "clay"] },
+          "buddyId": { "$ref": "#/$defs/id" },
+          "reference": {
+            "type": "object", "additionalProperties": false, "required": ["restingHeartRate", "basis"],
+            "properties": { "restingHeartRate": { "type": "number", "exclusiveMinimum": 0 }, "basis": { "$ref": "#/$defs/text" } }
+          }
+        }
+      }
+    },
+    "zones": {
+      "type": "array", "minItems": 1,
+      "items": {
+        "type": "object", "additionalProperties": false, "required": ["id", "name", "kind", "equipment"],
+        "properties": {
+          "id": { "$ref": "#/$defs/id" }, "name": { "$ref": "#/$defs/text" }, "kind": { "$ref": "#/$defs/text" },
+          "equipment": { "type": "array", "uniqueItems": true, "items": { "$ref": "#/$defs/text" } }
+        }
+      }
+    },
+    "devices": {
+      "type": "array", "minItems": 1,
+      "items": {
+        "type": "object", "additionalProperties": false, "required": ["id", "name", "subject", "metrics", "maxAgeS"],
+        "properties": {
+          "id": { "$ref": "#/$defs/id" }, "name": { "$ref": "#/$defs/text" }, "subject": { "$ref": "packet-stream#/$defs/subject" },
+          "assignedCrewId": { "$ref": "#/$defs/id" },
+          "metrics": { "type": "array", "minItems": 1, "uniqueItems": true, "items": { "$ref": "packet-stream#/$defs/metric" } },
+          "maxAgeS": { "type": "integer", "minimum": 1 }
+        }
+      }
+    },
+    "tasks": {
+      "type": "array",
+      "items": {
+        "type": "object", "additionalProperties": false, "required": ["id", "title", "reason", "crewId", "opensAtS", "dueAtS", "procedureId"],
+        "properties": {
+          "id": { "$ref": "#/$defs/id" }, "title": { "$ref": "#/$defs/text" }, "reason": { "$ref": "#/$defs/text" },
+          "crewId": { "$ref": "#/$defs/id" }, "opensAtS": { "$ref": "#/$defs/seconds" },
+          "dueAtS": { "$ref": "#/$defs/seconds" }, "phase": { "$ref": "scenario#/$defs/phase" },
+          "procedureId": { "$ref": "#/$defs/id" }
+        }
+      }
+    },
+    "procedures": {
+      "type": "array", "minItems": 1,
+      "items": {
+        "type": "object", "additionalProperties": false, "required": ["id", "version", "title", "purpose", "requiredEquipment", "steps", "sourceIds"],
+        "properties": {
+          "id": { "$ref": "#/$defs/id" }, "version": { "$ref": "#/$defs/text" }, "title": { "$ref": "#/$defs/text" }, "purpose": { "$ref": "#/$defs/text" },
+          "requiredEquipment": { "type": "array", "uniqueItems": true, "items": { "$ref": "#/$defs/text" } },
+          "steps": {
+            "type": "array", "minItems": 1,
+            "items": {
+              "type": "object", "additionalProperties": false, "required": ["title", "instruction"],
+              "properties": {
+                "title": { "$ref": "#/$defs/text" }, "instruction": { "$ref": "#/$defs/text" },
+                "requiresAssignee": { "type": "boolean" }
+              }
+            }
+          },
+          "sourceIds": { "type": "array", "uniqueItems": true, "items": { "$ref": "#/$defs/id" } }
+        }
+      }
+    },
+    "rules": {
+      "type": "object", "additionalProperties": false, "required": ["version", "co2RiseKpa", "co2WindowS", "restingPulseDeltaBpm"],
+      "properties": {
+        "version": { "$ref": "#/$defs/text" }, "co2RiseKpa": { "type": "number", "exclusiveMinimum": 0 },
+        "co2WindowS": { "type": "integer", "minimum": 1 }, "restingPulseDeltaBpm": { "type": "number", "exclusiveMinimum": 0 }
+      }
+    },
+    "sources": {
+      "type": "array",
+      "items": {
+        "type": "object", "additionalProperties": false, "required": ["id", "title", "description", "url"],
+        "properties": {
+          "id": { "$ref": "#/$defs/id" }, "title": { "$ref": "#/$defs/text" }, "description": { "$ref": "#/$defs/text" },
+          "url": { "type": "string", "pattern": "^https://" }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "id": { "type": "string", "pattern": "^[a-z0-9][a-z0-9-]*$" },
+    "text": { "type": "string", "minLength": 1 },
+    "seconds": { "type": "integer", "minimum": 0 }
+  }
+}

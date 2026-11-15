@@ -1,56 +1,33 @@
 # BY STAR · Mission Health
 
-Modular English-language WordPress prototype for an astronaut health-monitoring challenge.
-Branch: `fear-free`. Version: `0.1.0`.
+BY STAR is an English-language prototype for monitoring crew health on a long-duration mission. Six fictional astronauts work across a spacecraft, a lander and a construction site on the lunar far side. The replay opens during their return to the habitat with an environmental alert, a missing wrist signal and a separate crew concern.
 
-The initial release demonstrates collecting observations, reviewing transparent demo rules,
-and recording follow-up. Use fictional data only: browser storage is not a private health-record system.
+The WordPress demo has three pages. **Health** shows current telemetry, trends, the crew and their breathing environments. **Assist** guides checks and records handoffs. **Profiles** holds crew assignments, equipment, the mission schedule and project sources.
 
-## Start here
+| Start here | What it covers |
+| --- | --- |
+| [WordPress installation](docs/WORDPRESS-SETUP.md) | Upload the compiled files, activate the shared PHP snippet and add the three shortcodes. |
+| [Demonstration script](docs/ROADMAP.md) | Reproduce the incident, exercise the crew handoff and advance the simulated mission. |
+| [Product brief](docs/PRODUCT-BRIEF.md) | Design rationale, use of NASA evidence and proposed onboard operation. |
+| [Architecture](docs/ARCHITECTURE.md) | Source layout, telemetry contract and separation between replay, rules and presentation. |
+| [Verification](docs/VERIFICATION.md) | Automated coverage and WordPress acceptance steps. |
 
-1. Read [WordPress setup](docs/WORDPRESS-SETUP.md).
-2. Copy the generated [PHP snippet](wordpress/snippets/by-star-app.php) into WordPress.
-3. Create the eight pages and insert their shortcodes.
-4. Open **Profile & mission**, load the fictional week, and explore the demo.
+## Run locally
 
-## Development
-
-Node.js 20 or newer. No npm dependencies or installation step required.
+Use Node.js 22.18 or newer.
 
 ```sh
-npm test
+npm ci
 npm run build
 npm run preview
 ```
 
-Preview: http://127.0.0.1:4173. Stop the server with Ctrl+C.
-Edit `src/`, then rebuild. Commit the generated snippet and `dist/` with the source.
-The PHP file can also be installed as a plugin, but never enable both installation methods.
+Open [the local preview](http://127.0.0.1:4173). The production bundle and public data are in `dist/`. For source development with live reload, run `npm run dev`. The PHP snippet is in [wordpress/snippets/by-star-loader.php](wordpress/snippets/by-star-loader.php).
 
-## Repository map
+After building, run `pwsh -File scripts/package-wordpress.ps1` to create the WordPress ZIP in `release/`.
 
-| Path | Purpose |
-| --- | --- |
-| `src/config.js` | Page registry, fields and rule version |
-| `src/core/` | Data validation, demo rules, storage and UI helpers |
-| `src/modules/` | One view per WordPress page |
-| `src/app.js` | Shared shell and event handling |
-| `src/styles.css` | Scoped design system and responsive layout |
-| `scripts/` | Dependency-free build and preview server |
-| `wordpress/snippets/` | Generated copy-and-paste PHP artifact |
-| `dist/` | Standalone preview built from the same sources |
-| `tests/` | Data, rule, persistence and escaping checks |
-| `workers/` | Deferred Cloudflare boundary and implementation criteria |
-| `docs/` | Setup, architecture, roadmap and verification |
+## Data provenance
 
-## Release scope
+Personal and atmosphere readings in the lunar replay are synthetic JSON packets. The **Sources & data** section includes a separately labeled historical sample from the NASA Open Science Data Repository RadLab API. Its 16 readings come from ISS instruments and do not enter the lunar scenario or its rules. Lunar imagery is credited to NASA's Scientific Visualization Studio. See [third-party notices](dist/THIRD-PARTY-NOTICES.txt).
 
-Working: daily observations, date-based editing, local persistence, sleep trend/history,
-explainable alerts, daily checklist, profile editing, JSON export and printable summary.
-Environment explicitly shows unconnected sensors; it does not fabricate readings.
-
-Not implemented: authenticated health storage, device integrations, clinical assessment,
-cross-device synchronization, offline page caching, or a deployed Cloudflare service.
-
-See [architecture](docs/ARCHITECTURE.md), [roadmap](docs/ROADMAP.md), and
-[verification checklist](docs/VERIFICATION.md).
+Version 0.2.0 replaces the earlier daily form with a crew-centered replay. The prototype represents data availability, explanation and follow-up. The lunar identities, values and procedures are fictional.

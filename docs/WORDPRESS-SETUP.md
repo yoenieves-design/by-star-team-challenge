@@ -1,75 +1,52 @@
-# WordPress installation guide
+# Install BY STAR 0.2.0 in WordPress
 
-## 1. Install the shared PHP snippet
+## 1. Upload the compiled files
 
-1. In GitHub, select branch `fear-free` and open `wordpress/snippets/by-star-app.php`.
-2. Open the raw file and copy its complete contents **except the first `<?php` line**.
-3. In Code Snippets, create a **PHP** snippet named `BY STAR Mission Health v0.1.0`.
-4. Paste the code, select **Run everywhere**, save and activate it.
-5. Use only one active BY STAR version. The class guard prevents accidental redeclaration,
-   but it cannot decide which version you intend to use.
+Download branch `fear-free` as a ZIP from GitHub or use the prepared WordPress ZIP.
 
-The free PHP-snippet workflow is sufficient; no separate HTML, CSS or JavaScript snippet is required.
-The generated PHP registers all shortcodes and prints shared styles/scripts once in the footer.
-Your theme must call `wp_footer()`. A restrictive Content Security Policy may block inline assets;
-in that deployment, move assets to enqueued files with the appropriate policy instead.
+- **From the repository ZIP**, upload the contents of `dist/` into `wp-content/uploads/by-star/v0.2.0/` using your hosting file manager or SFTP. Keep the `assets/`, `data/`, `media/` and `simulation/` directories intact.
+- **From the WordPress ZIP**, upload the included `by-star/` directory into `wp-content/uploads/`. Keep `by-star-loader.php` and this guide available on your computer.
 
-Alternative: place the generated file in `wp-content/plugins/by-star-mission-health/`
-and activate it as a plugin. Do not activate the snippet at the same time.
+The site must be able to serve `assets/by-star-app.js` and `simulation/streams/personal.json` under that URL. Opening either URL in a new tab is a quick check. Use the same HTTPS host as the three pages. The files are compiled already, so the WordPress host needs no Node.js build step.
 
-## 2. Create pages
+## 2. Create or reuse three pages
 
-Create a parent page titled **Mission Health**, slug `mission-health`. It can contain a short
-introduction and a link to My status. Create these child pages beneath it:
+Create a parent page with slug `mission-health` if it does not exist. Use a full-width layout for each child page, with one **Shortcode** block per page.
 
-| Title | Child slug | Shortcode |
+| Page title | Path from the site home | Shortcode |
 | --- | --- | --- |
-| My status | `dashboard` | `[star_dashboard]` |
-| Daily log | `daily-log` | `[star_daily_log]` |
-| Indicators | `indicators` | `[star_indicators]` |
-| Alerts & actions | `actions` | `[star_actions]` |
-| Environment | `environment` | `[star_environment]` |
-| Wellbeing plan | `wellbeing` | `[star_wellbeing]` |
-| Health report | `report` | `[star_report]` |
-| Profile & mission | `profile` | `[star_profile]` |
+| Health | `mission-health/health` | `[by_star_health]` |
+| Assist | `mission-health/assist` | `[by_star_assist]` |
+| Profiles | `mission-health/profiles` | `[by_star_profiles]` |
 
-Use a WordPress **Shortcode block**, one module per page. Choose a full-width page template
-without a theme sidebar. Hide the theme's page title if it duplicates the application's title.
-The in-app menu is automatic; optionally add My status to your site's main menu.
-Enable a pretty permalink structure so these paths resolve.
+You can reuse the earlier **My status**, **Alerts & actions** and **Profile & mission** pages by updating their slugs and shortcodes. To keep existing URLs, put their actual paths into the `paths` array in the loader. The app renders its own menu. Update the site's public menu to point to the new Health page if needed.
 
-All pages must use the same HTTPS origin to share demo storage. WordPress users on the same
-browser profile share these records; logging out does not clear them.
+## 3. Activate the shared snippet
 
-## 3. Customize page URLs if needed
+1. Open `by-star-loader.php` from the package or from [wordpress/snippets/](../wordpress/snippets/) in the repository.
+2. In **Code Snippets**, create a **PHP** snippet called **BY STAR Mission Health 0.2.0**.
+3. Copy the complete file after its first `<?php` line and paste it into the snippet editor.
+4. The default `asset_base` uses the site's WordPress uploads URL. If you placed the files elsewhere, set it to the same-origin URL of the version folder, including the trailing slash. Adjust the three paths if you reused different page slugs.
+5. Select **Run everywhere**, save and activate. Once the new pages work, deactivate the 0.1.0 snippet and update links to the superseded pages.
 
-If using other slugs or a multilingual URL layout, create a separate PHP snippet:
+## 4. Walk through the demo
 
-```php
-add_filter( 'by_star_page_urls', function ( $links ) {
-    $links['dashboard'] = home_url( '/your-dashboard/' );
-    // Override other keys using the slug column above.
-    return $links;
-} );
-```
+1. Open **Health** at the new site URL. The replay starts paused at **01:48** on a fresh browser. The crew overview shows six profiles and a **Cabin CO₂ change needs review** incident.
+2. Open **Review incident**, expand **Evidence and timing**, and **Start guided check**. Complete the first step and choose **I can’t do this now**.
+3. Visit **Profiles**, then return to **Assist**. The paused step should still be available. Select Noah in **Crew handoff**, request support, then select Noah in the top bar to confirm receipt.
+4. Return to **Health**, select Maya and advance with **Next event**. The UI shows when the Earth relay becomes unavailable and when Maya's wrist signal returns.
+5. Test **I need help** and **Simplified view** on a phone. Visit **Profiles → Sources & data** to check that the historical JSON opens.
 
-## 4. Verify the installation
+Changes are stored in the browser and shared by the three pages on the same origin. **Restart replay** returns to the beginning and clears actions for that replay after confirmation. A private window starts a fresh session. The previous version's local records use a separate storage key.
 
-Open Profile & mission and load the fictional week. Navigate through every menu link.
-Save a daily log, reload the page, and confirm the entry remains. Test an action checkbox,
-export, mobile layout, and keyboard navigation. Environment should show no instrument connected.
+## If a page does not load
 
-If the loading message remains: inspect the browser console, confirm the snippet is active,
-check for blocked inline scripts, and temporarily disable script-delay/minification plugins.
-Clear WordPress/CDN caches after updates. Do not cache future private API responses.
+| What you see | What to check |
+| --- | --- |
+| Shortcode text remains visible | Confirm the PHP snippet is active and the page uses a Shortcode block. |
+| Loading text remains | Check that the script URL returns JavaScript and the theme calls the WordPress footer hook. Exclude the bundle from script optimization if a plugin prevents it from running. |
+| An HTTP or JSON error | Verify the version folder, capitalization, same-origin URL and all JSON subdirectories. |
+| Menu opens a different page | Check the full path in the snippet, including the parent slug. Clear site caches after updating. |
+| Layout is too narrow | Switch to a full-width template or place the shortcode in a wide group. |
 
-## 5. Update safely
-
-Edit source locally, run tests and build, then replace the existing snippet with the new generated
-file. Back up its previous contents first. Do not edit the generated file as the source of truth.
-Storage schema version 1 is retained across rebuilds; future incompatible schemas need migration.
-
-## Official references
-
-- [WordPress Shortcode API](https://developer.wordpress.org/plugins/shortcodes/)
-- [WordPress wp_footer hook](https://developer.wordpress.org/reference/hooks/wp_footer/)
+For a new deployment, upload a fresh version directory and update the asset base and version together so cached pages and JSON stay compatible.

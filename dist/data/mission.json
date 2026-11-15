@@ -1,0 +1,109 @@
+{
+  "schemaVersion": 1,
+  "code": "SELENE-06",
+  "name": "Selene Construction Mission",
+  "location": "Lunar far side",
+  "missionDay": 38,
+  "startUtc": "2034-11-05T06:40:00Z",
+  "crew": [
+    { "id": "alex", "name": "Alex Morgan", "role": "EVA team lead", "tone": "fern", "buddyId": "maya", "reference": { "restingHeartRate": 64, "basis": "Fictional preflight seated readings" } },
+    { "id": "maya", "name": "Maya Torres", "role": "Systems engineer", "tone": "clay", "buddyId": "alex", "reference": { "restingHeartRate": 67, "basis": "Fictional preflight seated readings" } },
+    { "id": "noah", "name": "Noah Chen", "role": "Crew medical officer", "tone": "sky", "buddyId": "samira", "reference": { "restingHeartRate": 62, "basis": "Fictional preflight seated readings" } },
+    { "id": "yoe", "name": "Yoe Reyes", "role": "Mission commander", "tone": "violet", "buddyId": "leila", "reference": { "restingHeartRate": 65, "basis": "Fictional preflight seated readings" } },
+    { "id": "samira", "name": "Samira Okafor", "role": "Rover operator", "tone": "gold", "buddyId": "noah", "reference": { "restingHeartRate": 66, "basis": "Fictional preflight seated readings" } },
+    { "id": "leila", "name": "Leila Duarte", "role": "Flight engineer", "tone": "sage", "buddyId": "yoe", "reference": { "restingHeartRate": 63, "basis": "Fictional preflight seated readings" } }
+  ],
+  "zones": [
+    { "id": "orbiter", "name": "Orbital cabin", "kind": "Spacecraft", "equipment": ["Cabin monitor", "Wrist monitor", "Crew terminal"] },
+    { "id": "lander", "name": "Descent cabin", "kind": "Lander", "equipment": ["Cabin monitor", "Wrist monitor", "Crew terminal"] },
+    { "id": "habitat", "name": "Surface habitat", "kind": "Lunar base", "equipment": ["Habitat air monitor", "Wrist monitor", "Crew terminal"] },
+    { "id": "airlock", "name": "Habitat airlock", "kind": "Transition zone", "equipment": ["Wrist monitor", "Crew terminal"] },
+    { "id": "worksite", "name": "Construction site", "kind": "Lunar surface", "equipment": ["Wrist monitor"] },
+    { "id": "rover", "name": "Rover cabin", "kind": "Surface vehicle", "equipment": ["Cabin monitor", "Wrist monitor", "Crew terminal"] },
+    { "id": "suit-alex", "name": "Alex’s suit", "kind": "Suit breathing loop", "equipment": ["Suit telemetry"] },
+    { "id": "suit-maya", "name": "Maya’s suit", "kind": "Suit breathing loop", "equipment": ["Suit telemetry"] }
+  ],
+  "devices": [
+    { "id": "wrist-alex", "name": "Alex’s wrist monitor", "subject": { "type": "crew", "id": "alex" }, "metrics": ["heart_rate", "skin_temperature", "activity"], "maxAgeS": 18 },
+    { "id": "wrist-maya", "name": "Maya’s wrist monitor", "subject": { "type": "crew", "id": "maya" }, "metrics": ["heart_rate", "skin_temperature", "activity"], "maxAgeS": 18 },
+    { "id": "wrist-noah", "name": "Noah’s wrist monitor", "subject": { "type": "crew", "id": "noah" }, "metrics": ["heart_rate", "skin_temperature", "activity"], "maxAgeS": 18 },
+    { "id": "wrist-yoe", "name": "Yoe’s wrist monitor", "subject": { "type": "crew", "id": "yoe" }, "metrics": ["heart_rate", "skin_temperature", "activity"], "maxAgeS": 18 },
+    { "id": "wrist-samira", "name": "Samira’s wrist monitor", "subject": { "type": "crew", "id": "samira" }, "metrics": ["heart_rate", "skin_temperature", "activity"], "maxAgeS": 18 },
+    { "id": "wrist-leila", "name": "Leila’s wrist monitor", "subject": { "type": "crew", "id": "leila" }, "metrics": ["heart_rate", "skin_temperature", "activity"], "maxAgeS": 18 },
+    { "id": "air-orbiter", "name": "Orbital cabin monitor", "subject": { "type": "zone", "id": "orbiter" }, "metrics": ["oxygen", "carbon_dioxide", "pressure"], "maxAgeS": 24 },
+    { "id": "air-lander", "name": "Descent cabin monitor", "subject": { "type": "zone", "id": "lander" }, "metrics": ["oxygen", "carbon_dioxide", "pressure"], "maxAgeS": 24 },
+    { "id": "air-habitat", "name": "Habitat air monitor", "subject": { "type": "zone", "id": "habitat" }, "metrics": ["oxygen", "carbon_dioxide", "pressure"], "maxAgeS": 24 },
+    { "id": "air-rover", "name": "Rover cabin monitor", "subject": { "type": "zone", "id": "rover" }, "metrics": ["oxygen", "carbon_dioxide", "pressure"], "maxAgeS": 24 },
+    { "id": "suit-air-alex", "name": "Alex’s suit monitor", "subject": { "type": "zone", "id": "suit-alex" }, "assignedCrewId": "alex", "metrics": ["oxygen", "carbon_dioxide", "pressure"], "maxAgeS": 24 },
+    { "id": "suit-air-maya", "name": "Maya’s suit monitor", "subject": { "type": "zone", "id": "suit-maya" }, "assignedCrewId": "maya", "metrics": ["oxygen", "carbon_dioxide", "pressure"], "maxAgeS": 24 }
+  ],
+  "tasks": [
+    { "id": "eva-prep", "title": "Pre-EVA equipment check", "reason": "Review the assigned equipment before the construction shift.", "crewId": "alex", "opensAtS": 0, "dueAtS": 30, "phase": "preparation", "procedureId": "eva-check" },
+    { "id": "alex-recovery", "title": "Post-EVA check-in", "reason": "Record how Alex feels after returning from the construction site.", "crewId": "alex", "opensAtS": 88, "dueAtS": 150, "phase": "recovery", "procedureId": "recovery-check" },
+    { "id": "maya-recovery", "title": "Post-EVA check-in", "reason": "Record how Maya feels after returning from the construction site.", "crewId": "maya", "opensAtS": 88, "dueAtS": 150, "phase": "recovery", "procedureId": "recovery-check" },
+    { "id": "habitat-log", "title": "Review habitat readings", "reason": "Review the air monitor record after a crew transfer.", "crewId": "noah", "opensAtS": 104, "dueAtS": 198, "procedureId": "air-review" },
+    { "id": "orbiter-check", "title": "Wrist monitor check", "reason": "Confirm that the orbital crew can receive personal observations.", "crewId": "yoe", "opensAtS": 110, "dueAtS": 210, "procedureId": "sensor-check" }
+  ],
+  "procedures": [
+    {
+      "id": "air-review", "version": "Demo 1", "title": "Review the cabin air monitor",
+      "purpose": "Verify the source of the environmental reading and record a handoff for the affected zone.",
+      "requiredEquipment": ["Crew terminal"], "sourceIds": ["environment", "eva"],
+      "steps": [
+        { "title": "Check the breathing environment", "instruction": "Read the zone and timestamp in the incident evidence. Compare them with the crew locations at the time of the observation." },
+        { "title": "Verify the source", "instruction": "Review the air monitor identifier and signal quality. Record the observation as unverified if you cannot confirm its source." },
+        { "title": "Record the handoff", "instruction": "Assign a crew member to follow up. Use Request support when local help is needed. Record completion when the information is ready for review.", "requiresAssignee": true }
+      ]
+    },
+    {
+      "id": "sensor-check", "version": "Demo 1", "title": "Check the sensor connection",
+      "purpose": "Find out whether the latest wrist monitor reading is available for review.",
+      "requiredEquipment": ["Wrist monitor"], "sourceIds": ["wearables"],
+      "steps": [
+        { "title": "Identify the monitor", "instruction": "Check that the device shown in the evidence belongs to the selected crew member." },
+        { "title": "Look for a current reading", "instruction": "Check the signal label and the measurement time. If the device is unavailable, pause this check or request support." },
+        { "title": "Record the result", "instruction": "Confirm that you reviewed the connection. Leave any unresolved readings for the assigned follow-up." }
+      ]
+    },
+    {
+      "id": "crew-review", "version": "Demo 1", "title": "Review a crew concern",
+      "purpose": "Save the available information for the crew medical officer.",
+      "requiredEquipment": [], "sourceIds": ["medical-operations"],
+      "steps": [
+        { "title": "Review the report", "instruction": "Confirm the crew member, time and stated concern." },
+        { "title": "Review recent context", "instruction": "Look at the available personal readings, activity and breathing environment. Flag any missing information." },
+        { "title": "Arrange follow-up", "instruction": "Assign a reviewer or use Request support. Record this review so the next crew member can pick it up." }
+      ]
+    },
+    {
+      "id": "eva-check", "version": "Demo 1", "title": "Review assigned equipment",
+      "purpose": "Record the equipment check before the scheduled exterior task.",
+      "requiredEquipment": ["Wrist monitor"], "sourceIds": ["eva"],
+      "steps": [
+        { "title": "Check the assigned device", "instruction": "Confirm the wrist monitor listed in Profiles is assigned to the crew member preparing for EVA." },
+        { "title": "Record equipment readiness", "instruction": "Record whether you completed the equipment check. Use the mission’s separate authorization process for EVA clearance." }
+      ]
+    },
+    {
+      "id": "recovery-check", "version": "Demo 1", "title": "Complete the post-EVA check-in",
+      "purpose": "Capture how the crew member feels and review available measurements after the return.",
+      "requiredEquipment": [], "sourceIds": ["eva", "medical-operations"],
+      "steps": [
+        { "title": "Confirm return context", "instruction": "Review the updated location and breathing environment for the returning crew member." },
+        { "title": "Check in with the crew member", "instruction": "Ask if there is a concern. Use Report a concern to record it alongside the telemetry." },
+        { "title": "Record the check-in", "instruction": "Complete the task after the check-in. Leave any concern open for its own review." }
+      ]
+    }
+  ],
+  "rules": { "version": "Demo 1", "co2RiseKpa": 0.12, "co2WindowS": 40, "restingPulseDeltaBpm": 15 },
+  "sources": [
+    { "id": "environment", "title": "NASA · Major Constituent Analyzer", "description": "Basis for distinguishing oxygen fraction, pressure and carbon dioxide measurements in the habitat.", "url": "https://ntrs.nasa.gov/citations/20120010634" },
+    { "id": "eva", "title": "NASA · Extravehicular activity risks", "description": "Informs the separation of preparation, work, return and follow-up.", "url": "https://www.nasa.gov/reference/risk-of-injury-and-compromised-performance-from-extravehicular-activity-eva/" },
+    { "id": "wearables", "title": "NASA · Wearable technology on the ISS", "description": "Examples of research using personal sensors during activity and rest.", "url": "https://www.nasa.gov/humans-in-space/wearable-tech-for-space-station-research/" },
+    { "id": "medical-operations", "title": "NASA · Medical operations", "description": "Mission planning, crew medical roles and phase-specific medical operations.", "url": "https://www.nasa.gov/reference/6-0-medical-operations/" },
+    { "id": "regolith", "title": "NASA · Lunar regolith hazards", "description": "Context for environmental review after returning from surface work.", "url": "https://science.nasa.gov/biological-physical/what-hazards-are-caused-by-lunar-regolith/" },
+    { "id": "relay", "title": "NASA · Lunar communications relays", "description": "Basis for representing Earth relay availability separately from local links.", "url": "https://www.nasa.gov/goddard/esc/lcrns/" },
+    { "id": "interfaces", "title": "NASA · Crew interfaces", "description": "Design reference for readable displays and redundant status cues.", "url": "https://www.nasa.gov/reference/10-0-crew-interfaces-vol-2/" },
+    { "id": "lunar-image", "title": "NASA Scientific Visualization Studio · The Moon’s Far Side", "description": "Lunar visualization from Lunar Reconnaissance Orbiter measurements. Credit NASA’s Scientific Visualization Studio.", "url": "https://svs.gsfc.nasa.gov/11747/" }
+  ]
+}
