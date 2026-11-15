@@ -125,4 +125,4 @@ Use the current submission portal’s time and format limits when recording a pr
 | Presentation or video | **Add the final public link, if required.** |
 | Original code license | MIT; see the [LICENSE](../LICENSE) and [third-party notices](../THIRD-PARTY-NOTICES.md). |
 
-The team-specific fields marked above are intentionally incomplete. They are not claims about participants, competition eligibility, submission status or a deadline. No project submission has been made by preparing this document.
+The team-specific fields marked above are intentionally incomplete. They are not claims about participants, competition eligibility, submission status or a deadline. No project submission has been made by preparing this document. Follow the [submission checklist](SUBMISSION-GUIDE.md) for verified organizer instructions and the remaining rules to check in the current official guides.

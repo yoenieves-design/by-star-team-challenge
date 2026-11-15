@@ -2,6 +2,8 @@
 
 The November 15, 2026 exercise round passed TypeScript validation and 30 unit tests. All 17 browser cases passed using Microsoft Edge, with the exercise flow and expanded route checks rerun after correcting test expectations. The browser cases include automated accessibility checks and a simulated speech-recognition service. Desktop and 390 px mobile exercise layouts were also inspected visually. Microphone accuracy and browser speech-service availability require testing on the visitor's device.
 
+The November 15 release review reran `npm run build:pages` and the complete 17-case browser suite successfully. The `main` documentation and license commit `b66d789` also passed GitHub Actions and Cloudflare Pages deployment. SHA-256 comparisons confirmed that the public production JavaScript, CSS, project license and bundled notices matched `dist/`. The closeout changes did not alter the application bundle. These checks verify the prototype's implemented behavior and deployment; they do not establish clinical validity.
+
 With the lockfile dependencies installed, run:
 
 ```sh

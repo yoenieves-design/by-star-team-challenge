@@ -109,6 +109,7 @@ Operational use would require authenticated device gateways, a continuously runn
 ## Project material and attribution
 
 - [Submission-ready project description](docs/PROJECT-SUBMISSION.md)
+- [Submission checklist and verified organizer instructions](docs/SUBMISSION-GUIDE.md)
 - [Product brief and design rationale](docs/PRODUCT-BRIEF.md)
 - [Guided demonstration and exercise walkthrough](docs/ROADMAP.md)
 - [Data behavior, local storage and repository audit](docs/DATA-AND-SECURITY.md)
