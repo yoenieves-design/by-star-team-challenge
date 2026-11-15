@@ -8,6 +8,7 @@
     "fixtures": "node scripts/create-telemetry.mjs",
     "typecheck": "npm run schemas && tsc --noEmit",
     "build": "npm run schemas && vite build && node scripts/write-preview.mjs",
+    "build:pages": "npm run typecheck && npm test && npm run build",
     "test": "npm run schemas && node --test \"tests/unit/*.test.ts\"",
     "test:browser": "playwright test",
     "dev": "npm run schemas && vite",
