@@ -2,6 +2,7 @@
   "name": "by-star-mission-health",
   "version": "0.2.0",
   "private": true,
+  "license": "MIT",
   "type": "module",
   "scripts": {
     "schemas": "node scripts/generate-validators.mjs",

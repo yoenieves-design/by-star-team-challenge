@@ -3,6 +3,8 @@ node_modules/
 .env.*
 !.env.example
 .wrangler/
+.dev.vars
+.dev.vars.*
 *.log
 src/adapters/validators.generated.js
 test-results/

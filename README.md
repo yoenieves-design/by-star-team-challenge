@@ -1,34 +1,120 @@
 # BY STAR · Mission Health
 
-BY STAR is an English-language prototype for monitoring crew health on a long-duration mission. Six fictional astronauts work across a spacecraft, a lander and a construction site on the lunar far side. The replay opens during their return to the habitat with an environmental alert, a missing wrist signal and a separate crew concern.
+**Understand the reading. Check the context. Record the next action.**
 
-The demo has four pages. **Health** shows current telemetry, trends, the crew and their breathing environments. **Assist** guides checks and records handoffs. **Exercise** synchronizes simulated cycling and body readings and saves workout records. **Profiles** holds crew assignments, equipment, the mission schedule and project sources.
+BY STAR is an English-language astronaut health-monitoring prototype by team **by-star** for the NASA Space Apps health-monitoring challenge. It follows six fictional crew members on SELENE-06, a lunar far-side construction mission, and shows how personal sensors, breathing-environment data, exercise equipment, clinical reports and crew observations can support a traceable medical review.
 
-| Start here | What it covers |
+**[Open the live demo](https://by-star-team-challenge.pages.dev/)** · **[Project description](docs/PROJECT-SUBMISSION.md)** · **[Demonstration walkthrough](docs/ROADMAP.md)**
+
+The public demo uses synthetic crew records and illustrative procedures. Its purpose is to demonstrate monitoring and follow-up; it does not diagnose, prescribe treatment or grant medical clearance. NASA references inform the design, and a separate historical NASA dataset demonstrates source provenance.
+
+## Explore the demo
+
+The app opens on **Health**, paused at **01:48** in a four-minute scenario. Select **Play replay** to advance the mission clock, or **Next event** to inspect a checkpoint. A running replay keeps its position across navigation. **Restart replay** returns to the beginning and asks before clearing saved work.
+
+For a guided introduction, choose **App guide → Explore the post-EVA case**. This creates a separate practice session with Maya selected. Follow its five stages through sensor verification, the clinical report and a handoff to Noah. **Return to my replay** restores access to the original session.
+
+| Page | What to try |
 | --- | --- |
-| [Cloudflare Pages deployment](docs/CLOUDFLARE-PAGES.md) | Review the demo from `fear-free`, publish the approved version from `main`, and connect the submission URL. |
-| [WordPress installation](docs/WORDPRESS-SETUP.md) | Upload the compiled files, activate the shared PHP snippet and add the four shortcodes. |
-| [Demonstration script](docs/ROADMAP.md) | Reproduce the incident, exercise the crew handoff and advance the simulated mission. |
-| [Product brief](docs/PRODUCT-BRIEF.md) | Design rationale, use of NASA evidence and proposed onboard operation. |
-| [Architecture](docs/ARCHITECTURE.md) | Source layout, telemetry contract and separation between replay, rules and presentation. |
-| [Verification](docs/VERIFICATION.md) | Automated coverage and WordPress acceptance steps. |
+| **Health** | Select one of six crew profiles, inspect the interactive body markers, compare activity-aware trends and review the breathing environment. Record rest, fatigue and a concern in **Quick check-in**. Open **My health → Clinical checks** for dated lab reports. |
+| **Assist** | Inspect the evidence, start a guided check, record an explicit outcome and request support from an assigned crew member. Switch to that profile to confirm receipt. Reopen a review or download its evidence as JSON. |
+| **Exercise** | Open Yoe’s orbital cycling session. Compare machine power and cadence with independently sourced chest heart rate, inspect a signal interruption, and save an early-stop or excerpt-complete record. The three-minute excerpt represents part of a fictional 25-minute plan. |
+| **Profiles** | Compare the crew, inspect individual equipment assignments, check **Sensors**, review the mission schedule and open **NASA data & references**. |
+
+The **App guide** is available on every page. Status text and icons accompany color. Keyboard controls, text tables for charts, responsive layouts and **Simplified view** support different viewing needs. Optional browser speech reads instructions and readings. **Voice controls** accepts three English commands after explicit activation and on-screen confirmation: **Read my heart rate**, **Show my next check**, and **Open Sensors**.
+
+## What the prototype demonstrates
+
+- **Source-aware monitoring.** Measurement time, reception time, device identity, units and quality remain attached to observations. Old or degraded measurements are visibly distinguished from current data.
+- **Context before interpretation.** Physical location, breathing zone and activity are separate. A resting heart-rate comparison requires a current sample with comparable resting context.
+- **Review with an outcome.** Completing procedural steps, resolving a signal issue and acknowledging support are separate states. Unresolved work remains visible; reopening preserves its history.
+- **Episodic clinical results.** A specimen mismatch holds Maya’s first urine report. A later corrected revision retains its lineage. The current accepted report is reviewed by the assigned medical profile.
+- **Exercise evidence.** Machine workload and physiological response use independent sources and units. Saved workout revisions preserve the evidence and coverage available when recorded.
+- **Local continuity.** IndexedDB retains the fictional session, actions and records. The scenario distinguishes a local telemetry interruption from loss of Earth relay.
+
+## Data and scientific basis
+
+| Input | Implemented variables | Provenance |
+| --- | --- | --- |
+| Personal telemetry | Heart rate in bpm, skin temperature in °C, movement in counts/min | Synthetic wrist-monitor packets. Yoe’s heart rate comes from a separately registered chest sensor; his wrist supplies skin temperature and movement. |
+| Breathing environment | Oxygen fraction in %, CO₂ partial pressure in kPa, total pressure in kPa | Synthetic cabin, habitat, rover and suit-monitor packets. |
+| Crew and mission context | Identity, location, activity, breathing zone, planned checks, link state, rest, fatigue and reported concerns | Fictional mission configuration, scripted context and crew-entered records. |
+| Clinical results | Urine specific gravity, specimen/order IDs, instrument quality, timestamps and revisions | Synthetic post-EVA urinalysis reports for Alex and Maya. |
+| Exercise | Cycle power in W, cadence in rpm, timing, perceived effort, source coverage and heart-rate sample statistics | Dedicated synthetic machine stream and independently identified body observations. |
+| Body mass | Dated mass in kg, instrument, inertial measurement method and reception time | One synthetic measurement; no body-composition estimate is inferred. |
+| Historical radiation reference | 16 absorbed dose-rate measurements in µGy/h from DosTel1 and DosTel2 on the ISS, April 1, 2022 | Real historical [NASA OSDR RadLab sample](public/data/radlab-iss-sample.json), kept separate from the lunar replay and its rules. |
+
+NASA’s [Earth-Independent Medical Operations concept](https://ntrs.nasa.gov/citations/20250000009) informs the integration of onboard information for crew review. [NASA-STD-3001 crew-interface guidance](https://www.nasa.gov/reference/10-0-crew-interfaces-vol-2/) informs visible data status, units and redundant status cues. These are design references; the prototype has not been certified against a NASA standard.
+
+The clinical scenario is grounded in NASA’s documented [medical evaluations around ISS EVA, §6.5.1](https://www.nasa.gov/wp-content/uploads/2024/09/ochmo-std-100-1a-rev-a-signed.pdf#page=52). Exercise references include [CEVIS, T2 and ARED](https://www.nasa.gov/general/astronaut-exercise/) and [inertial mass measurement](https://www.nasa.gov/image-article/astronaut-shannon-walker-works-columbus-laboratory-module/). T2 and ARED are reference entries in this demo; only the cycle has a simulated machine stream.
+
+Detailed contracts and source references are in [Clinical data](docs/CLINICAL-DATA.md), [Exercise data](docs/EXERCISE-DATA.md) and the [Product brief](docs/PRODUCT-BRIEF.md).
+
+## How playback works
+
+The JSON streams are generated deterministically before deployment. **Play** advances the clock and reveals packets at their recorded reception times. Personal and exercise samples are generally spaced six simulated seconds apart; environmental samples are spaced eight. The scenario includes a wrist outage, an exercise-machine outage, delayed delivery and a retransmission.
+
+The replay validates inputs, removes duplicates and preserves late samples without replacing newer observations. Monitoring rules derive review items from the evidence. User actions change the follow-up record; they do not change scripted physiological values or control equipment. All comparison and recovery thresholds are illustrative demo rules, not NASA clinical limits.
 
 ## Run locally
 
-Use Node.js 22.18 or newer.
+Use **Node.js 24.13.0**, as pinned in [.node-version](.node-version). The package supports Node.js 22.18 or newer.
 
 ```sh
 npm ci
-npm run build
+npm run build:pages
 npm run preview
 ```
 
-Open [the local preview](http://127.0.0.1:4173). The production bundle and public data are in `dist/`. For source development with live reload, run `npm run dev`. The PHP snippet is in [wordpress/snippets/by-star-loader.php](wordpress/snippets/by-star-loader.php).
+Open [http://127.0.0.1:4173](http://127.0.0.1:4173). For development with live reload, run `npm run dev`.
 
-After building, run `pwsh -File scripts/package-wordpress.ps1` to create the WordPress ZIP in `release/`.
+| Command | Purpose |
+| --- | --- |
+| `npm run fixtures` | Regenerate deterministic body, environmental and exercise streams. This overwrites the generated fixture files. |
+| `npm run typecheck` | Compile JSON validators and check TypeScript. |
+| `npm test` | Run unit tests for data validation, replay, monitoring, follow-up, clinical, exercise and voice behavior. |
+| `npm run build:pages` | Run type checking and unit tests, then build the static site into `dist/`. |
+| `npm run test:browser` | Run Playwright workflow and automated accessibility checks against the built preview. |
 
-## Data provenance
+Before the browser suite, run `npm run build` and `npx playwright install chromium`. Set the environment variable `BY_STAR_BROWSER_CHANNEL=msedge` to use an installed Microsoft Edge browser instead. See [Verification](docs/VERIFICATION.md) for tested flows and environment details. [GitHub Actions](.github/workflows/verify.yml) also checks regenerated output, bundle syntax and the optional PHP loader.
 
-**Profiles → Sensors** shows readings from the synthetic JSON packets driving the lunar replay. **Profiles → Mission & schedule** includes **NASA data & references**, where the historical RadLab sample contains 16 ISS instrument readings. The replay and its rules use the synthetic streams. Lunar imagery is credited to NASA's Scientific Visualization Studio. See [third-party notices](dist/THIRD-PARTY-NOTICES.txt).
+## Architecture and deployment
 
-Version 0.2.0 replaces the earlier daily form with a crew-centered replay. The prototype represents data availability, explanation and follow-up. The lunar identities, values and procedures are fictional.
+The application uses **TypeScript, Lit templates, Vite, Ajv, IndexedDB and the optional Web Speech API**. **Cloudflare Pages serves the static build and JSON files.** This release requires no Cloudflare Worker, application server, database service, API key or login.
+
+```text
+src/domain/        Data types and metric definitions
+src/services/      Validation, replay, monitoring, records and follow-up
+src/adapters/      JSON loading, local persistence and optional speech
+src/app/           Application composition and event handling
+src/ui/            Four pages, shared components and scoped styles
+public/data/       Mission, clinical/exercise plans and NASA reference sample
+public/simulation/ Scenario timeline and generated telemetry packets
+schemas/           JSON Schema contracts
+tests/             Unit and browser coverage
+wordpress/         Optional shortcode loader
+dist/              Reproducible deployment output
+```
+
+Edit source files and rebuild; do not hand-edit `dist/`. See [Architecture](docs/ARCHITECTURE.md) and [Cloudflare Pages setup](docs/CLOUDFLARE-PAGES.md) for build settings and the production/preview branch workflow.
+
+An optional [WordPress adapter](docs/WORDPRESS-SETUP.md) loads the same built application through `[by_star_health]`, `[by_star_assist]`, `[by_star_exercise]` and `[by_star_profiles]`. The public Pages demo runs independently of WordPress.
+
+## Prototype boundaries
+
+The crew identities, mission, live-looking sensor values, clinical reports, exercise plan and procedures are fictional. Profile selection demonstrates role behavior and provides no authentication or medical privacy boundary. Support requests and acknowledgments are saved locally; the app sends no external crew messages. Browser speech recognition may require the browser vendor’s internet service. A simulated Earth-link outage does not establish offline web-app capability.
+
+Operational use would require authenticated device gateways, a continuously running onboard service, protected records, validated mission procedures, authorized clinical review and verified message delivery. Radiation-dose assessment, infection diagnosis, blood/stool testing, autonomous treatment and automatic exercise adjustment are outside this implementation.
+
+## Project material and attribution
+
+- [Submission-ready project description](docs/PROJECT-SUBMISSION.md)
+- [Product brief and design rationale](docs/PRODUCT-BRIEF.md)
+- [Guided demonstration and exercise walkthrough](docs/ROADMAP.md)
+- [Data behavior, local storage and repository audit](docs/DATA-AND-SECURITY.md)
+- [NASA historical sample and original API query](public/data/radlab-iss-sample.json)
+- [Third-party attribution](THIRD-PARTY-NOTICES.md) and [bundled licenses](dist/THIRD-PARTY-NOTICES.txt)
+
+OpenAI Codex assisted with implementation, documentation drafting and test development. Scientific claims are supported by the cited primary sources. Packaged lunar imagery is credited to [NASA’s Scientific Visualization Studio](https://svs.gsfc.nasa.gov/11747/); the Inter font and bundled libraries retain their individual licenses. NASA references do not imply endorsement.
+
+The original project code is available under the [MIT License](LICENSE). Third-party materials retain their applicable licenses and attribution requirements.
