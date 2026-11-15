@@ -4,7 +4,7 @@ const template = await readFile(new URL('../index.html', import.meta.url), 'utf8
 const html = template.replace('</head>', '  <link rel="stylesheet" href="./assets/by-star-app.css">\n  </head>')
   .replace('<script type="module" src="/src/app/main.ts"></script>', '<script src="./assets/by-star-app.js" defer></script>');
 await writeFile(new URL('../dist/index.html', import.meta.url), html);
-// Keep the project's license alongside every standalone or WordPress build.
+// Keep the project's license alongside every deployed static build.
 await writeFile(new URL('../dist/LICENSE.txt', import.meta.url), await readFile(new URL('../LICENSE', import.meta.url), 'utf8'));
 
 const thirdParty = {

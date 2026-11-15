@@ -1,6 +1,6 @@
 # Architecture
 
-The TypeScript app runs in the browser. A small WordPress adapter provides page routes and enqueues the generated JavaScript and CSS. The standalone preview loads the same assets and data.
+The TypeScript app runs in the browser. Cloudflare Pages serves its HTML, generated JavaScript and CSS, and JSON data. The local production preview loads the same static build.
 
 | Path | Responsibility |
 | --- | --- |
@@ -12,8 +12,8 @@ The TypeScript app runs in the browser. A small WordPress adapter provides page 
 | `public/data/` | Versioned mission configuration, exercise plans, dated body-mass observations, episodic clinical reports and a separate historical reference dataset. |
 | `public/simulation/` | Scenario timeline and packet streams, emitted by a replaceable source. |
 | `schemas/` | JSON Schema contracts. Ajv compiles runtime validators at build time. |
-| `wordpress/snippets/` | Copyable PHP adapter for Code Snippets. |
-| `dist/` | Published static output. Edit the source and build again to update it. |
+| `scripts/` | Deterministic fixture generation, compiled JSON validators and static-site packaging. |
+| `dist/` | Generated deployment output, ignored by Git. Cloudflare Pages creates it during each build. |
 
 ## Telemetry flow
 
@@ -51,7 +51,7 @@ The browser stores the replay position, speed, active crew member, view preferen
 
 The optional walkthrough creates a unique session namespace and carries its identifier through all four routes. Its progress and actions do not replace the original session. Voice input uses an optional browser recognition adapter, starts only on explicit activation, accepts three read/navigation commands and requires confirmation. Recognition may require the browser vendor's network service. Voice output and all manual controls remain separate from record mutations.
 
-The onboard proposal would receive telemetry through authorized read-only gateways for personal devices, suit systems and habitat systems. A local mission service would run continuously, maintain history, deliver assignments and keep procedures available during loss of Earth relay. The browser replay illustrates those flows while open. Deployment on WordPress uses static assets and does not require a Worker.
+The onboard proposal would receive telemetry through authorized read-only gateways for personal devices, suit systems and habitat systems. A local mission service would run continuously, maintain history, deliver assignments and keep procedures available during loss of Earth relay. The browser replay illustrates those flows while open. The current Cloudflare Pages deployment serves static assets and requires no Worker or backend service.
 
 ## Updating data and procedures
 

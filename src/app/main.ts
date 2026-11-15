@@ -17,16 +17,15 @@ import { clock, concerns, currentPerson, sensorsHref, type Page, type ViewModel,
 import { walkthroughSteps } from '../ui/components/walkthrough.ts';
 import '../ui/styles/app.css';
 
-function routes(root: HTMLElement) {
+function routes() {
   const search = new URLSearchParams(location.search);
-  const pageOption = root.dataset.preview === 'true' ? search.get('page') : root.dataset.page;
+  const pageOption = search.get('page');
   const page: Page = isPage(pageOption) ? pageOption : 'health';
-  const assetBase = new URL(root.dataset.assetBase || './', location.href);
-  const links: Partial<Record<Page, string>> = JSON.parse(root.dataset.links || '{}');
+  const assetBase = new URL('./', location.href);
   const demoId = /^case-[a-f0-9-]{36}$/.test(search.get('by_star_demo') ?? '') ? search.get('by_star_demo')! : '';
   const tourStep = Math.max(0, Math.min(walkthroughSteps.length - 1, Math.floor(Number(search.get('by_star_stage')) || 0)));
   function href(target: Page, workId?: string) {
-    const url = new URL(links[target] || '?page=' + target, location.href);
+    const url = new URL('?page=' + target, location.href);
     if (workId) url.searchParams.set('by_star_work', workId);
     if (demoId) {
       url.searchParams.set('by_star_demo', demoId);
@@ -38,13 +37,13 @@ function routes(root: HTMLElement) {
 }
 
 async function mount(root: HTMLElement) {
-  // Remove the shortcode's fallback only after the application script runs.
+  // Replace the static loading message only after the application script runs.
   root.replaceChildren();
   render(loadingPage('Loading the mission replay…'), root);
   let configuration;
   let replayData;
   try {
-    configuration = routes(root);
+    configuration = routes();
     replayData = await loadDemoData(configuration.assetBase);
   } catch (error) {
     const reason = error instanceof Error ? error.message : 'The required files could not be loaded.';
@@ -447,7 +446,7 @@ async function mount(root: HTMLElement) {
 }
 
 function boot() {
-  const root = document.querySelector<HTMLElement>('.bs-app[data-page]');
+  const root = document.querySelector<HTMLElement>('.bs-app');
   if (root) void mount(root);
 }
 

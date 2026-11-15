@@ -1,8 +1,8 @@
 # Verification
 
-The November 15, 2026 exercise round passed TypeScript validation and 30 unit tests. All 17 browser cases passed using Microsoft Edge, with the exercise flow and expanded route checks rerun after correcting test expectations. The browser cases include automated accessibility checks and a simulated speech-recognition service. Desktop and 390 px mobile exercise layouts were also inspected visually. Microphone accuracy and browser speech-service availability require testing on the visitor's device.
+The November 15, 2026 repository cleanup passed `npm run build:pages`, including TypeScript validation and all 30 unit tests. All 16 remaining browser cases passed using Microsoft Edge after removal of the obsolete integration-specific case. The suite covers navigation, saved-session continuity, the guided walkthrough, clinical review, exercise, automated accessibility and a simulated speech-recognition service. Deterministic fixture regeneration produced no changes, and the compiled JavaScript passed its syntax check.
 
-The November 15 release review reran `npm run build:pages` and the complete 17-case browser suite successfully. The `main` documentation and license commit `b66d789` also passed GitHub Actions and Cloudflare Pages deployment. SHA-256 comparisons confirmed that the public production JavaScript, CSS, project license and bundled notices matched `dist/`. The closeout changes did not alter the application bundle. These checks verify the prototype's implemented behavior and deployment; they do not establish clinical validity.
+Cloudflare Pages builds the deployment from source; generated `dist/` files are excluded from Git. GitHub Actions repeats fixture validation, the build and browser tests for each push. These checks verify the prototype's implemented behavior; they do not establish clinical validity. Microphone accuracy and browser speech-service availability require testing on the visitor's device.
 
 With the lockfile dependencies installed, run:
 
@@ -12,14 +12,13 @@ npm test
 npm run build
 npx playwright install chromium
 npm run test:browser
-php -l wordpress/snippets/by-star-loader.php
 ```
 
-Set `BY_STAR_BROWSER_CHANNEL=msedge` in the shell to use installed Microsoft Edge for browser tests. The browser suite starts the production preview and checks the same compiled files intended for WordPress.
+Set `BY_STAR_BROWSER_CHANNEL=msedge` in the shell to use installed Microsoft Edge for browser tests. The browser suite starts the production preview and checks the same compiled files deployed by Cloudflare Pages.
 
 The unit suites cover telemetry schema compatibility, device attribution, time ordering, duplicate packets, missing measurements, breathing-zone grouping, planned task applicability and crew handoff transitions. Follow-up regressions cover explicit outcomes, incomplete evidence, reopening, check-ins and later alert episodes. Clinical-feed tests cover specimen matching, accepted and held reports, duplicates, correction lineage and invalid inputs. Voice tests use a fake recognition service to check the command allowlist, explicit activation and cancellation of late results.
 
-The browser suite exercises all four pages, persistence across navigation, controls on a narrow viewport and automated accessibility checks. The GitHub workflow verifies build reproducibility and checks PHP syntax. Automated recognition tests do not establish microphone quality or the availability of a browser vendor's speech service.
+The browser suite exercises all four pages, persistence across navigation, controls on a narrow viewport and automated accessibility checks. The GitHub workflow regenerates fixtures, checks the build and JavaScript syntax, and runs the browser suite. Automated recognition tests do not establish microphone quality or the availability of a browser vendor's speech service.
 
 When a crew-facing label, workflow or data source changes, update the corresponding App guide topic and follow its steps in the production preview. Check that measurement status and the links to Sensors, Assist and the mission schedule match the guide.
 
@@ -44,4 +43,4 @@ When a crew-facing label, workflow or data source changes, update the correspond
 
 Use the [clinical data contract](CLINICAL-DATA.md) when changing the episodic report fixtures. Keep its version and the importer behavior aligned. See the [demonstration sequence](ROADMAP.md) for the intended crew-facing walkthrough.
 
-On the deployed WordPress theme, confirm that all four child pages load the same asset version, the in-app links point to the correct URLs and the workflow persists through navigation. Review the narrow layout and expanded text on the target device. [Installation and manual walkthrough](WORDPRESS-SETUP.md).
+On the [deployed app](https://by-star-team-challenge.pages.dev/), confirm that all four routes load, the JSON feeds and license notices are available, and saved work persists through navigation. Review the narrow layout and expanded text on the target device. See [Cloudflare Pages setup](CLOUDFLARE-PAGES.md) for production settings and deployment verification.

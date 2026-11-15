@@ -13,7 +13,6 @@ jobs:
       - run: npm run fixtures
       - run: npm run build:pages
       - run: node --check dist/assets/by-star-app.js
-      - run: php -l wordpress/snippets/by-star-loader.php
-      - run: git diff --exit-code -- dist public/simulation/streams
+      - run: git diff --exit-code -- public/simulation/streams
       - run: npx playwright install --with-deps chromium
       - run: npm run test:browser

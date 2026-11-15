@@ -6,7 +6,7 @@
   src: url('@fontsource-variable/inter/files/inter-latin-wght-normal.woff2') format('woff2');
 }
 
-/* Scope the application to its shortcode so it can coexist with the site theme. */
+/* Keep application styles scoped to the root element. */
 .bs-app {
   --bs-page: #f3f5f1;
   --bs-white: #fff;

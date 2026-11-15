@@ -2,7 +2,7 @@ import { defineConfig } from 'vite';
 
 export default defineConfig({
   base: './',
-  // A classic shortcode script can inherit the page's character encoding.
+  // Use portable character escapes in the generated JavaScript bundle.
   esbuild: { charset: 'ascii' },
   build: {
     target: 'es2022',

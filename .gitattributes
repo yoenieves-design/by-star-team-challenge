@@ -1,6 +1,3 @@
 * text=auto eol=lf
 *.jpg binary
 *.woff2 binary
-# Compiled templates preserve vendor whitespace inside string literals.
-dist/assets/by-star-app.js -whitespace
-dist/** linguist-generated=true

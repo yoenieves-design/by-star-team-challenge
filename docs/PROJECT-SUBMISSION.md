@@ -95,7 +95,7 @@ Packaged lunar imagery is credited to [NASA’s Scientific Visualization Studio]
 
 ## Technology and accessibility
 
-The app is written in TypeScript, uses Lit templates for rendering, Vite for builds and Ajv for JSON Schema validation. Pure domain services handle replay, monitoring and follow-up. IndexedDB stores the fictional browser session. Cloudflare Pages hosts static HTML, JavaScript, CSS and JSON; no Cloudflare Worker or backend service is required. An optional WordPress shortcode adapter loads the same compiled application.
+The app is written in TypeScript, uses Lit templates for rendering, Vite for builds and Ajv for JSON Schema validation. Pure domain services handle replay, monitoring and follow-up. IndexedDB stores the fictional browser session. Cloudflare Pages builds the source from GitHub and hosts static HTML, JavaScript, CSS and JSON; no Cloudflare Worker or backend service is required.
 
 The interface provides keyboard navigation, visible focus, text and icons alongside color, readable labels with units, chart tables, a responsive layout and a simplified presentation. Automated accessibility tests support verification, but do not establish universal usability or formal certification. Voice uses the browser’s optional Web Speech API and may depend on the vendor’s internet service. Every supported voice action has an on-screen control.
 

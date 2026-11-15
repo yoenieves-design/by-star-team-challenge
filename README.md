@@ -76,7 +76,7 @@ Open [http://127.0.0.1:4173](http://127.0.0.1:4173). For development with live r
 | `npm run build:pages` | Run type checking and unit tests, then build the static site into `dist/`. |
 | `npm run test:browser` | Run Playwright workflow and automated accessibility checks against the built preview. |
 
-Before the browser suite, run `npm run build` and `npx playwright install chromium`. Set the environment variable `BY_STAR_BROWSER_CHANNEL=msedge` to use an installed Microsoft Edge browser instead. See [Verification](docs/VERIFICATION.md) for tested flows and environment details. [GitHub Actions](.github/workflows/verify.yml) also checks regenerated output, bundle syntax and the optional PHP loader.
+Before the browser suite, run `npm run build` and `npx playwright install chromium`. Set the environment variable `BY_STAR_BROWSER_CHANNEL=msedge` to use an installed Microsoft Edge browser instead. See [Verification](docs/VERIFICATION.md) for tested flows and environment details. [GitHub Actions](.github/workflows/verify.yml) also checks regenerated fixtures and bundle syntax.
 
 ## Architecture and deployment
 
@@ -92,13 +92,11 @@ public/data/       Mission, clinical/exercise plans and NASA reference sample
 public/simulation/ Scenario timeline and generated telemetry packets
 schemas/           JSON Schema contracts
 tests/             Unit and browser coverage
-wordpress/         Optional shortcode loader
-dist/              Reproducible deployment output
+scripts/           Fixture generation, validators and static-site packaging
+docs/              Architecture, data contracts and submission material
 ```
 
-Edit source files and rebuild; do not hand-edit `dist/`. See [Architecture](docs/ARCHITECTURE.md) and [Cloudflare Pages setup](docs/CLOUDFLARE-PAGES.md) for build settings and the production/preview branch workflow.
-
-An optional [WordPress adapter](docs/WORDPRESS-SETUP.md) loads the same built application through `[by_star_health]`, `[by_star_assist]`, `[by_star_exercise]` and `[by_star_profiles]`. The public Pages demo runs independently of WordPress.
+The build generates `dist/` locally and in Cloudflare Pages. This output is ignored by Git; the repository contains the source, fixtures and build instructions needed to reproduce it. Edit source files and rebuild rather than editing generated files. See [Architecture](docs/ARCHITECTURE.md) and [Cloudflare Pages setup](docs/CLOUDFLARE-PAGES.md) for build settings and the production/preview branch workflow.
 
 ## Prototype boundaries
 
@@ -115,7 +113,7 @@ Operational use would require authenticated device gateways, a continuously runn
 - [Guided demonstration and exercise walkthrough](docs/ROADMAP.md)
 - [Data behavior, local storage and repository audit](docs/DATA-AND-SECURITY.md)
 - [NASA historical sample and original API query](public/data/radlab-iss-sample.json)
-- [Third-party attribution](THIRD-PARTY-NOTICES.md) and [bundled licenses](dist/THIRD-PARTY-NOTICES.txt)
+- [Third-party attribution](THIRD-PARTY-NOTICES.md) and [bundled licenses](https://by-star-team-challenge.pages.dev/THIRD-PARTY-NOTICES.txt)
 
 OpenAI Codex assisted with implementation, documentation drafting and test development. Scientific claims are supported by the cited primary sources. Packaged lunar imagery is credited to [NASA’s Scientific Visualization Studio](https://svs.gsfc.nasa.gov/11747/); the Inter font and bundled libraries retain their individual licenses. NASA references do not imply endorsement.
 
