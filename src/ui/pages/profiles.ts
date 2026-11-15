@@ -1,25 +1,29 @@
 import { html } from 'lit-html';
 import { deviceReadings, metrics } from '../../domain/metrics.ts';
+import { bodyTelemetry } from '../components/body-telemetry.ts';
 import { avatar, deviceReadingTag, tag, workTag } from '../components/common.ts';
 import { icon } from '../components/icons.ts';
 import { sensorsPanel } from '../components/sensors.ts';
-import { crewTelemetry, telemetryReadings, telemetryRing } from '../components/telemetry-ring.ts';
+import { bodyReadings, breathingReadings, telemetryReadings } from '../components/telemetry-readings.ts';
 import { clock, currentPerson, personName, sensorsHref, zoneName, type ViewModel } from '../view-model.ts';
 
 function crewOverview(vm: ViewModel) {
-  const crew = vm.mission.crew.map(person => ({ person, readings: crewTelemetry(vm, person) }));
-  const fullyCurrent = crew.filter(({ readings }) => readings.every(({ current }) => current.status === 'fresh')).length;
+  const crew = vm.mission.crew;
+  const fullyCurrent = crew.filter(person => {
+    const air = breathingReadings(vm, vm.snapshot.context[person.id].breathingZoneId);
+    return [...bodyReadings(vm, person), ...air].every(({ current }) => current.status === 'fresh');
+  }).length;
   const alerts = vm.work.filter(item => item.alert && item.progress.status !== 'complete');
   return html`<section aria-labelledby="bs-crew-overview">
     <div class="bs-card-heading bs-wrap">
-      <div><h2 id="bs-crew-overview">Crew overview</h2><p>Personal and breathing environment readings at ${clock(vm.mission, vm.snapshot.atS)} UTC</p></div>
+      <div><h2 id="bs-crew-overview">Crew overview</h2><p>Select a body marker to see its source and measurement time.</p></div>
       <div class="bs-inline bs-wrap">
         ${tag(fullyCurrent + ' of ' + crew.length + ' crew with all readings current', 'muted', 'sensor')}
         ${tag(alerts.length + ' open ' + (alerts.length === 1 ? 'alert' : 'alerts'), alerts.length ? 'amber' : 'muted')}
       </div>
     </div>
     <div class="bs-crew-telemetry-grid">
-      ${crew.map(({ person, readings }) => {
+      ${crew.map(person => {
         const context = vm.snapshot.context[person.id];
         const alertCount = alerts.filter(item => item.crewIds.includes(person.id)).length;
         return html`<article class="bs-card bs-profile-card bs-crew-telemetry-card" aria-label=${person.name}>
@@ -28,13 +32,13 @@ function crewOverview(vm: ViewModel) {
             ${avatar(person)}
           </div>
           <div class="bs-crew-signal">
-            ${telemetryRing(readings)}
             <div><strong>${zoneName(vm, context.zoneId)}</strong>
               <p>${context.activity}</p>
               ${alertCount ? tag(alertCount + ' open ' + (alertCount === 1 ? 'alert' : 'alerts'), 'amber', 'warning') : ''}
             </div>
           </div>
-          ${telemetryReadings(vm, readings, true)}
+          ${bodyTelemetry(vm, person, true)}
+          ${breathingPanel(vm, context.breathingZoneId)}
           <button class="bs-button bs-button-line" data-action="open-crew-profile" data-crew=${person.id}
             aria-label=${'View profile for ' + person.name} ?disabled=${vm.state.saving}>View profile</button>
         </article>`;
@@ -43,10 +47,17 @@ function crewOverview(vm: ViewModel) {
   </section>`;
 }
 
+function breathingPanel(vm: ViewModel, zoneId: string) {
+  return html`<div class="bs-crew-breathing">
+    <h4>Breathing environment</h4>
+    <p>${zoneName(vm, zoneId)}</p>
+    ${telemetryReadings(vm, breathingReadings(vm, zoneId), true)}
+  </div>`;
+}
+
 function crewProfile(vm: ViewModel) {
   const person = currentPerson(vm);
   const context = vm.snapshot.context[person.id];
-  const readings = crewTelemetry(vm, person);
   const devices = vm.mission.devices.filter(device =>
     (device.subject.type === 'crew' && device.subject.id === person.id)
     || device.assignedCrewId === person.id);
@@ -70,10 +81,13 @@ function crewProfile(vm: ViewModel) {
     </section>
     <section class="bs-card bs-profile-card bs-full">
       <div class="bs-card-heading">
-        <div><h2>Telemetry snapshot</h2><p>Body readings and air in ${zoneName(vm, context.breathingZoneId)} · ${clock(vm.mission, vm.snapshot.atS)} UTC</p></div>
+        <div><h2>Telemetry snapshot</h2><p>Select a body marker to see its source and measurement time.</p></div>
         <span class="bs-card-icon">${icon('sensor', 22)}</span>
       </div>
-      <div class="bs-profile-telemetry">${telemetryRing(readings)}${telemetryReadings(vm, readings)}</div>
+      <div class="bs-body-air-grid">
+        ${bodyTelemetry(vm, person)}
+        ${breathingPanel(vm, context.breathingZoneId)}
+      </div>
     </section>
     <section class="bs-card bs-profile-card bs-full">
       <div class="bs-card-heading bs-wrap"><div><h2>Assigned equipment</h2><p>Configured sources and latest signal</p></div>

@@ -2,7 +2,7 @@ import { render } from 'lit-html';
 import { loadDemoData } from '../adapters/demo-data.ts';
 import { openSessionStore } from '../adapters/session-store.ts';
 import { speak, stopSpeech } from '../adapters/voice.ts';
-import { latestReading, numberLabel } from '../domain/metrics.ts';
+import { isMetric, latestReading, numberLabel } from '../domain/metrics.ts';
 import type { FollowUpEvent, Session } from '../domain/types.ts';
 import { appendFollowUp, listWork } from '../services/follow-up.ts';
 import { createReplay } from '../services/replay.ts';
@@ -47,8 +47,10 @@ async function mount(root: HTMLElement) {
   const store = await openSessionStore(assetBase.href, newSession(scenario), mission.crew.map(person => person.id));
   let session = await store.load();
   const workParam = search.get('by_star_work');
+  const profileSection = search.get('by_star_profile');
   const state: ViewState = {
-    healthMode: 'crew', profileTab: search.get('by_star_profile') === 'sensors' ? 'sensors' : 'crew', trendMetric: 'heart_rate', trendWindow: 'recent',
+    healthMode: 'crew', profileTab: profileSection === 'sensors' || profileSection === 'mission' ? profileSection : 'crew',
+    trendMetric: 'heart_rate', trendWindow: 'recent',
     workId: workParam === 'report' ? null : workParam, reportOpen: workParam === 'report',
     error: '', notice: '', saving: false,
   };
@@ -236,7 +238,7 @@ async function mount(root: HTMLElement) {
         break;
       }
       case 'trend-metric':
-        if (field.value === 'heart_rate' || field.value === 'skin_temperature' || field.value === 'carbon_dioxide') {
+        if (isMetric(field.value)) {
           state.trendMetric = field.value;
           paint(true);
         }

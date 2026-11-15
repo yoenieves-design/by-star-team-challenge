@@ -15,4 +15,6 @@ Set `BY_STAR_BROWSER_CHANNEL=msedge` in the shell to use installed Microsoft Edg
 
 The unit suite checks schema compatibility, device attribution, time ordering, duplicate packets, missing measurements, grouping by breathing zone, planned task applicability and crew handoff transitions. The browser suite exercises all three pages, persistence across navigation, key controls on a narrow viewport and automated accessibility checks. The GitHub workflow verifies build reproducibility and checks PHP syntax.
 
+When a crew-facing label, workflow or data source changes, update the corresponding App guide topic and follow its steps in the production preview. Check that measurement status and the links to Sensors, Assist and the mission schedule match the guide.
+
 On the deployed WordPress theme, confirm that all three child pages load the same asset version, the in-app links point to the correct URLs and the workflow persists through navigation. Review the narrow layout and expanded text on the target device. [Installation and manual walkthrough](WORDPRESS-SETUP.md).

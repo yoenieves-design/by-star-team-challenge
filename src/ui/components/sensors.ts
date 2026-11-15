@@ -5,7 +5,7 @@ import { clock, personName, zoneName, type ViewModel } from '../view-model.ts';
 import { deviceReadingTag, localLinkTag, tag } from './common.ts';
 import { icon } from './icons.ts';
 import { replayControls } from './replay-controls.ts';
-import { telemetryReadings } from './telemetry-ring.ts';
+import { telemetryReadings } from './telemetry-readings.ts';
 
 function sensorCard(vm: ViewModel, device: Device, readings: ReturnType<typeof deviceReadings>) {
   const packet = vm.snapshot.latestPackets.get(device.id);

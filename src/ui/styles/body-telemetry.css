@@ -1,0 +1,108 @@
+.bs-app .bs-body-telemetry {
+  border: 0;
+  margin: 0;
+  padding: 0;
+  min-inline-size: 0;
+  --bs-body-current: #2f6957;
+  --bs-body-stale: #79531e;
+  --bs-body-degraded: #8a4131;
+  --bs-body-unavailable: #535f5a;
+}
+.bs-app .bs-body-layout {
+  display: grid;
+  grid-template-columns: minmax(106px, 1fr) minmax(0, 2fr);
+  align-items: center;
+  gap: clamp(10px, 3cqw, 24px);
+}
+.bs-app .bs-body-figure {
+  position: relative;
+  justify-self: center;
+  width: min(100%, 136px);
+  min-width: 106px;
+  aspect-ratio: 120 / 195;
+}
+.bs-app .bs-body-silhouette {
+  display: block;
+  width: 100%;
+  height: 100%;
+  fill: #e5eee5;
+  stroke: #8da698;
+  stroke-width: 1.4;
+}
+.bs-app .bs-body-marker {
+  position: absolute;
+  display: grid;
+  place-items: center;
+  inset-inline-start: var(--bs-marker-x);
+  inset-block-start: var(--bs-marker-y);
+  translate: -50% -50%;
+  width: 44px;
+  height: 44px;
+  cursor: pointer;
+  color: var(--bs-body-unavailable);
+}
+.bs-app .bs-body-marker[data-metric="heart_rate"] { --bs-marker-x: 46%; --bs-marker-y: 31%; }
+.bs-app .bs-body-marker[data-metric="skin_temperature"] { --bs-marker-x: 83%; --bs-marker-y: 51%; }
+.bs-app .bs-body-marker[data-metric="activity"] { --bs-marker-x: 41%; --bs-marker-y: 77%; }
+.bs-app .bs-body-marker[data-status="fresh"] { color: var(--bs-body-current); }
+.bs-app .bs-body-marker[data-status="stale"] { color: var(--bs-body-stale); }
+.bs-app .bs-body-marker[data-status="degraded"] { color: var(--bs-body-degraded); }
+.bs-app .bs-body-marker input { position: absolute; inset: 0; margin: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; }
+.bs-app .bs-body-marker-icon, .bs-app .bs-body-marker-status {
+  display: grid;
+  place-items: center;
+  background: #fff;
+  border: 1px solid currentColor;
+  pointer-events: none;
+}
+.bs-app .bs-body-marker-icon { width: 30px; height: 30px; border-radius: 8px; }
+.bs-app .bs-body-marker-status { position: absolute; top: 2px; right: 2px; width: 15px; height: 15px; border-radius: 50%; }
+.bs-app .bs-body-marker input:checked + .bs-body-marker-icon { background: currentColor; }
+.bs-app .bs-body-marker input:checked + .bs-body-marker-icon svg { color: #fff; }
+.bs-app .bs-body-marker input:focus-visible + .bs-body-marker-icon { outline: 3px solid var(--bs-outline); outline-offset: 3px; }
+.bs-app .bs-body-values { min-width: 0; }
+.bs-app .bs-body-row { border-bottom: 1px solid var(--bs-line); }
+.bs-app .bs-body-row:last-child { border-bottom: 0; }
+.bs-app .bs-body-reading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0 8px;
+  min-height: 44px;
+  cursor: pointer;
+  font-size: .9em;
+  padding: 5px 7px;
+}
+.bs-app .bs-body-reading:hover { background: var(--bs-soft); }
+.bs-app .bs-body-reading strong { color: var(--bs-ink); font-variant-numeric: tabular-nums; }
+.bs-app .bs-body-reading strong[data-status="stale"] { color: var(--bs-body-stale); }
+.bs-app .bs-body-reading strong[data-status="degraded"] { color: var(--bs-body-degraded); }
+.bs-app .bs-body-reading strong[data-status="unavailable"] { color: var(--bs-body-unavailable); }
+.bs-app .bs-body-detail { display: none; padding: 0 7px 8px; color: var(--bs-muted); font-size: .79em; }
+.bs-app .bs-body-detail p + p { margin-top: 4px; }
+.bs-app .bs-body-detail .bs-button { margin-top: 4px; }
+.bs-app .bs-body-layout:has(.bs-body-marker[data-metric="heart_rate"] input:checked) .bs-body-row[data-metric="heart_rate"],
+.bs-app .bs-body-layout:has(.bs-body-marker[data-metric="skin_temperature"] input:checked) .bs-body-row[data-metric="skin_temperature"],
+.bs-app .bs-body-layout:has(.bs-body-marker[data-metric="activity"] input:checked) .bs-body-row[data-metric="activity"] { background: #f4f7f2; }
+.bs-app .bs-body-layout:has(.bs-body-marker[data-metric="heart_rate"] input:checked) .bs-body-row[data-metric="heart_rate"] .bs-body-detail,
+.bs-app .bs-body-layout:has(.bs-body-marker[data-metric="skin_temperature"] input:checked) .bs-body-row[data-metric="skin_temperature"] .bs-body-detail,
+.bs-app .bs-body-layout:has(.bs-body-marker[data-metric="activity"] input:checked) .bs-body-row[data-metric="activity"] .bs-body-detail { display: block; }
+.bs-app .bs-body-telemetry-compact .bs-body-layout { grid-template-columns: 106px minmax(0, 1fr); gap: 8px; }
+.bs-app .bs-body-telemetry-compact .bs-body-reading { font-size: .83em; }
+.bs-app .bs-body-telemetry-compact .bs-body-reading strong { font-size: .95em; }
+.bs-app .bs-crew-breathing { border-top: 1px solid var(--bs-line); padding-top: 10px; }
+.bs-app .bs-crew-breathing h4 { font-size: 1em; }
+.bs-app .bs-crew-breathing > p { font-size: .82em; color: var(--bs-muted); }
+.bs-app .bs-body-air-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+.bs-app .bs-body-air-grid .bs-crew-breathing { margin: 0; border-top: 0; border-left: 1px solid var(--bs-line); padding: 4px 0 4px 16px; }
+
+@container (max-width: 850px) {
+  .bs-app .bs-body-air-grid { grid-template-columns: minmax(0, 1fr); }
+  .bs-app .bs-body-air-grid .bs-crew-breathing { border-left: 0; border-top: 1px solid var(--bs-line); padding: 10px 0 0; }
+}
+
+@media (forced-colors: active) {
+  .bs-app .bs-body-silhouette { fill: Canvas; stroke: CanvasText; }
+  .bs-app .bs-body-marker input:checked + .bs-body-marker-icon { forced-color-adjust: none; color: HighlightText; background: Highlight; border-color: Highlight; }
+}

@@ -27,8 +27,9 @@ test('The lunar replay changes context, distinguishes stale data and preserves a
   await expect(page.getByRole('heading', { name: 'Cabin CO₂ change needs review' })).toBeVisible();
   await page.getByRole('link', { name: 'Review incident' }).click();
   await expect(page.getByRole('heading', { name: 'Assist', exact: true })).toBeVisible();
-  await page.getByText('Evidence and timing').click();
+  await page.getByRole('region', { name: 'Mission content' }).getByText('Evidence and timing').click();
   await expect(page.getByText('Observations attached when the alert opened')).toBeVisible();
+  await expect(page.getByRole('columnheader', { name: 'Received UTC' })).toBeVisible();
   await expect(page.getByText(/Other reports from this zone.*Dizziness reported after return/)).toBeVisible();
   await page.getByRole('button', { name: 'Acknowledge alert' }).click();
   await page.getByRole('button', { name: 'Start guided check' }).click();
@@ -57,11 +58,12 @@ test('The lunar replay changes context, distinguishes stale data and preserves a
 
   await page.getByRole('navigation').getByRole('link', { name: 'Health' }).click();
   await page.getByRole('button', { name: /Maya Torres/ }).click();
-  await expect(page.locator('.bs-person-heading').getByText('Reading out of date')).toBeVisible();
+  const pulse = page.getByRole('group', { name: 'Body readings for Maya Torres' }).getByRole('radio', { name: 'Heart rate' });
+  await expect(pulse).toHaveAccessibleDescription('Reading out of date');
   await page.getByRole('button', { name: 'Next event' }).click();
   await expect(page.getByText('Earth relay unavailable', { exact: true }).last()).toBeVisible();
   await page.getByRole('button', { name: 'Next event' }).click();
-  await expect(page.locator('.bs-person-heading').getByText('Current reading')).toBeVisible();
+  await expect(pulse).toHaveAccessibleDescription(/bpm/);
   expect(errors).toEqual([]);
 });
 
@@ -111,12 +113,43 @@ test('Profiles shows all six crew and opens the selected telemetry snapshot', as
   await expect(page.getByRole('article')).toHaveCount(6);
   const maya = page.getByRole('article', { name: 'Maya Torres' });
   await expect(maya.getByText('Reading out of date').first()).toBeVisible();
-  await expect(maya.getByText('3/6', { exact: true })).toBeVisible();
+  const overviewBody = maya.getByRole('group', { name: 'Body readings for Maya Torres' });
+  await overviewBody.getByRole('radio', { name: 'Skin temperature' }).check();
+  await expect(overviewBody.getByRole('radio', { name: 'Skin temperature' })).toHaveAccessibleDescription('Reading out of date');
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(390);
   await maya.getByRole('button', { name: 'View profile for Maya Torres' }).click();
   await expect(page.getByRole('heading', { name: 'Maya Torres' })).toBeFocused();
   await expect(page.getByRole('heading', { name: 'Telemetry snapshot' })).toBeVisible();
-  await expect(page.getByText('3/6', { exact: true })).toBeVisible();
+  const profileBody = page.getByRole('group', { name: 'Body readings for Maya Torres' });
+  await profileBody.getByRole('radio', { name: 'Heart rate' }).focus();
+  await page.keyboard.press('ArrowRight');
+  await expect(profileBody.getByRole('radio', { name: 'Skin temperature' })).toBeChecked();
+  await expect(profileBody.getByText(/A contact sensor reads skin temperature/)).toBeVisible();
+});
+
+test('The App guide is keyboard accessible and links to the working mission schedule', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto('/');
+  const trigger = page.getByRole('button', { name: 'App guide', exact: true });
+  const guide = page.getByRole('dialog', { name: 'App guide' });
+  await trigger.press('Enter');
+  await expect(guide.getByRole('heading', { name: 'App guide' })).toBeFocused();
+  await guide.getByText('Verify a reading or sensor', { exact: true }).click();
+  await expect(guide.getByRole('link', { name: 'Open Sensors' })).toBeVisible();
+  const result = await new AxeBuilder({ page }).include('#bs-app-guide').withTags(['wcag2a', 'wcag2aa', 'wcag21aa', 'wcag22aa']).analyze();
+  expect(result.violations.map(violation => violation.id)).toEqual([]);
+  await page.keyboard.press('Escape');
+  await expect(guide).toBeHidden();
+  await expect(trigger).toBeFocused();
+  await expect(page.getByRole('link', { name: 'I need help' })).toBeVisible();
+  await page.getByLabel('Trend indicator').selectOption('oxygen');
+  await expect(page.getByRole('img', { name: 'Oxygen fraction trend in %' })).toBeVisible();
+  await trigger.click();
+  await guide.getByText('Follow mission routines', { exact: true }).click();
+  await guide.getByRole('link', { name: 'Open mission schedule' }).click();
+  await expect(page).toHaveURL(/by_star_profile=mission$/);
+  await expect(page.getByRole('heading', { name: 'Mission health plan' })).toBeVisible();
+  await expect(trigger).toBeVisible();
 });
 
 test('Sensors lists every device, links to the affected review and follows reconnection', async ({ page }) => {
@@ -135,7 +168,7 @@ test('Sensors lists every device, links to the affected review and follows recon
 
   await wrist.getByRole('link', { name: 'Review sensor alert' }).click();
   await expect(page).toHaveURL(/by_star_work=signal-maya$/);
-  await page.getByText('Evidence and timing').click();
+  await page.getByRole('region', { name: 'Mission content' }).getByText('Evidence and timing').click();
   await expect(page.getByText('Maya’s wrist monitor', { exact: true })).toBeVisible();
   await page.getByRole('link', { name: 'View sensors' }).click();
 

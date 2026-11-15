@@ -56,10 +56,10 @@ function evidence(vm: ViewModel, item: WorkItem) {
     <p>${alert.reason}</p>
     ${alert.evidence.length ? html`<div class="bs-table-wrap"><table>
       <caption>Observations attached when the alert opened</caption>
-      <thead><tr><th scope="col">Indicator</th><th scope="col">Reading</th><th scope="col">Measured UTC</th><th scope="col">Source</th><th scope="col">Quality</th></tr></thead>
+      <thead><tr><th scope="col">Indicator</th><th scope="col">Reading</th><th scope="col">Measured UTC</th><th scope="col">Received UTC</th><th scope="col">Source</th><th scope="col">Quality</th></tr></thead>
       <tbody>${alert.evidence.map(reading => html`<tr><th scope="row">${metrics[reading.metric].label}</th>
         <td>${reading.value === null ? '—' : numberLabel(reading.value, reading.metric) + ' ' + reading.unit}</td>
-        <td>${clock(vm.mission, reading.measuredAtS)}</td><td>${reading.deviceId}</td><td>${reading.quality}</td>
+        <td>${clock(vm.mission, reading.measuredAtS)}</td><td>${clock(vm.mission, reading.receivedAtS)}</td><td>${reading.deviceId}</td><td>${reading.quality}</td>
       </tr>`)}</tbody>
     </table></div>` : ''}
     ${nearby.length ? html`<p><strong>Other reports from this zone</strong> ${nearby.map(report => report.detail).join('. ')}. The cause is unconfirmed.</p>` : ''}

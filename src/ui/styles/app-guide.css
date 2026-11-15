@@ -1,0 +1,112 @@
+.bs-app .bs-topbar .bs-guide-trigger {
+  color: var(--bs-brand-dark);
+  font-size: .8em;
+}
+
+.bs-app .bs-app-guide {
+  width: min(44rem, calc(100% - 24px));
+  max-width: none;
+  max-height: min(50rem, calc(100dvh - 24px));
+  margin: auto;
+  padding: 0;
+  overflow: hidden;
+  border: 1px solid var(--bs-line);
+  border-radius: var(--bs-radius);
+  background: var(--bs-page);
+  color: var(--bs-ink);
+  overscroll-behavior: contain;
+}
+
+.bs-app .bs-app-guide[open] {
+  display: flex;
+  flex-direction: column;
+}
+
+.bs-app .bs-app-guide::backdrop { background: rgb(12 25 22 / .58); }
+
+.bs-app .bs-guide-header {
+  display: flex;
+  flex: none;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px clamp(12px, 4vw, 24px);
+  border-bottom: 1px solid var(--bs-line);
+  background: var(--bs-white);
+}
+
+.bs-app .bs-guide-header form { margin: 0; }
+
+.bs-app .bs-guide-body {
+  display: grid;
+  align-content: start;
+  gap: 8px;
+  min-height: 0;
+  padding: 14px clamp(12px, 4vw, 24px);
+  overflow: auto;
+  overscroll-behavior: contain;
+}
+
+.bs-app .bs-guide-topic {
+  border: 1px solid var(--bs-line);
+  border-radius: 10px;
+  background: var(--bs-white);
+}
+
+.bs-app .bs-guide-topic > summary {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 46px;
+  padding: 10px 14px;
+  border-radius: 9px;
+  color: var(--bs-brand-dark);
+  font-weight: 680;
+  list-style: none;
+}
+
+.bs-app .bs-guide-topic > summary::-webkit-details-marker { display: none; }
+
+.bs-app .bs-guide-topic > summary::after {
+  content: '';
+  width: 8px;
+  height: 8px;
+  flex: none;
+  margin-left: auto;
+  border-right: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
+  transform: translateY(-2px) rotate(45deg);
+}
+
+.bs-app .bs-guide-topic[open] > summary {
+  border-radius: 9px 9px 0 0;
+  background: var(--bs-soft);
+}
+
+.bs-app .bs-guide-topic[open] > summary::after { transform: translateY(2px) rotate(225deg); }
+
+.bs-app .bs-guide-topic-content {
+  display: grid;
+  justify-items: start;
+  gap: 12px;
+  padding: 12px 14px 15px;
+}
+
+.bs-app .bs-guide-topic-content ol, .bs-app .bs-guide-topic-content ul { padding-inline-start: 21px; }
+.bs-app .bs-guide-topic-content li + li { margin-top: 7px; }
+
+.bs-app .bs-guide-statuses {
+  display: grid;
+  gap: 6px;
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: var(--bs-page);
+}
+
+.bs-app .bs-guide-statuses dt { font-weight: 650; }
+.bs-app .bs-guide-statuses dd { color: var(--bs-muted); }
+
+@container (max-width: 520px) {
+  .bs-app .bs-topbar .bs-guide-trigger { padding-inline: 6px; }
+}

@@ -43,10 +43,18 @@ export function currentPerson(vm: ViewModel) {
   return vm.mission.crew.find(person => person.id === vm.session.crewId)!;
 }
 
-export function sensorsHref(vm: ViewModel) {
+function profileHref(vm: ViewModel, section: 'mission' | 'sensors') {
   const url = new URL(vm.href('profiles'));
-  url.searchParams.set('by_star_profile', 'sensors');
+  url.searchParams.set('by_star_profile', section);
   return url.href;
+}
+
+export function sensorsHref(vm: ViewModel) {
+  return profileHref(vm, 'sensors');
+}
+
+export function missionScheduleHref(vm: ViewModel) {
+  return profileHref(vm, 'mission');
 }
 
 export function personName(vm: ViewModel, id: string | undefined) {

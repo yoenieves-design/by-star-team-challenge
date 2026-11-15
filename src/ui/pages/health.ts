@@ -1,14 +1,14 @@
 import { html } from 'lit-html';
 import { repeat } from 'lit-html/directives/repeat.js';
-import { latestReading, metrics } from '../../domain/metrics.ts';
-import type { Metric, Subject } from '../../domain/types.ts';
-import { canSpeak } from '../../adapters/voice.ts';
+import { metrics } from '../../domain/metrics.ts';
 import type { WorkItem } from '../../services/follow-up.ts';
 import { alertLabels, avatar, localLinkTag, measurementDetail, measurementValue, readingTag, tag, workTag } from '../components/common.ts';
-import { icon, type Icon } from '../components/icons.ts';
+import { bodyTelemetry } from '../components/body-telemetry.ts';
+import { icon } from '../components/icons.ts';
 import { replayControls } from '../components/replay-controls.ts';
+import { bodyReadings, breathingReadings } from '../components/telemetry-readings.ts';
 import { trendChart } from '../components/trend-chart.ts';
-import { clock, currentPerson, personName, sensorsHref, zoneName, type ViewModel } from '../view-model.ts';
+import { clock, currentPerson, missionScheduleHref, personName, sensorsHref, zoneName, type ViewModel } from '../view-model.ts';
 
 function healthHeading(vm: ViewModel) {
   const { mission, snapshot } = vm;
@@ -29,7 +29,8 @@ function crewCards(vm: ViewModel) {
     ${repeat(vm.mission.crew, person => person.id, person => {
       const selected = vm.session.crewId === person.id;
       const context = vm.snapshot.context[person.id];
-      const reading = latestReading(vm.snapshot, vm.mission.devices, { type: 'crew', id: person.id }, 'heart_rate');
+      const readings = bodyReadings(vm, person);
+      const current = readings.filter(({ current }) => current.status === 'fresh').length;
       const open = vm.work.filter(work => work.alert && work.crewIds.includes(person.id) && work.progress.status !== 'complete').length;
       return html`<button type="button" class="bs-crew-card" data-action="select-crew" data-crew=${person.id}
         aria-pressed=${selected ? 'true' : 'false'} ?disabled=${vm.state.saving}>
@@ -38,40 +39,16 @@ function crewCards(vm: ViewModel) {
         </span>
         <span class="bs-crew-location">${icon('map', 15)} ${zoneName(vm, context.zoneId)}</span>
         <span class="bs-crew-state">
-          ${reading.status !== 'fresh' ? readingTag(reading.status)
-            : open ? tag(open === 1 ? '1 open review' : open + ' open reviews', 'amber', 'warning')
-              : tag('Data current', 'green', 'check')}
+          ${tag(current + '/' + readings.length + ' body readings current', current === readings.length ? 'green' : 'amber',
+            current === readings.length ? 'check' : 'warning')}
+          ${open ? tag(open === 1 ? '1 open review' : open + ' open reviews', 'amber', 'warning') : ''}
         </span>
       </button>`;
     })}
   </div>`;
 }
 
-function bodyTelemetry(vm: ViewModel, crewId: string) {
-  const subject: Subject = { type: 'crew', id: crewId };
-  const indicators: [Metric, Icon][] = [['heart_rate', 'heart'], ['skin_temperature', 'thermometer'], ['activity', 'activity']];
-  return html`<div class="bs-body-grid">
-    ${indicators.map(([metric, glyph]) => {
-      const current = latestReading(vm.snapshot, vm.mission.devices, subject, metric);
-      return html`<article class="bs-card bs-metric-card">
-        <span class="bs-metric-label">${icon(glyph, 19)} ${metrics[metric].label}</span>
-        <strong class="bs-metric-value">${measurementValue(current, metric)}</strong>
-        <small>${current.status === 'fresh' ? 'Measured ' + clock(vm.mission, current.reading.measuredAtS) + ' UTC'
-          : current.reading ? 'Last measured ' + clock(vm.mission, current.reading.measuredAtS) + ' UTC' : 'Waiting for a packet'}</small>
-        <details class="bs-details bs-metric-details"><summary>Reading details</summary>
-          <p>${measurementDetail(vm, current)}</p>
-          <p>${metrics[metric].explanation}</p>
-          ${metric === 'heart_rate' && canSpeak() ? html`<button type="button" class="bs-button bs-button-plain" data-action="listen-pulse">
-            ${icon('volume', 17)} Listen to current reading</button>` : ''}
-        </details>
-      </article>`;
-    })}
-  </div>`;
-}
-
 function environment(vm: ViewModel, zoneId: string) {
-  const subject: Subject = { type: 'zone', id: zoneId };
-  const co2 = latestReading(vm.snapshot, vm.mission.devices, subject, 'carbon_dioxide');
   return html`<section class="bs-card bs-environment" aria-labelledby="bs-environment-title">
     <div class="bs-card-heading">
       <div><h2 id="bs-environment-title">Breathing environment</h2>
@@ -79,32 +56,32 @@ function environment(vm: ViewModel, zoneId: string) {
       <span class="bs-card-icon">${icon('wind', 22)}</span>
     </div>
     <dl class="bs-environment-readings">
-      ${(['oxygen', 'carbon_dioxide', 'pressure'] as const).map(metric => {
-        const current = latestReading(vm.snapshot, vm.mission.devices, subject, metric);
-        return html`<div><dt>${metrics[metric].label}</dt><dd>${measurementValue(current, metric)}</dd></div>`;
-      })}
+      ${breathingReadings(vm, zoneId).map(({ metric, current }) => html`<div><dt>${metrics[metric].label}</dt><dd>
+          ${current.status === 'fresh' ? html`<strong class="bs-environment-value">${measurementValue(current, metric)}</strong>` : readingTag(current.status)}
+          <small>${measurementDetail(vm, current)}</small>
+        </dd></div>`)}
     </dl>
-    <div class="bs-environment-footer">
-      ${readingTag(co2.status)}
-      <small>${measurementDetail(vm, co2)}</small>
-    </div>
   </section>`;
 }
 
 function nextTask(vm: ViewModel) {
-  const tasks = vm.work.filter(item => item.task && item.crewIds.includes(vm.session.crewId) && item.available);
-  const next = tasks.filter(task => task.progress.status !== 'complete').sort((a, b) => a.task!.dueAtS - b.task!.dueAtS)[0];
+  const tasks = vm.work.filter(item => item.task && item.crewIds.includes(vm.session.crewId));
+  const pending = tasks.filter(task => task.progress.status !== 'complete' && (task.available || task.progress.status !== 'new'))
+    .sort((a, b) => a.task!.dueAtS - b.task!.dueAtS);
+  const next = pending.find(task => task.progress.status !== 'new') ?? pending[0];
   const completed = tasks.filter(task => task.progress.status === 'complete').length;
   return html`<section class="bs-card bs-task-card" aria-labelledby="bs-next-task">
     <div class="bs-card-heading"><div><h2 id="bs-next-task">Next health task</h2><p>Assigned mission routine</p></div>
       <span class="bs-card-icon">${icon('calendar', 21)}</span>
     </div>
     ${next ? html`<strong>${next.title}</strong><p>${next.detail}</p>
-      <p class="bs-task-time">${icon('clock', 16)} ${vm.snapshot.atS > next.task!.dueAtS ? 'Past due' : 'Due'} · ${clock(vm.mission, next.task!.dueAtS)} UTC</p>
+      <p class="bs-task-time bs-wrap">${icon('clock', 16)} ${vm.snapshot.atS > next.task!.dueAtS ? 'Past due' : 'Due'} · ${clock(vm.mission, next.task!.dueAtS)} UTC
+        ${next.progress.status !== 'new' ? workTag(next.progress.status) : ''}</p>
       <a class="bs-button bs-button-line" href=${vm.href('assist', next.id)}>${next.progress.status === 'new' ? 'Open check-in' : 'Continue check-in'} ${icon('arrow', 16)}</a>`
-      : html`<p>No upcoming checks for the current activity.</p>`}
-    ${tasks.length ? html`<div class="bs-routine"><span>Routine progress</span><strong>${completed} of ${tasks.length} complete</strong>
+      : html`<p>No check available for the current activity.</p>`}
+    ${tasks.length ? html`<div class="bs-routine"><span>Scheduled checks</span><strong>${completed} of ${tasks.length} complete</strong>
       <progress value=${completed} max=${tasks.length} aria-label="Routine tasks completed"></progress></div>` : ''}
+    <a class="bs-button bs-button-plain bs-schedule-link" href=${missionScheduleHref(vm)}>View mission schedule ${icon('arrow', 15)}</a>
   </section>`;
 }
 
@@ -139,7 +116,6 @@ export function healthPage(vm: ViewModel) {
   const lead = open.find(item => item.alert?.kind === 'environment') ?? open[0];
   const leadContext = lead?.crewIds.length ? lead.crewIds.length + (lead.crewIds.length === 1 ? ' crew member' : ' crew members')
     : zoneName(vm, lead?.alert?.zoneId);
-  const pulse = latestReading(vm.snapshot, vm.mission.devices, { type: 'crew', id: person.id }, 'heart_rate');
 
   return html`
     ${healthHeading(vm)}
@@ -168,9 +144,8 @@ export function healthPage(vm: ViewModel) {
         <section class="bs-person-heading" aria-labelledby="bs-telemetry-title">
           ${avatar(person)}
           <div><h2 id="bs-telemetry-title">${person.name}</h2><p>${zoneName(vm, context.zoneId)} · ${context.activity}</p></div>
-          ${readingTag(pulse.status)}
         </section>
-        ${bodyTelemetry(vm, person.id)}
+        <section class="bs-card" aria-label="Body readings">${bodyTelemetry(vm, person)}</section>
         ${vm.session.simple ? '' : trendChart(vm, person.id, context.breathingZoneId)}
       </div>
       <div class="bs-column">

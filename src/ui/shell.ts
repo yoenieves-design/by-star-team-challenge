@@ -1,4 +1,5 @@
 import { html } from 'lit-html';
+import { appGuide, appGuideButton } from './components/app-guide.ts';
 import { avatar, tag } from './components/common.ts';
 import { icon } from './components/icons.ts';
 import { assistPage } from './pages/assist.ts';
@@ -49,6 +50,7 @@ export function shell(vm: ViewModel) {
               ${vm.mission.crew.map(member => html`<option value=${member.id} ?selected=${member.id === person.id}>${member.name}</option>`)}
             </select>
           </label>
+          ${appGuideButton()}
         </div>
       </header>
       <div id="bs-content" class="bs-content" role="region" aria-label="Mission content" tabindex="-1">
@@ -59,6 +61,7 @@ export function shell(vm: ViewModel) {
         <footer class="bs-footer">BY STAR · Fictional mission simulation</footer>
       </div>
     </div>
+    ${appGuide(vm)}
   </div>`;
 }
 

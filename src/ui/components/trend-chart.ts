@@ -1,5 +1,5 @@
 import { html, svg } from 'lit-html';
-import { metrics, numberLabel, subjectKey } from '../../domain/metrics.ts';
+import { metricIds, metrics, numberLabel, subjectKey } from '../../domain/metrics.ts';
 import type { Metric, Reading, Subject } from '../../domain/types.ts';
 import { clock, type ViewModel } from '../view-model.ts';
 
@@ -61,7 +61,8 @@ function plot(vm: ViewModel, readings: Reading[], metric: Metric, from: number, 
 
 export function trendChart(vm: ViewModel, crewId: string, zoneId: string) {
   const metric = vm.state.trendMetric;
-  const subject: Subject = metric === 'carbon_dioxide' ? { type: 'zone', id: zoneId } : { type: 'crew', id: crewId };
+  const subjectType = metrics[metric].subjectType;
+  const subject: Subject = { type: subjectType, id: subjectType === 'zone' ? zoneId : crewId };
   const to = vm.snapshot.atS;
   const from = vm.state.trendWindow === 'recent' ? Math.max(0, to - 60) : 0;
   const readings = (vm.snapshot.readings.get(subjectKey(subject, metric)) ?? []).filter(item => item.measuredAtS >= from);
@@ -70,9 +71,7 @@ export function trendChart(vm: ViewModel, crewId: string, zoneId: string) {
       <div><h3 id="bs-trend-title">Indicator trend</h3><p>Measured time · UTC</p></div>
       <div class="bs-inline bs-wrap">
         <select aria-label="Trend indicator" data-select="trend-metric" .value=${metric}>
-          <option value="heart_rate">Heart rate</option>
-          <option value="skin_temperature">Skin temperature</option>
-          <option value="carbon_dioxide">CO₂ in breathing zone</option>
+          ${metricIds.map(id => html`<option value=${id}>${metrics[id].label}</option>`)}
         </select>
         <select aria-label="Trend time range" data-select="trend-window" .value=${vm.state.trendWindow}>
           <option value="recent">Last 60 seconds</option>
