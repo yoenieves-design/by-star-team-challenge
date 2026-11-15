@@ -42,7 +42,7 @@ test('The lunar replay changes context, distinguishes stale data and preserves a
   await page.getByRole('navigation').getByRole('link', { name: 'Profiles' }).click();
   await page.getByRole('button', { name: 'Mission & schedule' }).click();
   await expect(page.getByRole('heading', { name: 'Mission health plan' })).toBeVisible();
-  await page.getByRole('button', { name: 'Sources & data' }).click();
+  await expect(page.getByRole('heading', { name: 'NASA data & references' })).toBeVisible();
   await expect(page.getByRole('link', { name: 'View sample JSON' })).toHaveAttribute('href', /radlab-iss-sample\.json$/);
   await page.getByRole('navigation').getByRole('link', { name: 'Assist' }).click();
   await expect(page.getByRole('button', { name: 'Resume check' })).toBeVisible();
@@ -119,8 +119,37 @@ test('Profiles shows all six crew and opens the selected telemetry snapshot', as
   await expect(page.getByText('3/6', { exact: true })).toBeVisible();
 });
 
+test('Sensors lists every device, links to the affected review and follows reconnection', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto('/');
+  await page.getByRole('link', { name: 'View sensors' }).click();
+  const sensors = page.getByRole('region', { name: 'Sensors', exact: true });
+  await expect(sensors.getByRole('article')).toHaveCount(12);
+  await expect(sensors.getByText('11 of 12 devices with current readings')).toBeVisible();
+  await expect(sensors.getByRole('article', { name: 'Habitat air monitor' }).getByText('CO₂ partial pressure')).toBeVisible();
+  const wrist = sensors.getByRole('article', { name: 'Maya’s wrist monitor' });
+  await expect(wrist.getByText('Reading out of date').first()).toBeVisible();
+  await expect(wrist.getByText('06:41:18 UTC', { exact: true })).toBeVisible();
+  await expect(wrist.getByText('06:41:19 UTC', { exact: true })).toBeVisible();
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(390);
+
+  await wrist.getByRole('link', { name: 'Review sensor alert' }).click();
+  await expect(page).toHaveURL(/by_star_work=signal-maya$/);
+  await page.getByText('Evidence and timing').click();
+  await expect(page.getByText('Maya’s wrist monitor', { exact: true })).toBeVisible();
+  await page.getByRole('link', { name: 'View sensors' }).click();
+
+  await page.getByRole('button', { name: 'Next event' }).click();
+  await expect(sensors.getByText('Earth relay unavailable')).toBeVisible();
+  await page.getByRole('button', { name: 'Next event' }).click();
+  await expect(wrist.getByText('Current reading', { exact: true })).toBeVisible();
+  await expect(wrist.getByText('06:42:36 UTC', { exact: true })).toBeVisible();
+  await expect(sensors.getByText('12 of 12 devices with current readings')).toBeVisible();
+  await expect(wrist.getByRole('link', { name: 'Review sensor alert' })).toBeVisible();
+});
+
 test('Core routes pass automated accessibility checks', async ({ page }) => {
-  for (const [route, heading] of [['health', 'Crew health'], ['assist', 'Assist'], ['profiles', 'Profiles']]) {
+  for (const [route, heading] of [['health', 'Crew health'], ['assist', 'Assist'], ['profiles&by_star_profile=sensors', 'Sensors'], ['profiles', 'Profiles']]) {
     await page.goto('/?page=' + route);
     await expect(page.getByRole('heading', { name: heading, exact: true })).toBeVisible();
     const result = await new AxeBuilder({ page }).include('.bs-app').withTags(['wcag2a', 'wcag2aa', 'wcag21aa', 'wcag22aa']).analyze();
@@ -166,6 +195,10 @@ test('WordPress page markup loads the bundle and navigates with versioned upload
   });
   await page.goto(links.health);
   await expect(page.getByRole('heading', { name: 'Crew health', exact: true })).toBeVisible();
+  await page.getByRole('link', { name: 'View sensors' }).click();
+  await expect(page).toHaveURL(/mission-health\/profiles\/\?by_star_profile=sensors$/);
+  await expect(page.getByRole('heading', { name: 'Sensors', exact: true })).toBeVisible();
+  await page.getByRole('navigation').getByRole('link', { name: 'Health' }).click();
   await page.getByRole('link', { name: 'Review incident' }).click();
   await expect(page).toHaveURL(/mission-health\/assist\/\?by_star_work=air-habitat$/);
   await expect(page.getByRole('heading', { name: 'Cabin CO₂ change needs review', exact: true })).toBeVisible();

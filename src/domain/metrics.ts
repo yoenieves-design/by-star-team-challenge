@@ -29,3 +29,10 @@ export function latestReading(snapshot: Snapshot, devices: Device[], subject: Su
   const reading = snapshot.readings.get(subjectKey(subject, metric))?.at(-1);
   return stateFor(reading, devices.find(device => device.id === reading?.deviceId), snapshot.atS);
 }
+
+export function deviceReadings(snapshot: Snapshot, device: Device) {
+  return device.metrics.map(metric => {
+    const reading = snapshot.readings.get(subjectKey(device.subject, metric))?.findLast(item => item.deviceId === device.id);
+    return { metric, current: stateFor(reading, device, snapshot.atS) };
+  });
+}

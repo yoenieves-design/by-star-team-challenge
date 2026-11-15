@@ -58,7 +58,29 @@ test('Delayed packets update history without replacing a newer measurement', () 
   const current = latestReading(snapshot, mission.devices, maya, 'heart_rate');
   assert.equal(current.status, 'fresh');
   assert.equal(current.reading?.measuredAtS, 156);
+  assert.equal(snapshot.latestPackets.get('wrist-maya')?.measuredAtS, 84);
+  assert.equal(snapshot.latestPackets.get('wrist-maya')?.receivedAtS, 158);
   assert.ok(snapshot.readings.get(subjectKey(maya, 'heart_rate'))?.some(item => item.measuredAtS === 84 && item.receivedAtS === 158));
+});
+
+test('Missing and degraded sensor channels create device-specific alerts', () => {
+  const modified = createReplay({ ...data, packets: data.packets
+    .filter(packet => packet.deviceId !== 'suit-air-alex')
+    .map(packet => packet.deviceId === 'air-rover' && packet.measuredAtS === 16 ? {
+      ...packet, measurements: packet.measurements.map(item => item.metric === 'pressure' ? { ...item, quality: 'degraded' } : item),
+    } : packet),
+  });
+  const alerts = (atS: number) => modified.snapshot(atS).alerts.filter(item => item.kind === 'sensor');
+  assert.equal(alerts(16).length, 0);
+  const roverFault = alerts(17)[0];
+  assert.equal(roverFault.deviceId, 'air-rover');
+  assert.deepEqual(roverFault.crewIds, ['samira']);
+  assert.deepEqual(roverFault.evidence.map(item => item.metric), ['pressure']);
+  assert.equal(alerts(24).length, 1);
+  const silentSuit = alerts(25).find(item => item.deviceId === 'suit-air-alex');
+  assert.equal(silentSuit?.atS, 25);
+  assert.deepEqual(silentSuit?.evidence, []);
+  assert.deepEqual(replay.snapshot(153).alerts.filter(item => item.kind === 'sensor').map(item => item.id), ['signal-maya']);
 });
 
 test('The incident is grouped by breathing zone and a crew report stays separate', () => {

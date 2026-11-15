@@ -57,11 +57,11 @@
     },
     {
       "id": "sensor-check", "version": "Demo 1", "title": "Check the sensor connection",
-      "purpose": "Find out whether the latest wrist monitor reading is available for review.",
-      "requiredEquipment": ["Wrist monitor"], "sourceIds": ["wearables"],
+      "purpose": "Verify the data source and record missing, delayed or degraded readings.",
+      "requiredEquipment": [], "sourceIds": ["wearables", "environment", "eva-telemetry"],
       "steps": [
-        { "title": "Identify the monitor", "instruction": "Check that the device shown in the evidence belongs to the selected crew member." },
-        { "title": "Look for a current reading", "instruction": "Check the signal label and the measurement time. If the device is unavailable, pause this check or request support." },
+        { "title": "Identify the monitor", "instruction": "In Profiles → Sensors, find the equipment assigned to the crew member or zone. Compare its ID with the incident evidence when available." },
+        { "title": "Look for a current reading", "instruction": "Compare the measurement and reception times. Check the status of each reading. If you cannot verify the data, pause the check or request support." },
         { "title": "Record the result", "instruction": "Confirm that you reviewed the connection. Leave any unresolved readings for the assigned follow-up." }
       ]
     },
@@ -99,7 +99,9 @@
   "sources": [
     { "id": "environment", "title": "NASA · Major Constituent Analyzer", "description": "Basis for distinguishing oxygen fraction, pressure and carbon dioxide measurements in the habitat.", "url": "https://ntrs.nasa.gov/citations/20120010634" },
     { "id": "eva", "title": "NASA · Extravehicular activity risks", "description": "Informs the separation of preparation, work, return and follow-up.", "url": "https://www.nasa.gov/reference/risk-of-injury-and-compromised-performance-from-extravehicular-activity-eva/" },
-    { "id": "wearables", "title": "NASA · Wearable technology on the ISS", "description": "Examples of research using personal sensors during activity and rest.", "url": "https://www.nasa.gov/humans-in-space/wearable-tech-for-space-station-research/" },
+    { "id": "wearables", "title": "NASA · Wearable technology on the ISS", "description": "Examples of research using personal sensors during activity and rest.", "url": "https://www.nasa.gov/missions/station/iss-research/wearable-tech-for-space-station-research/" },
+    { "id": "wireless-wearables", "title": "NASA · Crew Active Dosimeters", "description": "An example of personal equipment sending timestamped readings via Bluetooth to an onboard computer.", "url": "https://srag.jsc.nasa.gov/spaceradiation/how/how.cfm" },
+    { "id": "eva-telemetry", "title": "NASA · Advanced suit communications design", "description": "An engineering reference on suit telemetry and a proposed redundant wireless path.", "url": "https://ntrs.nasa.gov/citations/20150008350" },
     { "id": "medical-operations", "title": "NASA · Medical operations", "description": "Mission planning, crew medical roles and phase-specific medical operations.", "url": "https://www.nasa.gov/reference/6-0-medical-operations/" },
     { "id": "regolith", "title": "NASA · Lunar regolith hazards", "description": "Context for environmental review after returning from surface work.", "url": "https://science.nasa.gov/biological-physical/what-hazards-are-caused-by-lunar-regolith/" },
     { "id": "relay", "title": "NASA · Lunar communications relays", "description": "Basis for representing Earth relay availability separately from local links.", "url": "https://www.nasa.gov/goddard/esc/lcrns/" },

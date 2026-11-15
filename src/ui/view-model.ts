@@ -14,7 +14,7 @@ export const concerns = [
 
 export interface ViewState {
   healthMode: 'crew' | 'personal';
-  profileTab: 'overview' | 'crew' | 'mission' | 'evidence';
+  profileTab: 'overview' | 'crew' | 'mission' | 'sensors';
   trendMetric: Metric;
   trendWindow: 'recent' | 'full';
   workId: string | null;
@@ -41,6 +41,12 @@ export interface ViewModel {
 
 export function currentPerson(vm: ViewModel) {
   return vm.mission.crew.find(person => person.id === vm.session.crewId)!;
+}
+
+export function sensorsHref(vm: ViewModel) {
+  const url = new URL(vm.href('profiles'));
+  url.searchParams.set('by_star_profile', 'sensors');
+  return url.href;
 }
 
 export function personName(vm: ViewModel, id: string | undefined) {

@@ -136,6 +136,7 @@ export interface Alert {
   atS: number;
   crewIds: string[];
   zoneId?: string;
+  deviceId?: string;
   evidence: Reading[];
   procedureId: string;
   reason: string;
@@ -146,6 +147,7 @@ export interface Snapshot {
   context: Record<string, CrewContext>;
   links: Record<Link, boolean>;
   readings: Map<string, Reading[]>;
+  latestPackets: Map<string, Packet>;
   alerts: Alert[];
 }
 

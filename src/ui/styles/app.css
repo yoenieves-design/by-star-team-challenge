@@ -508,13 +508,13 @@
 .bs-app .bs-profile-card > p { color: var(--bs-muted); margin: 6px 0 10px; }
 .bs-app .bs-profile-identity { display: flex; align-items: center; gap: 13px; }
 .bs-app .bs-profile-identity p { color: var(--bs-muted); }
-.bs-app .bs-profile-telemetry, .bs-app .bs-crew-telemetry-grid {
+.bs-app .bs-profile-telemetry, .bs-app .bs-crew-telemetry-grid, .bs-app .bs-sensors {
   --bs-signal-current: #357361;
   --bs-signal-stale: #a57033;
   --bs-signal-degraded: #a54d35;
   --bs-signal-unavailable: #a6b1ab;
 }
-.bs-app .bs-crew-telemetry-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr)); gap: 14px; }
+.bs-app .bs-crew-telemetry-grid, .bs-app .bs-sensor-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr)); gap: 14px; }
 .bs-app .bs-crew-telemetry-card { min-width: 0; display: flex; flex-direction: column; gap: 10px; }
 .bs-app .bs-crew-telemetry-card > .bs-button { align-self: start; margin-top: auto; }
 .bs-app .bs-crew-signal { display: flex; align-items: center; gap: 16px; }
@@ -555,6 +555,17 @@
 .bs-app .bs-signal-dot[data-status="fresh"] { background: var(--bs-signal-current); }
 .bs-app .bs-signal-dot[data-status="stale"] { background: var(--bs-signal-stale); }
 .bs-app .bs-signal-dot[data-status="degraded"] { background: var(--bs-signal-degraded); }
+.bs-app .bs-sensor-group { margin-top: 19px; }
+.bs-app .bs-sensor-group h3 { margin-bottom: 9px; }
+.bs-app .bs-sensor-card { min-width: 0; }
+.bs-app .bs-sensor-card h4 { font-size: 1.04em; }
+.bs-app .bs-sensor-card .bs-card-heading { margin-bottom: 9px; }
+.bs-app .bs-sensor-card code { overflow-wrap: anywhere; }
+.bs-app .bs-sensor-times { color: var(--bs-muted); font-size: .79em; padding: 6px 9px; border-radius: 7px; background: #f4f7f2; }
+.bs-app .bs-sensor-times > div { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 0 8px; }
+.bs-app .bs-sensor-times dd { font-variant-numeric: tabular-nums; }
+.bs-app .bs-sensor-alert { display: inline-flex; align-items: center; gap: 6px; min-height: 32px; margin-top: 5px; font-size: .85em; font-weight: 650; }
+.bs-app .bs-connection-details { max-width: 72ch; font-size: .88em; }
 .bs-app .bs-definition-list { margin-top: 13px; }
 .bs-app .bs-definition-list > div { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; padding: 8px 0; border-bottom: 1px solid #e6ece4; }
 .bs-app .bs-definition-list dt { color: var(--bs-muted); font-size: .86em; }

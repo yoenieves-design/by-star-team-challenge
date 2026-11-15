@@ -26,6 +26,7 @@ function matchesDevice(packet: Packet, data: ReplayData) {
 export function normalizeTelemetry(data: ReplayData) {
   const contextAt = createContextLookup(data);
   const histories = new Map<string, Reading[]>();
+  const packetsByDevice = new Map<string, Packet[]>();
   const ids = new Set<string>();
   const sequences = new Set<string>();
   const refreshTimes = new Set<number>();
@@ -45,6 +46,9 @@ export function normalizeTelemetry(data: ReplayData) {
     }
     ids.add(packet.id);
     sequences.add(sequenceKey);
+    const devicePackets = packetsByDevice.get(packet.deviceId) ?? [];
+    devicePackets.push(packet);
+    packetsByDevice.set(packet.deviceId, devicePackets);
     const { measurements, ...envelope } = packet;
     const context = packet.subject.type === 'crew' ? contextAt(packet.measuredAtS)[packet.subject.id] : undefined;
     for (const item of measurements) {
@@ -62,5 +66,5 @@ export function normalizeTelemetry(data: ReplayData) {
   for (const series of histories.values()) {
     series.sort((a, b) => a.measuredAtS - b.measuredAtS || a.receivedAtS - b.receivedAtS || a.sequence - b.sequence);
   }
-  return { contextAt, histories, refreshTimes, duplicateCount, rejectedCount };
+  return { contextAt, histories, packetsByDevice, refreshTimes, duplicateCount, rejectedCount };
 }

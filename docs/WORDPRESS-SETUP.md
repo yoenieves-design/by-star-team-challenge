@@ -35,7 +35,7 @@ You can reuse the earlier **My status**, **Alerts & actions** and **Profile & mi
 2. Open **Review incident**, expand **Evidence and timing**, and **Start guided check**. Complete the first step and choose **I can’t do this now**.
 3. Visit **Profiles**, then return to **Assist**. The paused step should still be available. Select Noah in **Crew handoff**, request support, then select Noah in the top bar to confirm receipt.
 4. Return to **Health**, select Maya and advance with **Next event**. The UI shows when the Earth relay becomes unavailable and when Maya's wrist signal returns.
-5. Test **I need help** and **Simplified view** on a phone. Visit **Profiles → Sources & data** to check that the historical JSON opens.
+5. Test **I need help** and **Simplified view** on a phone. Open **Health → View sensors** to check the device list. Visit **Profiles → Mission & schedule → NASA data & references** to open the historical JSON.
 
 Changes are stored in the browser and shared by the three pages on the same origin. **Restart replay** returns to the beginning and clears actions for that replay after confirmation. A private window starts a fresh session. The previous version's local records use a separate storage key.
 

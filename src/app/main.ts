@@ -48,7 +48,7 @@ async function mount(root: HTMLElement) {
   let session = await store.load();
   const workParam = search.get('by_star_work');
   const state: ViewState = {
-    healthMode: 'crew', profileTab: 'crew', trendMetric: 'heart_rate', trendWindow: 'recent',
+    healthMode: 'crew', profileTab: search.get('by_star_profile') === 'sensors' ? 'sensors' : 'crew', trendMetric: 'heart_rate', trendWindow: 'recent',
     workId: workParam === 'report' ? null : workParam, reportOpen: workParam === 'report',
     error: '', notice: '', saving: false,
   };
@@ -149,14 +149,12 @@ async function mount(root: HTMLElement) {
         state.healthMode = button.dataset.mode === 'personal' ? 'personal' : 'crew';
         paint(true);
         break;
-      case 'profile-tab':
-        if (button.dataset.tab === 'overview' || button.dataset.tab === 'mission' || button.dataset.tab === 'evidence') {
-          state.profileTab = button.dataset.tab;
-        } else {
-          state.profileTab = 'crew';
-        }
+      case 'profile-tab': {
+        const tab = button.dataset.tab;
+        state.profileTab = tab === 'overview' || tab === 'mission' || tab === 'sensors' ? tab : 'crew';
         paint(true);
         break;
+      }
       case 'simple':
         await update(current => ({ ...current, simple: !current.simple }), 'View preference updated.');
         break;

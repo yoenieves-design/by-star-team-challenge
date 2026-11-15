@@ -19,14 +19,21 @@ export function createReplay(data: ReplayData) {
     for (const [key, values] of telemetry.histories) {
       readings.set(key, values.filter(item => item.receivedAtS <= time));
     }
+    const latestPackets: Snapshot['latestPackets'] = new Map();
+    for (const [deviceId, packets] of telemetry.packetsByDevice) {
+      const packet = packets.findLast(item => item.receivedAtS <= time);
+      if (packet) latestPackets.set(deviceId, packet);
+    }
     return {
-      atS: time, context: telemetry.contextAt(time), links, readings,
+      atS: time, context: telemetry.contextAt(time), links, readings, latestPackets,
       alerts: [...recorded.values()].filter(item => item.atS <= time).sort((a, b) => a.atS - b.atS),
     };
   }
 
   // Replay at arrivals, expiry boundaries and context changes. Results do not depend on playback speed.
   const times = new Set([0, ...telemetry.refreshTimes, ...scenario.events.map(event => event.atS)]);
+  // A silent device still needs a startup deadline even if it never sends a packet.
+  for (const device of mission.devices) times.add(device.maxAgeS + 1);
   for (const atS of [...times].filter(time => time <= scenario.durationS).sort((a, b) => a - b)) {
     const frame = snapshot(atS);
     for (const alert of detectAlerts(mission, frame)) {

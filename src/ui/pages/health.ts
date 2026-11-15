@@ -4,10 +4,11 @@ import { latestReading, metrics } from '../../domain/metrics.ts';
 import type { Metric, Subject } from '../../domain/types.ts';
 import { canSpeak } from '../../adapters/voice.ts';
 import type { WorkItem } from '../../services/follow-up.ts';
-import { alertLabels, avatar, measurementDetail, measurementValue, readingTag, tag, workTag } from '../components/common.ts';
+import { alertLabels, avatar, localLinkTag, measurementDetail, measurementValue, readingTag, tag, workTag } from '../components/common.ts';
 import { icon, type Icon } from '../components/icons.ts';
+import { replayControls } from '../components/replay-controls.ts';
 import { trendChart } from '../components/trend-chart.ts';
-import { clock, currentPerson, elapsed, personName, zoneName, type ViewModel } from '../view-model.ts';
+import { clock, currentPerson, personName, sensorsHref, zoneName, type ViewModel } from '../view-model.ts';
 
 function healthHeading(vm: ViewModel) {
   const { mission, snapshot } = vm;
@@ -17,39 +18,10 @@ function healthHeading(vm: ViewModel) {
       <h1>Crew health</h1>
     </div>
     <div class="bs-inline bs-wrap">
-      ${tag(snapshot.links.local ? 'Local link available' : 'Local link interrupted', snapshot.links.local ? 'green' : 'amber', 'signal')}
+      ${localLinkTag(snapshot.links.local)}
       ${tag(snapshot.links.earth ? 'Earth relay available' : 'Earth relay unavailable', snapshot.links.earth ? 'green' : 'amber', 'link')}
     </div>
   </div>`;
-}
-
-function replayControls(vm: ViewModel) {
-  const { scenario, snapshot } = vm;
-  const active = scenario.milestones.findLast(item => item.atS <= snapshot.atS);
-  const ended = snapshot.atS >= scenario.durationS;
-  const playLabel = vm.playing ? 'Pause replay' : 'Play replay';
-  return html`<section class="bs-replay" aria-label="Scenario playback">
-    <div class="bs-replay-controls">
-      <button type="button" class="bs-button bs-button-primary bs-icon-button" data-action="play" aria-label=${playLabel} title=${playLabel} ?disabled=${ended || vm.state.saving}>
-        ${icon(vm.playing ? 'pause' : 'play', 19)}
-      </button>
-      <div class="bs-replay-label">
-        <strong>${scenario.title}</strong>
-        <span>${active?.label ?? 'Waiting for first event'}</span>
-      </div>
-    </div>
-    <div class="bs-replay-position">
-      <progress aria-label="Replay progress" value=${snapshot.atS} max=${scenario.durationS}></progress>
-      <span>${elapsed(snapshot.atS)} / ${elapsed(scenario.durationS)}</span>
-    </div>
-    <div class="bs-inline bs-wrap bs-replay-actions">
-      <select aria-label="Playback speed" data-select="speed" .value=${String(vm.session.speed)} ?disabled=${vm.state.saving}>
-        <option value="1">1×</option><option value="2">2×</option><option value="4">4×</option><option value="8">8×</option>
-      </select>
-      <button type="button" class="bs-button bs-button-line" data-action="next-event" ?disabled=${!vm.nextEvent || vm.state.saving} title=${vm.nextEvent?.label || 'Replay complete'}>${icon('next', 16)} Next event</button>
-      <button type="button" class="bs-button bs-button-plain bs-icon-button" data-action="restart" aria-label="Restart replay" title="Restart replay" ?disabled=${vm.state.saving}>${icon('restart', 17)}</button>
-    </div>
-  </section>`;
 }
 
 function crewCards(vm: ViewModel) {
@@ -138,12 +110,15 @@ function nextTask(vm: ViewModel) {
 
 function alertsList(vm: ViewModel, alerts: WorkItem[], openCount: number) {
   return html`<section class="bs-card bs-alert-list" aria-labelledby="bs-alerts-title">
-    <div class="bs-card-heading"><div><h2 id="bs-alerts-title">Alerts &amp; follow-up</h2>
-      <p>${openCount} open · ${alerts.length - openCount} completed</p></div></div>
+    <div class="bs-card-heading bs-wrap"><div><h2 id="bs-alerts-title">Alerts &amp; follow-up</h2>
+      <p>${openCount} open · ${alerts.length - openCount} completed</p></div>
+      <a class="bs-button bs-button-line" href=${sensorsHref(vm)}>${icon('sensor', 16)} View sensors</a>
+    </div>
     ${alerts.length ? repeat(alerts, item => item.id, item => {
       const alert = item.alert!;
       const concern = alert.kind === 'concern';
-      const context = concern ? personName(vm, item.crewIds[0]) : alertLabels[alert.kind];
+      const device = vm.mission.devices.find(item => item.id === alert.deviceId);
+      const context = concern ? personName(vm, item.crewIds[0]) : device?.name ?? alertLabels[alert.kind];
       return html`<a href=${vm.href('assist', item.id)} class="bs-alert-row">
         ${icon(alert.kind === 'sensor' ? 'sensor' : alert.kind === 'environment' ? 'wind' : 'assist', 18)}
         <span><strong>${concern ? item.detail : item.title}</strong><small>${context} · ${clock(vm.mission, alert.atS)} UTC</small></span>
@@ -162,6 +137,8 @@ export function healthPage(vm: ViewModel) {
       || b.alert!.atS - a.alert!.atS);
   const open = related.filter(item => item.progress.status !== 'complete');
   const lead = open.find(item => item.alert?.kind === 'environment') ?? open[0];
+  const leadContext = lead?.crewIds.length ? lead.crewIds.length + (lead.crewIds.length === 1 ? ' crew member' : ' crew members')
+    : zoneName(vm, lead?.alert?.zoneId);
   const pulse = latestReading(vm.snapshot, vm.mission.devices, { type: 'crew', id: person.id }, 'heart_rate');
 
   return html`
@@ -169,7 +146,7 @@ export function healthPage(vm: ViewModel) {
     ${lead ? html`<section class="bs-incident" aria-labelledby="bs-incident-title">
       <span class="bs-incident-icon">${icon('warning', 23)}</span>
       <div>
-        <p class="bs-incident-meta">${alertLabels[lead.alert!.kind]} · ${lead.crewIds.length} ${lead.crewIds.length === 1 ? 'crew member' : 'crew members'} · ${workTag(lead.progress.status)}</p>
+        <p class="bs-incident-meta">${alertLabels[lead.alert!.kind]} · ${leadContext} · ${workTag(lead.progress.status)}</p>
         <h2 id="bs-incident-title">${lead.title}</h2>
         <p>${lead.detail}</p>
       </div>

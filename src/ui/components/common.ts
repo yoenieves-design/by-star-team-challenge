@@ -26,6 +26,17 @@ export function readingTag(status: ReadingState['status']) {
   return tag(readingLabels[status], status === 'degraded' ? 'amber' : 'muted', status === 'degraded' ? 'warning' : 'clock');
 }
 
+export function deviceReadingTag(readings: { current: ReadingState }[]) {
+  const status = readings[0].current.status;
+  if (readings.every(({ current }) => current.status === status)) return readingTag(status);
+  const fresh = readings.filter(({ current }) => current.status === 'fresh').length;
+  return tag(fresh + ' of ' + readings.length + ' readings current', 'amber', 'warning');
+}
+
+export function localLinkTag(available: boolean) {
+  return tag(available ? 'Local link available' : 'Local link interrupted', available ? 'green' : 'amber', 'signal');
+}
+
 export function workTag(status: Progress['status']) {
   const labels = {
     new: 'New', acknowledged: 'Acknowledged', 'in-progress': 'In progress',

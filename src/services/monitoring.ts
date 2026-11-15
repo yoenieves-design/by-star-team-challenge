@@ -1,4 +1,4 @@
-import { latestReading, subjectKey } from '../domain/metrics.ts';
+import { deviceReadings, latestReading, subjectKey } from '../domain/metrics.ts';
 import type { Alert, Mission, Reading, Snapshot } from '../domain/types.ts';
 
 export function concernAlert(id: string, crewId: string, category: string, atS: number, zoneId?: string): Alert {
@@ -37,21 +37,38 @@ function airChanges(mission: Mission, snapshot: Snapshot) {
   return alerts;
 }
 
+function sensorChanges(mission: Mission, snapshot: Snapshot) {
+  if (!snapshot.links.local) return [];
+  const alerts: Alert[] = [];
+  for (const device of mission.devices) {
+    const affected = deviceReadings(snapshot, device).filter(({ current }) =>
+      current.status !== 'fresh' && (current.reading || snapshot.atS > device.maxAgeS));
+    if (!affected.length) continue;
+
+    const subject = device.subject;
+    const crewId = subject.type === 'crew' ? subject.id : device.assignedCrewId;
+    const zoneId = subject.type === 'zone' ? subject.id : snapshot.context[subject.id].zoneId;
+    const crewIds = crewId ? [crewId] : Object.keys(snapshot.context).filter(id => snapshot.context[id].breathingZoneId === zoneId);
+    // Preserve the IDs used by existing wrist monitor follow-ups.
+    const wrist = subject.type === 'crew' && device.id === 'wrist-' + subject.id;
+    alerts.push({
+      id: wrist ? 'signal-' + subject.id : 'device-signal-' + device.id,
+      kind: 'sensor', deviceId: device.id, title: wrist ? 'Wrist monitor needs a check' : 'Sensor needs a check',
+      detail: `Review ${affected.length} of ${device.metrics.length} readings from ${device.name}.`,
+      priority: 'review', atS: snapshot.atS, crewIds, zoneId,
+      evidence: affected.flatMap(({ current }) => current.reading ? [current.reading] : []),
+      procedureId: 'sensor-check', reason: 'The device has missing, expired or degraded readings.',
+    });
+  }
+  return alerts;
+}
+
 function personalChanges(mission: Mission, snapshot: Snapshot) {
   const alerts: Alert[] = [];
   for (const person of mission.crew) {
     const subject = { type: 'crew' as const, id: person.id };
     const context = snapshot.context[person.id];
     const current = latestReading(snapshot, mission.devices, subject, 'heart_rate');
-    if (snapshot.links.local && current.reading && ['stale', 'degraded', 'unavailable'].includes(current.status)) {
-      alerts.push({
-        id: 'signal-' + person.id, kind: 'sensor', title: 'Wrist monitor needs a check',
-        detail: person.name + ' has no current reliable wrist reading.',
-        priority: 'review', atS: snapshot.atS, crewIds: [person.id], zoneId: context.zoneId,
-        evidence: [current.reading], procedureId: 'sensor-check', reason: 'Device age or signal quality check',
-      });
-    }
-
     if (!context.resting || current.status !== 'fresh') continue;
     const history = snapshot.readings.get(subjectKey(subject, 'heart_rate')) || [];
     const pair = history.slice(-2).filter(usable);
@@ -70,5 +87,5 @@ function personalChanges(mission: Mission, snapshot: Snapshot) {
 }
 
 export function detectAlerts(mission: Mission, snapshot: Snapshot) {
-  return [...airChanges(mission, snapshot), ...personalChanges(mission, snapshot)];
+  return [...airChanges(mission, snapshot), ...sensorChanges(mission, snapshot), ...personalChanges(mission, snapshot)];
 }

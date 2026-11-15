@@ -11,6 +11,7 @@ Open Health in a fresh browser profile. The replay opens at 01:48, shortly after
 | Select Maya on Health and step through the replay | The old wrist reading is marked out of date. The link recovery changes the state as new packets arrive. The Earth relay has its own status. |
 | Restart and advance through the early checkpoints | The selected crew member moves from the descent cabin to a suit breathing loop, through the airlock and into the habitat. |
 | Open I need help | A few explicit choices let the active crew member file a concern without typing a profile. |
-| Open Sources & data in Profiles | The downloaded ISS sample and scientific references are distinct from the demo readings. |
+| Open Sensors in Profiles | Maya’s wrist monitor shows out-of-date readings and links to its sensor alert. Two presses of **Next event** from the briefing show the signal returning. |
+| Open NASA data & references in Mission & schedule | The historical ISS sample and research references inform the mission proposal. |
 
 Future integration work includes device authentication, continuous onboard processing, role-based access, operational protocol validation, multi-location synchronization, outcomes for multi-crew incident review and hands-free voice input.

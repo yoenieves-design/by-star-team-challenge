@@ -29,6 +29,6 @@ After building, run `pwsh -File scripts/package-wordpress.ps1` to create the Wor
 
 ## Data provenance
 
-Personal and atmosphere readings in the lunar replay are synthetic JSON packets. The **Sources & data** section includes a separately labeled historical sample from the NASA Open Science Data Repository RadLab API. Its 16 readings come from ISS instruments and do not enter the lunar scenario or its rules. Lunar imagery is credited to NASA's Scientific Visualization Studio. See [third-party notices](dist/THIRD-PARTY-NOTICES.txt).
+**Profiles → Sensors** shows readings from the synthetic JSON packets driving the lunar replay. **Profiles → Mission & schedule** includes **NASA data & references**, where the historical RadLab sample contains 16 ISS instrument readings. The replay and its rules use the synthetic streams. Lunar imagery is credited to NASA's Scientific Visualization Studio. See [third-party notices](dist/THIRD-PARTY-NOTICES.txt).
 
 Version 0.2.0 replaces the earlier daily form with a crew-centered replay. The prototype represents data availability, explanation and follow-up. The lunar identities, values and procedures are fictional.

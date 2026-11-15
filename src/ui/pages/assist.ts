@@ -1,11 +1,11 @@
 import { html } from 'lit-html';
 import { repeat } from 'lit-html/directives/repeat.js';
-import { metrics, numberLabel, latestReading } from '../../domain/metrics.ts';
+import { deviceReadings, metrics, numberLabel } from '../../domain/metrics.ts';
 import type { WorkItem } from '../../services/follow-up.ts';
 import { canSpeak } from '../../adapters/voice.ts';
-import { alertLabels, readingTag, workTag } from '../components/common.ts';
+import { alertLabels, deviceReadingTag, workTag } from '../components/common.ts';
 import { icon } from '../components/icons.ts';
-import { clock, concerns, currentPerson, personName, zoneName, type ViewModel } from '../view-model.ts';
+import { clock, concerns, currentPerson, personName, sensorsHref, zoneName, type ViewModel } from '../view-model.ts';
 
 function reportForm(vm: ViewModel) {
   const person = currentPerson(vm);
@@ -44,12 +44,15 @@ function queue(vm: ViewModel, selected: WorkItem | undefined) {
 function evidence(vm: ViewModel, item: WorkItem) {
   const alert = item.alert;
   if (!alert) return '';
+  const device = vm.mission.devices.find(item => item.id === alert.deviceId);
   const nearby = alert.kind === 'environment' ? vm.work.filter(candidate => candidate.alert?.kind === 'concern'
     && candidate.alert.zoneId === alert.zoneId && Math.abs(candidate.alert.atS - alert.atS) <= vm.mission.rules.co2WindowS) : [];
   return html`<details class="bs-details bs-evidence">
     <summary>Evidence and timing</summary>
     <p><strong>Recorded</strong> ${clock(vm.mission, alert.atS)} UTC · ${alertLabels[alert.kind]}</p>
-    <p><strong>Related crew</strong> ${item.crewIds.map(id => personName(vm, id)).join(', ')}</p>
+    ${item.crewIds.length ? html`<p><strong>Related crew</strong> ${item.crewIds.map(id => personName(vm, id)).join(', ')}</p>` : ''}
+    ${device ? html`<p class="bs-inline bs-wrap"><strong>${device.name}</strong> ${deviceReadingTag(deviceReadings(vm.snapshot, device))}
+      <a href=${sensorsHref(vm)}>View sensors</a></p>` : ''}
     <p>${alert.reason}</p>
     ${alert.evidence.length ? html`<div class="bs-table-wrap"><table>
       <caption>Observations attached when the alert opened</caption>
@@ -59,7 +62,6 @@ function evidence(vm: ViewModel, item: WorkItem) {
         <td>${clock(vm.mission, reading.measuredAtS)}</td><td>${reading.deviceId}</td><td>${reading.quality}</td>
       </tr>`)}</tbody>
     </table></div>` : ''}
-    ${alert.kind === 'sensor' ? html`<p>Current wrist signal ${readingTag(latestReading(vm.snapshot, vm.mission.devices, { type: 'crew', id: alert.crewIds[0] }, 'heart_rate').status)}</p>` : ''}
     ${nearby.length ? html`<p><strong>Other reports from this zone</strong> ${nearby.map(report => report.detail).join('. ')}. The cause is unconfirmed.</p>` : ''}
     <p class="bs-muted">Simulated observations</p>
   </details>`;
@@ -109,10 +111,11 @@ function procedure(vm: ViewModel, item: WorkItem) {
   const finalStep = progress.step + 1 === guide.steps.length;
   const assignFirst = !!step?.requiresAssignee && !progress.assigneeId;
   const handoffInStep = active && !!step && (progress.status === 'paused' || step.requiresAssignee || (finalStep && !!item.alert));
+  const subject = item.crewIds.length ? item.crewIds.map(id => personName(vm, id)).join(', ') : zoneName(vm, item.alert?.zoneId);
 
   return html`<section class="bs-card bs-assist-work" aria-labelledby="bs-work-title">
     <div class="bs-card-heading">
-      <div><p>${item.alert ? alertLabels[item.alert.kind] : 'Scheduled check'} · ${item.crewIds.map(id => personName(vm, id)).join(', ')}</p>
+      <div><p>${item.alert ? alertLabels[item.alert.kind] : 'Scheduled check'} · ${subject}</p>
         <h2 id="bs-work-title" tabindex="-1">${item.title}</h2></div>
       ${workTag(progress.status)}
     </div>

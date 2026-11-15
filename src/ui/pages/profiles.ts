@@ -1,9 +1,10 @@
 import { html } from 'lit-html';
-import { metrics, stateFor, subjectKey } from '../../domain/metrics.ts';
-import { avatar, readingTag, tag, workTag } from '../components/common.ts';
+import { deviceReadings, metrics } from '../../domain/metrics.ts';
+import { avatar, deviceReadingTag, tag, workTag } from '../components/common.ts';
 import { icon } from '../components/icons.ts';
+import { sensorsPanel } from '../components/sensors.ts';
 import { crewTelemetry, telemetryReadings, telemetryRing } from '../components/telemetry-ring.ts';
-import { clock, currentPerson, personName, zoneName, type ViewModel } from '../view-model.ts';
+import { clock, currentPerson, personName, sensorsHref, zoneName, type ViewModel } from '../view-model.ts';
 
 function crewOverview(vm: ViewModel) {
   const crew = vm.mission.crew.map(person => ({ person, readings: crewTelemetry(vm, person) }));
@@ -75,19 +76,13 @@ function crewProfile(vm: ViewModel) {
       <div class="bs-profile-telemetry">${telemetryRing(readings)}${telemetryReadings(vm, readings)}</div>
     </section>
     <section class="bs-card bs-profile-card bs-full">
-      <div class="bs-card-heading"><div><h2>Assigned equipment</h2><p>Configured sources and latest signal</p></div></div>
-      ${devices.map(device => {
-        const statuses = device.metrics.map(metric => stateFor(
-          vm.snapshot.readings.get(subjectKey(device.subject, metric))?.findLast(reading => reading.deviceId === device.id),
-          device, vm.snapshot.atS,
-        ).status);
-        const current = statuses.filter(status => status === 'fresh').length;
-        return html`<div class="bs-device-row">${icon('sensor', 22)}
-          <div><strong>${device.name}</strong><p>${device.metrics.map(metric => metrics[metric].label).join(' · ')}</p></div>
-          ${statuses.every(status => status === statuses[0])
-            ? readingTag(statuses[0]) : tag(current + ' of ' + statuses.length + ' readings current')}
-        </div>`;
-      })}
+      <div class="bs-card-heading bs-wrap"><div><h2>Assigned equipment</h2><p>Configured sources and latest signal</p></div>
+        <a class="bs-button bs-button-line" href=${sensorsHref(vm)}>View sensors ${icon('arrow', 16)}</a>
+      </div>
+      ${devices.map(device => html`<div class="bs-device-row">${icon('sensor', 22)}
+        <div><strong>${device.name}</strong><p>${device.metrics.map(metric => metrics[metric].label).join(' · ')}</p></div>
+        ${deviceReadingTag(deviceReadings(vm.snapshot, device))}
+      </div>`)}
     </section>
   </div>`;
 }
@@ -132,33 +127,31 @@ function missionProfile(vm: ViewModel) {
         <h3>${zone.name}</h3><ul>${zone.equipment.map(item => html`<li>${item}</li>`)}</ul>
       </article>`)}</div>
     </section>
+    ${missionReferences(vm)}
   </div>`;
 }
 
-function evidenceProfile(vm: ViewModel) {
-  return html`<div class="bs-profile-grid">
-    <section class="bs-card bs-profile-card bs-full">
-      <div class="bs-card-heading"><div><h2>Historical radiation data</h2><p>NASA OSDR RadLab · International Space Station</p></div>
-        ${tag('Historical data', 'green', 'info')}</div>
-      <p>Sixteen absorbed dose-rate observations from DosTel1 and DosTel2 on April 1, 2022.
-        The file records instrument measurements in µGy/h. The lunar replay uses its own synthetic readings.</p>
-      <a class="bs-button bs-button-line" href=${vm.asset('data/radlab-iss-sample.json')} target="_blank" rel="noopener noreferrer">View sample JSON ${icon('external', 16)}</a>
-      <a class="bs-button bs-button-line" href="https://visualization.osdr.nasa.gov/radlab/gui/data-api/" target="_blank" rel="noopener noreferrer">RadLab API ${icon('external', 16)}</a>
-    </section>
-    <section class="bs-card bs-profile-card bs-full">
-      <div class="bs-card-heading"><div><h2>Design and science references</h2><p>Sources for the mission context and interface</p></div></div>
+function missionReferences(vm: ViewModel) {
+  return html`<section class="bs-card bs-profile-card bs-full" aria-labelledby="bs-mission-references">
+    <div class="bs-card-heading bs-wrap"><div><h2 id="bs-mission-references">NASA data &amp; references</h2><p>NASA OSDR RadLab · International Space Station</p></div>
+      ${tag('Historical data', 'green', 'info')}</div>
+    <p>Sixteen absorbed dose-rate observations from DosTel1 and DosTel2 on April 1, 2022.
+      The file records instrument measurements in µGy/h. The lunar replay uses its own synthetic readings.</p>
+    <a class="bs-button bs-button-line" href=${vm.asset('data/radlab-iss-sample.json')} target="_blank" rel="noopener noreferrer">View sample JSON ${icon('external', 16)}</a>
+    <a class="bs-button bs-button-line" href="https://visualization.osdr.nasa.gov/radlab/gui/data-api/" target="_blank" rel="noopener noreferrer">RadLab API ${icon('external', 16)}</a>
+    <details class="bs-details"><summary>Design and science references</summary>
       <ul class="bs-source-list">${vm.mission.sources.map(source => html`<li>
         <a href=${source.url} target="_blank" rel="noopener noreferrer">${source.title} ${icon('external', 15)}</a>
         <p>${source.description}</p>
       </li>`)}</ul>
-    </section>
-  </div>`;
+    </details>
+  </section>`;
 }
 
 export function profilesPage(vm: ViewModel) {
   const active = vm.state.profileTab;
-  const tabs = [{ id: 'overview', label: 'Crew overview' }, { id: 'crew', label: 'Crew member' }, { id: 'mission', label: 'Mission & schedule' }, { id: 'evidence', label: 'Sources & data' }];
-  const pages = { overview: crewOverview, crew: crewProfile, mission: missionProfile, evidence: evidenceProfile };
+  const tabs = [{ id: 'overview', label: 'Crew overview' }, { id: 'crew', label: 'Crew member' }, { id: 'mission', label: 'Mission & schedule' }, { id: 'sensors', label: 'Sensors' }];
+  const pages = { overview: crewOverview, crew: crewProfile, mission: missionProfile, sensors: sensorsPanel };
   return html`<div class="bs-page-heading">
     <p class="bs-overline">${icon('users', 17)} ${vm.mission.code}</p>
     <h1>Profiles</h1><p>Review crew telemetry, assignments and planned health checks.</p>

@@ -25,7 +25,7 @@ The scenario timeline supplies observed location and activity. A person's physic
 
 ## Monitoring and follow-up
 
-The environmental rule compares good readings from an occupied breathing environment and preserves the two records that opened the review. It produces one review item for that zone in the replay. Separate records cover a stale wrist signal and an astronaut's reported concern. The resting pulse rule considers only comparable resting observations. The numeric settings in the mission file illustrate the logic and carry a demo version.
+The environmental rule compares good readings from an occupied breathing environment and preserves the two records that opened the review. It produces one review item for that zone in the replay. The sensor rule opens a review per device when a channel is stale, degraded or missing beyond its startup window. A local link interruption suppresses new device alerts while individual reading status still reflects the data available. **Profiles → Sensors** uses the same device rules and shows packet reception time and newest measurement time separately. The resting pulse rule considers only comparable resting observations. The numeric settings in the mission file illustrate the logic and carry a demo version.
 
 Follow-up is an append-only list within a replay. Acknowledgement, assignment, recorded support requests, receipt and step completion are separate events. A recipient confirms the handoff while the local link is available. The authority in the prototype is the selected fictional crew member. A real deployment would derive that identity and its permissions from the mission's access system.
 
