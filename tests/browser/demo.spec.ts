@@ -2,6 +2,20 @@ import { expect, test } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
 
 test('The lunar replay changes context, distinguishes stale data and preserves a handoff', async ({ page }) => {
+  await page.addInitScript(() => {
+    // Exercise consecutive actions even when the browser reports saves slowly.
+    const descriptor = Object.getOwnPropertyDescriptor(IDBTransaction.prototype, 'oncomplete')!;
+    Object.defineProperty(IDBTransaction.prototype, 'oncomplete', {
+      ...descriptor,
+      set(this: IDBTransaction, handler: ((event: Event) => void) | null) {
+        if (handler && this.mode === 'readwrite') {
+          descriptor.set!.call(this, (event: Event) => setTimeout(() => handler.call(this, event), 80));
+        } else {
+          descriptor.set!.call(this, handler);
+        }
+      },
+    });
+  });
   const errors: string[] = [];
   page.on('pageerror', error => errors.push(error.message));
   await page.goto('/');

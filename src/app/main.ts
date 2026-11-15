@@ -76,6 +76,8 @@ async function mount(root: HTMLElement) {
     const focused = document.activeElement;
     state.error = '';
     state.saving = true;
+    // Make mutating controls unavailable before IndexedDB begins the transaction.
+    paint(true);
     try {
       session = await store.update(current => change(current, Date.now()));
       state.notice = notice;

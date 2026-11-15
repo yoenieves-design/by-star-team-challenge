@@ -29,10 +29,11 @@ function queue(vm: ViewModel, selected: WorkItem | undefined) {
   const groups = [{ work: alerts, label: 'Crew alerts' }, { work: tasks, label: 'My scheduled checks' }];
   return html`<aside class="bs-card bs-assist-queue" aria-label="Assist queue">
     <div class="bs-card-heading"><div><h2>Follow-up queue</h2><p>Choose an alert or scheduled check.</p></div></div>
-    <button type="button" data-action="report-form" class="bs-button bs-button-line" aria-pressed=${vm.state.reportOpen}>${icon('assist', 17)} Report a concern</button>
+    <button type="button" data-action="report-form" class="bs-button bs-button-line" aria-pressed=${vm.state.reportOpen}
+      ?disabled=${vm.state.saving}>${icon('assist', 17)} Report a concern</button>
     ${groups.map(({ work, label }) => html`<h3>${label}</h3>
       ${work.length ? repeat(work, item => item.id, item => html`<button type="button" class="bs-queue-item" data-action="select-work"
-        data-work=${item.id} aria-pressed=${selected?.id === item.id && !vm.state.reportOpen}>
+        data-work=${item.id} aria-pressed=${selected?.id === item.id && !vm.state.reportOpen} ?disabled=${vm.state.saving}>
         <span><strong>${item.title}</strong>
           <small>${item.alert?.zoneId ? zoneName(vm, item.alert.zoneId) : item.crewIds.map(id => personName(vm, id)).join(', ')}</small>
         </span>${workTag(item.progress.status)}

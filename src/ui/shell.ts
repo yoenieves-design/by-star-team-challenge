@@ -40,7 +40,7 @@ export function shell(vm: ViewModel) {
           ${tag('Simulation', 'muted', 'info')}
           <span class="bs-topbar-clock">${clock(vm.mission, vm.snapshot.atS)} UTC</span>
           <button type="button" class="bs-button bs-button-plain bs-simple-toggle" data-action="simple"
-            aria-pressed=${vm.session.simple} title="Simplified view">
+            aria-pressed=${vm.session.simple} title="Simplified view" ?disabled=${vm.state.saving}>
             ${icon('simple', 19)} <span>Simplified view</span>
           </button>
           <label class="bs-crew-menu">
