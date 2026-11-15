@@ -2,6 +2,8 @@
 
 This document provides English text for the project submission and an extended walkthrough. The description reflects the implemented browser prototype. Complete the team-specific fields at the end before publishing. The required Project Demo is a separate video of no more than 30 seconds or a deck of no more than seven slides, including title and introduction. Use the [presentation outline](PRESENTATION-OUTLINE.md) and [verified submission checklist](SUBMISSION-GUIDE.md).
 
+> **Demo disclosure:** All astronaut names, profiles and medical records shown in the demo are fictional. Mission data is simulated. These fictional identities are separate from the real members of Team by-star. The historical NASA RadLab sample is real reference data, kept separate from the simulated mission.
+
 ## Project title
 
 BY STAR — Mission Health
