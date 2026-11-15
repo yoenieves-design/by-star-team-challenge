@@ -8,8 +8,8 @@ The TypeScript app runs in the browser. A small WordPress adapter provides page 
 | `src/services/` | Telemetry normalization, replay, monitoring, task applicability and follow-up state. These functions do not depend on the DOM. |
 | `src/adapters/` | Fetching and validating JSON, IndexedDB persistence and optional browser speech. |
 | `src/app/` | Compose adapters and services, handle commands and share a single snapshot with the UI. |
-| `src/ui/` | Three page views, charts, shared controls and scoped styles. Lit templates update readings without replacing the surrounding controls. |
-| `public/data/` | Versioned mission configuration, episodic clinical reports and a separate historical reference dataset. |
+| `src/ui/` | Four page views, charts, shared controls and scoped styles. Lit templates update readings without replacing the surrounding controls. |
+| `public/data/` | Versioned mission configuration, exercise plans, dated body-mass observations, episodic clinical reports and a separate historical reference dataset. |
 | `public/simulation/` | Scenario timeline and packet streams, emitted by a replaceable source. |
 | `schemas/` | JSON Schema contracts. Ajv compiles runtime validators at build time. |
 | `wordpress/snippets/` | Copyable PHP adapter for Code Snippets. |
@@ -37,11 +37,19 @@ Follow-up is an append-only list within a replay. Acknowledgement, assignment, r
 
 `src/services/review-summary.ts` produces a dated local JSON export containing the original observations, current data availability, crew-reported context, review outcome and history. A clinical export also includes the order, instrument, selected report, earlier received revisions and its supersession status. Exporting does not transmit a notification or an Earth message.
 
+## Exercise input and record snapshots
+
+`src/domain/exercise.ts` and `src/services/exercise.ts` model an equipment inventory, assigned session, cycle samples and dated body-mass observations. The separate versioned plan is `public/data/exercise-plan.json`; machine packets are in `public/simulation/streams/exercise.json`. Workload and cadence keep their own W and rpm units. Yoe's registered chest heart-rate observations remain in the core body-telemetry stream and retain device provenance when displayed alongside exercise data; his wrist supplies skin temperature and movement. The exercise service validates its own typed input contract. See [EXERCISE-DATA.md](EXERCISE-DATA.md).
+
+The fourth route renders the exercise state against the shared mission snapshot. Its session window is an explicitly shortened excerpt of a longer fictional plan. Sample age, quality and reception time control availability. Dropouts leave gaps; late arrivals preserve measured time. A body-mass sample is a dated kg observation and has no continuous freshness rule or inferred body-composition result.
+
+The optional `Session.exerciseRecords` collection preserves exercise record revisions with the received evidence at capture time, crew-reported effort and early-stop or excerpt-complete state. An exercise record enters Assist through an additional work item and uses the existing follow-up log, outcome and handoff validation. A saved record's source evidence remains fixed as later packets arrive. Export includes that recorded evidence and its coverage context.
+
 ## Playback and persistence
 
-The browser stores the replay position, speed, active crew member, view preference and follow-up events in IndexedDB. A saved wall-clock anchor advances a running replay between navigations. Packet timestamps stay fixed and the view reconstructs missed scripted events on return. A paused replay stays at the saved position. When IndexedDB is unavailable, the demo explains that its temporary session resets on navigation.
+The browser stores the replay position, speed, active crew member, view preference, follow-up events and exercise record revisions in IndexedDB. A saved wall-clock anchor advances a running replay between navigations. Packet timestamps stay fixed and the view reconstructs missed scripted events on return. A paused replay stays at the saved position. When IndexedDB is unavailable, the demo explains that its temporary session resets on navigation.
 
-The optional walkthrough creates a unique session namespace and carries its identifier through all three routes. Its progress and actions do not replace the original session. Voice input uses an optional browser recognition adapter, starts only on explicit activation, accepts three read/navigation commands and requires confirmation. Recognition may require the browser vendor's network service. Voice output and all manual controls remain separate from record mutations.
+The optional walkthrough creates a unique session namespace and carries its identifier through all four routes. Its progress and actions do not replace the original session. Voice input uses an optional browser recognition adapter, starts only on explicit activation, accepts three read/navigation commands and requires confirmation. Recognition may require the browser vendor's network service. Voice output and all manual controls remain separate from record mutations.
 
 The onboard proposal would receive telemetry through authorized read-only gateways for personal devices, suit systems and habitat systems. A local mission service would run continuously, maintain history, deliver assignments and keep procedures available during loss of Earth relay. The browser replay illustrates those flows while open. Deployment on WordPress uses static assets and does not require a Worker.
 
@@ -49,8 +57,9 @@ The onboard proposal would receive telemetry through authorized read-only gatewa
 
 - Edit `public/data/mission.json` to change crew assignments, equipment, rules or guidance.
 - Edit `public/data/clinical-results.json` for the synthetic laboratory order/report stream and preserve correction lineage.
+- Edit `public/data/exercise-plan.json` for the fictional exercise inventory, session assignment and dated mass observations. Keep the machine stream in `public/simulation/streams/exercise.json` consistent with its equipment and session IDs.
 - Edit `public/simulation/eva-return.json` for locations, activities, link events and checkpoints.
-- Run `npm run fixtures` to regenerate the packet streams after adjusting `scripts/create-telemetry.mjs`. This command overwrites the generated sample streams.
+- Run `npm run fixtures` to regenerate the packet streams after adjusting `scripts/create-telemetry.mjs` or `scripts/create-exercise.mjs`. This command overwrites the generated sample streams.
 - Run `npm test` and `npm run build` to validate and package the result.
 
 The historical RadLab sample is available separately in Profiles. Synthetic telemetry and clinical reports enter through separate adapters and services; historical radiation records do not trigger this scenario's health rules.

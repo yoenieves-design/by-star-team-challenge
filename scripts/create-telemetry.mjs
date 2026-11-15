@@ -31,9 +31,14 @@ function personalMeasurements(crew, time) {
   const exertion = onEva && time >= 34 && time < 88 ? 37 : 0;
   const recovery = onEva && time >= 88 ? Math.max(6, 29 - Math.floor((time - 88) / 3)) : 0;
   const variation = [0, 2, 1, 3, -1, 1][Math.floor(time / 6) % 6];
-  const pulse = crew.reference.restingHeartRate + variation + exertion + recovery + (crew.id === 'samira' ? 11 : 0);
+  // The same mission clock drives the cycle workload and its independent chest sensor.
+  // These illustrative responses are deterministic, not a physiological model.
+  const cycling = crew.id === 'yoe' && time >= 30 && time < 210
+    ? time < 60 ? 20 + (time - 30) : time < 150 ? 50 : Math.max(8, 50 - (time - 150) * 0.7)
+    : 0;
+  const pulse = Math.round(crew.reference.restingHeartRate + variation + exertion + recovery + cycling + (crew.id === 'samira' ? 11 : 0));
   const skin = 32 + (crew.reference.restingHeartRate - 62) / 10 + (exertion + recovery) / 30;
-  const movement = 7 + Math.floor((exertion + recovery) * 5 / 2) + variation * 3;
+  const movement = 7 + Math.floor((exertion + recovery + cycling) * 5 / 2) + variation * 3;
   return [
     measurement('heart_rate', pulse, 'bpm'),
     measurement('skin_temperature', Number(skin.toFixed(1)), '°C'),
@@ -66,7 +71,7 @@ for (const device of mission.devices) {
     for (let time = 0; time < scenario.durationS; time += 6) {
       // Maya’s receiver loses signal after the airlock return and gets a delayed packet.
       if (crew.id === 'maya' && time > 78 && time < 156) continue;
-      personal.push(emit(device, time / 6 + 1, time, personalMeasurements(crew, time)));
+      personal.push(emit(device, time / 6 + 1, time, personalMeasurements(crew, time).filter(reading => device.metrics.includes(reading.metric))));
     }
     if (crew.id === 'maya') {
       personal.push({ ...emit(device, 15, 84, personalMeasurements(crew, 84)), receivedAtS: 158 });

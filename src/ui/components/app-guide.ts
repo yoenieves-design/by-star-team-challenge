@@ -84,6 +84,21 @@ export function appGuide(vm: ViewModel) {
         <p>An accepted report still needs clinical interpretation. A dated result remains part of the record as the mission clock advances. The app’s planned orders and results are fictional; it does not prescribe tests. Profile selection simulates the reviewer role, and all demonstration records are publicly viewable.</p>`,
     },
     {
+      title: 'Monitor and record exercise', glyph: 'activity', content: html`
+        <ol>
+          <li>Open <strong>Exercise</strong>. Confirm the active profile; choose <strong>Open Yoe’s session</strong> to explore the assigned cycle workout in this replay.</li>
+          <li>Review the assigned machine, location and phase. The demo shows a <strong>3-minute excerpt</strong> of a fictional 25-minute plan. Elapsed replay time does not certify that a real workout was performed.</li>
+          <li>Use <strong>Play replay</strong> to advance the shared mission clock. Power in watts and cadence in rpm come from the cycle. Heart rate in bpm comes from Yoe’s chest sensor. Skin temperature and movement come from his wrist monitor.</li>
+          <li>Compare each sample’s measured and received times. During a reading gap, the current value becomes a dash and a review appears in Assist. The charts keep missing intervals visible. A late packet keeps its original measurement time.</li>
+          <li>Use <strong>Save workout record</strong> after selecting perceived effort and the matching outcome: an early stop during the excerpt or completion once it ends. Saving pauses the replay. The record preserves the observations and available signal coverage.</li>
+          <li>Open the saved record in <strong>Assist</strong> to verify its evidence, record an outcome or request crew support. Download its JSON for a dated local record. An early record remains available if you later save the remainder as a new revision.</li>
+          <li><strong>Report discomfort</strong> records a concern for the active crew member, pauses the replay and opens Assist. Use the mission’s approved procedures for actual symptoms.</li>
+        </ol>
+        <p>Body mass is a separate dated observation in kilograms. An inertial instrument can determine mass from force and acceleration in microgravity. Body mass does not identify muscle mass or bone density.</p>
+        <p>CEVIS, T2 and ARED are NASA ISS reference equipment. Only the cycle has a simulated machine feed in this demo; it does not control or connect to actual exercise hardware. Actual exercise plans are assigned by the mission team.</p>
+        <a class="bs-button bs-button-line" href=${vm.href('exercise')}>Open Exercise</a>`,
+    },
+    {
       title: 'Report a concern', glyph: 'assist', content: html`
         <ol>
           <li>Confirm the active crew member, then select <strong>I need help</strong> or <strong>Assist → Report a concern</strong>.</li>
@@ -121,8 +136,8 @@ export function appGuide(vm: ViewModel) {
     {
       title: 'Use replay and accessibility controls', glyph: 'play', content: html`
         <ul>
-          <li>In <strong>Health</strong> or <strong>Sensors</strong>, use <strong>Play replay</strong>, <strong>Pause replay</strong> and <strong>Playback speed</strong> to control the mission clock. <strong>Next event</strong> jumps to a checkpoint and pauses.</li>
-          <li><strong>Restart replay</strong> starts over and clears recorded follow-up for this replay. Cancel the confirmation to keep your work.</li>
+          <li>In <strong>Health</strong>, <strong>Exercise</strong> or <strong>Sensors</strong>, use <strong>Play replay</strong>, <strong>Pause replay</strong> and <strong>Playback speed</strong> to control the mission clock. <strong>Next event</strong> jumps to a checkpoint and pauses.</li>
+          <li><strong>Restart replay</strong> starts over and clears recorded follow-up and workout records for this replay. Cancel the confirmation to keep your work.</li>
           <li><strong>Explore the post-EVA case</strong> starts a separate practice replay with five guided stages. Use <strong>Next walkthrough step</strong> or <strong>Previous step</strong> to navigate and <strong>Return to my replay</strong> to return to your original saved session.</li>
           <li><strong>Simplified view</strong> removes the trend chart and enlarges the interface. When browser speech is available, use <strong>Listen to current reading</strong> for heart rate or <strong>Listen</strong> for the current <strong>Assist</strong> instruction.</li>
           <li>Use Tab to move between controls, Enter or Space to activate buttons, and Escape to close this guide.</li>

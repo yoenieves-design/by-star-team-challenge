@@ -1,0 +1,75 @@
+import { expect, test } from '@playwright/test';
+import AxeBuilder from '@axe-core/playwright';
+import { readFile } from 'node:fs/promises';
+
+test('Cycle readings share Health context, retain gaps and save reviewed record revisions', async ({ page }) => {
+  await page.goto('/?page=exercise');
+  await page.getByRole('button', { name: 'Open Yoe’s session' }).click();
+  await expect(page.getByLabel('Active crew member')).toHaveValue('yoe');
+  await expect(page.getByRole('region', { name: 'Power', exact: true }).getByText('Reading out of date', { exact: true })).toBeVisible();
+  const heart = page.getByRole('region', { name: 'Heart rate', exact: true });
+  await expect(heart.getByText('Yoe’s chest heart-rate sensor', { exact: false })).toBeVisible();
+  await expect(heart).toContainText('116 bpm');
+  await expect(page.locator('option[value="excerpt-complete"]')).toBeDisabled();
+  await page.getByLabel('Perceived effort').selectOption('moderate');
+  await page.getByLabel('Session outcome').selectOption('stopped-early');
+  await page.getByRole('button', { name: 'Save workout record' }).click();
+  await expect(page.getByText('Stopped early · Revision 1', { exact: true })).toBeVisible();
+  const download = page.waitForEvent('download');
+  await page.getByRole('button', { name: 'Download workout JSON' }).click();
+  const snapshot = JSON.parse(await readFile((await (await download).path())!, 'utf8'));
+  expect(snapshot.record.crewId).toBe('yoe');
+  expect(snapshot.record.savedAtS).toBe(108);
+  expect(snapshot.record.summary.machineCoverage).toBeLessThan(100);
+  expect(snapshot.record.heartRateSamples.every((reading: { deviceId: string; receivedAtS: number }) => reading.deviceId === 'chest-yoe' && reading.receivedAtS <= 108)).toBe(true);
+  await page.getByRole('link', { name: 'Review in Assist' }).click();
+  await expect(page.getByText('Saved workout evidence', { exact: true })).toBeVisible();
+  await page.getByRole('button', { name: 'Start guided check' }).click();
+  await page.getByRole('button', { name: 'Done · next step' }).click();
+  await page.getByRole('radio', { name: 'Further review needed', exact: true }).check();
+  await page.getByRole('button', { name: 'Complete follow-up' }).click();
+  await page.getByRole('navigation').getByRole('link', { name: 'Health' }).click();
+  await expect(page.getByRole('heading', { name: 'Yoe Reyes', exact: true })).toBeVisible();
+  await expect(page.getByText('Orbital cabin · Steady cycling', { exact: true })).toBeVisible();
+  await page.getByRole('navigation').getByRole('link', { name: 'Exercise' }).click();
+  for (let step = 0; step < 5; step++) await page.getByRole('button', { name: 'Next event' }).click();
+  await expect(page.getByRole('progressbar', { name: 'Replay progress' })).toHaveAttribute('value', '210');
+  await expect(page.locator('option[value="stopped-early"]')).toBeDisabled();
+  await page.getByLabel('Perceived effort').selectOption('moderate');
+  await page.getByLabel('Session outcome').selectOption('excerpt-complete');
+  await page.getByRole('button', { name: 'Save workout record' }).click();
+  await expect(page.getByText('Excerpt completed · Revision 2', { exact: true })).toBeVisible();
+  await page.reload();
+  await expect(page.getByText('Stopped early · Revision 1', { exact: true })).toBeVisible();
+  await expect(page.getByText('Excerpt completed · Revision 2', { exact: true })).toBeVisible();
+});
+
+test('Exercise is usable on mobile and discomfort becomes a dated crew concern', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto('/?page=exercise');
+  await page.getByRole('button', { name: 'Open Yoe’s session' }).click();
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(390);
+  const result = await new AxeBuilder({ page }).include('.bs-app').withTags(['wcag2a', 'wcag2aa', 'wcag21aa', 'wcag22aa']).analyze();
+  expect(result.violations.map(item => item.id)).toEqual([]);
+  await page.getByRole('button', { name: 'Report discomfort', exact: true }).click();
+  await expect(page).toHaveURL(/page=assist&by_star_work=report-/);
+  await expect(page.getByRole('region', { name: 'Crew concern reported' })).toContainText('Discomfort during exercise');
+  await page.getByRole('region', { name: 'Mission content' }).getByText('Review summary', { exact: true }).click();
+  const download = page.waitForEvent('download');
+  await page.getByRole('button', { name: 'Download review JSON' }).click();
+  const report = JSON.parse(await readFile((await (await download).path())!, 'utf8'));
+  expect(report.crew[0].id).toBe('yoe');
+  expect(report.exerciseEvidence.plan.id).toBe('yoe-cevis-replay');
+  expect(report.exerciseEvidence.machinePackets.every((packet: { receivedAtS: number }) => packet.receivedAtS <= 108)).toBe(true);
+  await page.getByRole('navigation').getByRole('link', { name: 'Exercise' }).click();
+  await expect(page.getByRole('button', { name: 'Play replay', exact: true })).toBeVisible();
+});
+
+test('An unavailable exercise stream leaves core monitoring available', async ({ page }) => {
+  await page.route('**/simulation/streams/exercise.json', route => route.fulfill({ status: 503, body: 'Unavailable' }));
+  await page.goto('/?page=exercise');
+  await expect(page.getByRole('heading', { name: 'Exercise feed unavailable', exact: true })).toBeVisible();
+  await page.getByRole('navigation').getByRole('link', { name: 'Health' }).click();
+  await expect(page.getByRole('group', { name: 'Body readings for Alex Morgan' })).toBeVisible();
+  await expect(page.getByText(/Exercise feed unavailable/)).toBeVisible();
+});

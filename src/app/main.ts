@@ -4,6 +4,8 @@ import { openSessionStore } from '../adapters/session-store.ts';
 import { createVoiceController, initialVoiceState, speak, stopSpeech } from '../adapters/voice.ts';
 import { loadClinicalData, clinicalWork } from '../services/clinical.ts';
 import type { ClinicalData } from '../domain/clinical.ts';
+import type { ExerciseData } from '../domain/exercise.ts';
+import { loadExerciseData, exerciseWork, saveExerciseRecord } from '../services/exercise.ts';
 import { createReviewSummary } from '../services/review-summary.ts';
 import { isMetric, latestReading, numberLabel } from '../domain/metrics.ts';
 import type { FollowUpEvent, Session } from '../domain/types.ts';
@@ -58,6 +60,10 @@ async function mount(root: HTMLElement) {
   let clinicalError = '';
   try { clinical = await loadClinicalData(assetBase, mission, scenario); }
   catch (error) { clinicalError = 'Clinical feed unavailable. ' + (error instanceof Error ? error.message : 'Try reloading the demo.'); }
+  let exercise: ExerciseData | null = null;
+  let exerciseError = '';
+  try { exercise = await loadExerciseData(assetBase, mission, scenario); }
+  catch (error) { exerciseError = 'Exercise feed unavailable. ' + (error instanceof Error ? error.message : 'Try reloading the demo.'); }
   const initial = newSession(scenario);
   if (demoId) initial.crewId = 'maya';
   const store = await openSessionStore(assetBase.href + (demoId ? ':' + demoId : ''), initial, mission.crew.map(person => person.id));
@@ -71,7 +77,10 @@ async function mount(root: HTMLElement) {
     error: '', notice: '', saving: false, voice: initialVoiceState(),
   };
   let view: ViewModel;
-  const extraWork = (current: Session, snapshot: ReturnType<typeof replay.snapshot>) => clinical ? clinicalWork(mission, snapshot, current, clinical) : [];
+  const extraWork = (current: Session, snapshot: ReturnType<typeof replay.snapshot>) => [
+    ...(clinical ? clinicalWork(mission, snapshot, current, clinical) : []),
+    ...(exercise ? exerciseWork(mission, snapshot, current, exercise) : []),
+  ];
 
   function paint(force = false) {
     const now = Date.now();
@@ -81,7 +90,7 @@ async function mount(root: HTMLElement) {
     view = {
       page, mission, scenario, session, snapshot, state, work: listWork(mission, snapshot, session, extraWork(session, snapshot)),
       playing: isPlaying(session, scenario, now), persistent: store.persistent, href, asset,
-      clinical, clinicalError, guided: !!demoId, tourStep,
+      clinical, clinicalError, exercise, exerciseError, guided: !!demoId, tourStep,
       nextEvent: scenario.milestones.find(item => item.atS > at),
     };
     render(shell(view), root);
@@ -192,13 +201,44 @@ async function mount(root: HTMLElement) {
       case 'export-review': {
         const work = view.work.find(item => item.id === targetId);
         if (!work) break;
-        const result = createReviewSummary(mission, view.snapshot, session, work, clinical);
+        const result = createReviewSummary(mission, view.snapshot, session, work, clinical, exercise);
         const url = URL.createObjectURL(new Blob([JSON.stringify(result, null, 2)], { type: 'application/json' }));
         const link = document.createElement('a');
         link.href = url;
         link.download = 'by-star-' + work.id.replace(/[^a-z0-9-]/gi, '-') + '.json';
         link.click();
         window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+        break;
+      }
+      case 'export-exercise': {
+        const result = session.exerciseRecords?.find(item => item.id === button.dataset.record && item.savedAtS <= view.snapshot.atS);
+        if (!result) break;
+        const content = {
+          schemaVersion: 1, origin: 'synthetic', mission: mission.code, missionStartUtc: mission.startUtc,
+          record: result, plan: exercise?.sessions.find(item => item.id === result.sessionId),
+          equipment: exercise?.equipment.find(item => item.id === result.equipmentId),
+          note: 'Saved observation of a fictional exercise excerpt. Incomplete coverage is retained; this is not a completed daily prescription.',
+        };
+        const url = URL.createObjectURL(new Blob([JSON.stringify(content, null, 2)], { type: 'application/json' }));
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = 'by-star-workout-' + result.id.replace(/[^a-z0-9-]/gi, '-') + '.json';
+        link.click();
+        window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+        break;
+      }
+      case 'open-exercise-crew':
+        await selectCrew(button.dataset.crew ?? '');
+        break;
+      case 'exercise-report': {
+        if (!exercise?.sessions.some(item => item.id === button.dataset.session && item.crewId === session.crewId)) break;
+        const targetId = 'report-' + crypto.randomUUID();
+        await update((current, now) => {
+          const snapshot = replay.snapshot(position(current, scenario, now));
+          return appendFollowUp(stopAt(current, snapshot.atS), {
+            type: 'report', targetId, category: 'Discomfort during exercise', exerciseSessionId: button.dataset.session,
+          }, mission, snapshot, extraWork(current, snapshot));
+        }, 'Exercise concern recorded. Replay paused for review.', () => location.assign(href('assist', targetId)));
         break;
       }
       case 'play':
@@ -214,7 +254,7 @@ async function mount(root: HTMLElement) {
         }, 'Moved to the next replay event.');
         break;
       case 'restart':
-        if (session.activity.length && !window.confirm('Restart the replay and clear its recorded follow-up?')) return;
+        if ((session.activity.length || session.exerciseRecords?.length) && !window.confirm('Restart the replay and clear its recorded follow-up and workouts?')) return;
         stopSpeech();
         await update(current => ({ ...newSession(scenario, 0), simple: current.simple, speed: current.speed }),
           'Replay restarted.', () => { state.workId = null; });
@@ -314,6 +354,21 @@ async function mount(root: HTMLElement) {
 
   root.addEventListener('submit', async event => {
     const form = event.target;
+    if (form instanceof HTMLFormElement && form.dataset.form === 'exercise-record') {
+      event.preventDefault();
+      if (!exercise || form.dataset.crew !== session.crewId || !form.reportValidity()) return;
+      const data = new FormData(form);
+      const outcome = data.get('outcome');
+      const effort = data.get('effort');
+      if ((outcome !== 'excerpt-complete' && outcome !== 'stopped-early')
+        || (effort !== 'light' && effort !== 'moderate' && effort !== 'hard')) return;
+      const source = exercise;
+      await update((current, now) => {
+        const snapshot = replay.snapshot(position(current, scenario, now));
+        return saveExerciseRecord(stopAt(current, snapshot.atS), source, snapshot, outcome, effort);
+      }, 'Workout record saved. Replay paused; review is available in Assist.');
+      return;
+    }
     if (!(form instanceof HTMLFormElement) || form.dataset.form !== 'check-in') return;
     event.preventDefault();
     if (form.dataset.crew !== session.crewId || !form.reportValidity()) return;

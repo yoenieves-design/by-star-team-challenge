@@ -3,6 +3,7 @@ import { repeat } from 'lit-html/directives/repeat.js';
 import { deviceReadings, metrics, numberLabel } from '../../domain/metrics.ts';
 import { isWorkPending, type WorkItem } from '../../services/follow-up.ts';
 import { clinicalEvidence } from '../components/clinical-checks.ts';
+import { exerciseEvidence } from '../components/exercise-summary.ts';
 import { outcomeLabels, reviewSummary } from '../components/review-summary.ts';
 import { canSpeak } from '../../adapters/voice.ts';
 import { alertLabels, deviceReadingTag, tag, workTag } from '../components/common.ts';
@@ -31,8 +32,9 @@ function queue(vm: ViewModel, selected: WorkItem | undefined) {
   const assigned = vm.work.filter(item => item.progress.assigneeId === vm.session.crewId
     && (isWorkPending(item) || item.progress.receipt === 'requested'));
   const clinical = vm.work.filter(item => item.clinical && (item.crewIds.includes(vm.session.crewId) || item.requiredReviewerId === vm.session.crewId));
+  const exercise = vm.work.filter(item => item.exercise && !item.alert && item.crewIds.includes(vm.session.crewId));
   const groups = [{ work: assigned, label: 'Assigned to me' }, { work: alerts, label: 'Crew alerts' },
-    { work: tasks, label: 'My scheduled checks' }, { work: clinical, label: 'Clinical reports' }];
+    { work: tasks, label: 'My scheduled checks' }, { work: clinical, label: 'Clinical reports' }, { work: exercise, label: 'Exercise records' }];
   return html`<aside class="bs-card bs-assist-queue" aria-label="Assist queue">
     <div class="bs-card-heading"><div><h2>Follow-up queue</h2><p>Choose an alert or scheduled check.</p></div></div>
     <button type="button" data-action="report-form" class="bs-button bs-button-line" aria-pressed=${vm.state.reportOpen}
@@ -128,13 +130,14 @@ function procedure(vm: ViewModel, item: WorkItem) {
 
   return html`<section class="bs-card bs-assist-work" aria-labelledby="bs-work-title">
     <div class="bs-card-heading">
-      <div><p>${item.alert ? alertLabels[item.alert.kind] : item.clinical ? 'Clinical report' : 'Scheduled check'} · ${subject}</p>
+      <div><p>${item.alert ? alertLabels[item.alert.kind] : item.clinical ? 'Clinical report' : item.exercise ? 'Exercise record' : 'Scheduled check'} · ${subject}</p>
         <h2 id="bs-work-title" tabindex="-1">${item.title}</h2></div>
       ${workTag(progress.status)}
     </div>
     <p>${item.detail}</p>
     ${evidence(vm, item)}
     ${item.clinical && vm.clinical ? clinicalEvidence(vm, item.id, vm.clinical) : ''}
+    ${item.exercise ? exerciseEvidence(vm, item.id) : ''}
     ${item.condition ? html`<div class="bs-condition"><strong>${item.condition.label}</strong><p>${item.condition.detail}</p></div>` : ''}
     ${restricted ? html`<p class="bs-warning-note">Review is assigned to ${personName(vm, item.requiredReviewerId)}. Switch to that active crew profile to record the clinical review. Profile selection simulates a role in this public demo.</p>` : ''}
     <div class="bs-procedure">

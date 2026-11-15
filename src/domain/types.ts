@@ -1,8 +1,10 @@
+import type { ExerciseRecord } from './exercise.ts';
+
 export type Metric = 'heart_rate' | 'skin_temperature' | 'activity' | 'oxygen' | 'carbon_dioxide' | 'pressure';
 export type Quality = 'good' | 'degraded' | 'unavailable';
 export type Subject = { type: 'crew' | 'zone'; id: string };
 export type Link = 'local' | 'earth';
-export type Phase = 'preparation' | 'eva' | 'return' | 'recovery' | 'routine';
+export type Phase = 'preparation' | 'eva' | 'return' | 'recovery' | 'routine' | 'exercise';
 
 export interface Device {
   id: string;
@@ -171,7 +173,7 @@ export type FollowUpEvent =
   | { type: 'outcome'; targetId: string; outcome: ReviewOutcome }
   | { type: 'reopen'; targetId: string }
   | { type: 'pause' | 'resume' | 'request-support' | 'receipt'; targetId: string }
-  | { type: 'report'; targetId: string; category: string }
+  | { type: 'report'; targetId: string; category: string; exerciseSessionId?: string }
   | { type: 'check-in'; targetId: string; sleep: 'rested' | 'mixed' | 'poor'; fatigue: 'low' | 'moderate' | 'high';
       concern: string; onset: 'now' | 'earlier' | 'unsure' };
 
@@ -186,4 +188,6 @@ export interface Session {
   crewId: string;
   simple: boolean;
   activity: OperatorEvent[];
+  /** Saved workout observations are independent of the procedural review log. */
+  exerciseRecords?: ExerciseRecord[];
 }

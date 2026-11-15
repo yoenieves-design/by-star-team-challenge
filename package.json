@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "schemas": "node scripts/generate-validators.mjs",
-    "fixtures": "node scripts/create-telemetry.mjs",
+    "fixtures": "node scripts/create-telemetry.mjs && node scripts/create-exercise.mjs",
     "typecheck": "npm run schemas && tsc --noEmit",
     "build": "npm run schemas && vite build && node scripts/write-preview.mjs",
     "build:pages": "npm run typecheck && npm test && npm run build",

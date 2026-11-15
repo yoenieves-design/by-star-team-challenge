@@ -5,6 +5,7 @@ import { bodyTelemetry } from '../components/body-telemetry.ts';
 import { avatar, deviceReadingTag, tag, workTag } from '../components/common.ts';
 import { icon } from '../components/icons.ts';
 import { sensorsPanel } from '../components/sensors.ts';
+import { exerciseSummary } from '../components/exercise-summary.ts';
 import { bodyReadings, breathingReadings, telemetryReadings } from '../components/telemetry-readings.ts';
 import { clock, currentPerson, personName, sensorsHref, zoneName, type ViewModel } from '../view-model.ts';
 
@@ -143,6 +144,7 @@ function missionProfile(vm: ViewModel) {
         <h3>${zone.name}</h3><ul>${zone.equipment.map(item => html`<li>${item}</li>`)}</ul>
       </article>`)}</div>
     </section>
+    <div class="bs-full">${exerciseSummary(vm, true)}</div>
     ${missionReferences(vm)}
   </div>`;
 }

@@ -23,9 +23,14 @@
     { "atS": 157, "label": "Wrist monitor reconnects" },
     { "atS": 166, "label": "Corrected clinical report received" },
     { "atS": 174, "label": "Earth relay restored" },
+    { "atS": 210, "label": "Cycle exercise excerpt complete" },
     { "atS": 240, "label": "End of replay" }
   ],
   "events": [
+    { "type": "context", "atS": 30, "crewId": "yoe", "context": { "zoneId": "orbiter", "breathingZoneId": "orbiter", "phase": "exercise", "activity": "Cycle warm-up", "resting": false } },
+    { "type": "context", "atS": 60, "crewId": "yoe", "context": { "zoneId": "orbiter", "breathingZoneId": "orbiter", "phase": "exercise", "activity": "Steady cycling", "resting": false } },
+    { "type": "context", "atS": 150, "crewId": "yoe", "context": { "zoneId": "orbiter", "breathingZoneId": "orbiter", "phase": "exercise", "activity": "Cycle cool-down", "resting": false } },
+    { "type": "context", "atS": 210, "crewId": "yoe", "context": { "zoneId": "orbiter", "breathingZoneId": "orbiter", "phase": "recovery", "activity": "Post-exercise check", "resting": false } },
     { "type": "context", "atS": 34, "crewId": "alex", "context": { "zoneId": "worksite", "breathingZoneId": "suit-alex", "phase": "eva", "activity": "Surface construction", "resting": false } },
     { "type": "context", "atS": 34, "crewId": "maya", "context": { "zoneId": "worksite", "breathingZoneId": "suit-maya", "phase": "eva", "activity": "Surface construction", "resting": false } },
     { "type": "context", "atS": 76, "crewId": "alex", "context": { "zoneId": "airlock", "breathingZoneId": "suit-alex", "phase": "return", "activity": "Airlock return", "resting": false } },

@@ -7,6 +7,7 @@ The demonstration follows six crew members on the fictional SELENE-06 lunar cons
 | Surface | What the demonstration shows |
 | --- | --- |
 | Health | A selected crew member and six-person overview, an interactive body map, breathing-zone readings, activity-aware trends, link state, shared alerts, a quick self-report, clinical results and the next scheduled check. |
+| Exercise | A simulated orbital cycling session with machine workload and cadence, separately sourced body readings, the assigned exercise context and dated body-mass records. |
 | Assist | Steps with source and equipment context, explicit review outcomes, pause and resume, assigned work, a simulated crew handoff, clinical report review and a downloadable review record. |
 | Profiles | Crew body maps, assigned instruments, illustrative preflight references, live replay of sensor packets, the planned schedule and project sources. |
 
@@ -21,6 +22,7 @@ The App guide is available from every page, with instructions for checking evide
 | Mission and crew input | Crew identity, location, breathing zone, activity, link availability, assigned checks and reported concerns | NASA's Earth-Independent Medical Operations concept brings crew reports and onboard reference, wearable and environmental data together for the crew medical officer. [NASA EIMO concept](https://ntrs.nasa.gov/citations/20250000009) |
 | Quick check-in | Perceived rest, current fatigue, a concern category and approximate onset | NASA medical operations address work/rest scheduling, fatigue management and behavioral health. These demo questions are illustrative self-reports. [NASA medical operations](https://www.nasa.gov/reference/6-0-medical-operations/) |
 | Episodic clinical report | A synthetic urine specific-gravity observation, order and specimen identities, instrument and method, quality, timestamps and revision history | NASA documents urinalysis around ISS EVA. The demo uses one illustrative analyte and a fictional mission instrument. [NASA astronaut medical evaluation, section 6.5.1](https://www.nasa.gov/wp-content/uploads/2024/09/ochmo-std-100-1a-rev-a-signed.pdf#page=52) |
+| Exercise equipment and mass instrument | Cycling workload (W), cadence (rpm), session timing and dated total body mass (kg), displayed alongside existing body observations | NASA documents CEVIS cycling measurements and SLAMMD mass measurement using known force and resulting acceleration. The demo uses fictional orbital equipment inspired by these capabilities. [NASA exercise monitoring](https://ntrs.nasa.gov/api/citations/20220019338/downloads/Evidence%20report%20aerobic%20and%20muscle_FINAL%209-21-22%20Pubpress%20accepted_v2.pdf#page=55) · [NASA SLAMMD](https://www.nasa.gov/image-article/astronaut-shannon-walker-works-columbus-laboratory-module/) |
 
 The replay shows the path from a reading to a crew decision. A late packet retains its sample time, a signal alert names the affected device, and a crew member can verify the evidence, request a handoff and record follow-up. The crew can still inspect the replay and follow the prepared guide during a simulated Earth relay interruption.
 
@@ -43,6 +45,14 @@ The body view explains the individual's fictional preflight heart-rate reference
 NASA-STD-3001 Volume 2 informs the visible stale or missing data labels (V2 10020), status text and symbols alongside color (V2 10045), and units displayed with values (V2 10046). The project uses these sections as prototype design references. NASA's EVA and environmental documentation informs the separation of activity, location and breathing environment. Mission links model the role of relays where direct communications are unavailable. [Crew interfaces](https://www.nasa.gov/reference/10-0-crew-interfaces-vol-2/) · [EVA risks](https://www.nasa.gov/reference/risk-of-injury-and-compromised-performance-from-extravehicular-activity-eva/) · [Lunar communications relays](https://www.nasa.gov/goddard/esc/lcrns/).
 
 The [historical sample](../public/data/radlab-iss-sample.json) preserves 16 absorbed dose-rate records returned by RadLab for DosTel1 and DosTel2 on the ISS from the April 1, 2022 query window. The source timestamps and values are preserved in the file. It demonstrates traceable instrument data separately from the synthetic story. The replay has no real patient data. [NASA RadLab API documentation](https://visualization.osdr.nasa.gov/radlab/gui/data-api/).
+
+## Exercise and physical conditioning
+
+The **Exercise** page follows Yoe's fictional cycle session in the orbital cabin. Workload and cadence arrive from a dedicated machine stream while heart rate remains traceable to Yoe's chest sensor. His wrist monitor supplies skin temperature and movement. The exercise context also appears in the health view, keeping an exercise observation distinct from a resting reference comparison. The same replay clock drives the machine, body readings and link interruptions.
+
+The three-minute replay excerpt represents part of a fictional 25-minute plan. Crew members can inspect phases and incoming samples, report perceived effort or discomfort, save an early-stop or excerpt-complete record and send the recorded item through Assist's review flow. Earlier record revisions retain the source observations available when they were saved. Data gaps and source coverage remain visible alongside the summaries.
+
+NASA documents CEVIS, T2 and ARED as complementary ISS exercise equipment. BY STAR implements a CEVIS-inspired cycle excerpt; treadmill and resistance equipment are reference entries. A dated mass observation illustrates an inertial measurement, keeping total body mass separate from muscle mass or body composition. No general training prescription or universal heart-rate zone is generated. See the [exercise data contract and primary NASA references](EXERCISE-DATA.md). [NASA · Astronaut Exercise](https://www.nasa.gov/general/astronaut-exercise/).
 
 ## Clinical checks
 

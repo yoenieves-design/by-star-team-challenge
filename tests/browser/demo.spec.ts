@@ -159,8 +159,8 @@ test('Sensors lists every device, links to the affected review and follows recon
   await page.goto('/');
   await page.getByRole('link', { name: 'View sensors' }).click();
   const sensors = page.getByRole('region', { name: 'Sensors', exact: true });
-  await expect(sensors.getByRole('article')).toHaveCount(12);
-  await expect(sensors.getByText('11 of 12 devices with current readings')).toBeVisible();
+  await expect(sensors.getByRole('article')).toHaveCount(13);
+  await expect(sensors.getByText('12 of 13 devices with current readings')).toBeVisible();
   await expect(sensors.getByRole('article', { name: 'Habitat air monitor' }).getByText('CO₂ partial pressure')).toBeVisible();
   const wrist = sensors.getByRole('article', { name: 'Maya’s wrist monitor' });
   await expect(wrist.getByText('Reading out of date').first()).toBeVisible();
@@ -179,12 +179,12 @@ test('Sensors lists every device, links to the affected review and follows recon
   await page.getByRole('button', { name: 'Next event' }).click();
   await expect(wrist.getByText('Current reading', { exact: true })).toBeVisible();
   await expect(wrist.getByText('06:42:36 UTC', { exact: true })).toBeVisible();
-  await expect(sensors.getByText('12 of 12 devices with current readings')).toBeVisible();
+  await expect(sensors.getByText('13 of 13 devices with current readings')).toBeVisible();
   await expect(wrist.getByRole('link', { name: 'Review sensor alert' })).toBeVisible();
 });
 
 test('Core routes pass automated accessibility checks', async ({ page }) => {
-  for (const [route, heading] of [['health', 'Crew health'], ['assist', 'Assist'], ['profiles&by_star_profile=sensors', 'Sensors'], ['profiles', 'Profiles']]) {
+  for (const [route, heading] of [['health', 'Crew health'], ['assist', 'Assist'], ['profiles&by_star_profile=sensors', 'Sensors'], ['exercise', 'Exercise'], ['profiles', 'Profiles']]) {
     await page.goto('/?page=' + route);
     await expect(page.getByRole('heading', { name: heading, exact: true })).toBeVisible();
     const result = await new AxeBuilder({ page }).include('.bs-app').withTags(['wcag2a', 'wcag2aa', 'wcag21aa', 'wcag22aa']).analyze();

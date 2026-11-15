@@ -5,15 +5,17 @@ import { icon } from './components/icons.ts';
 import { assistPage } from './pages/assist.ts';
 import { healthPage } from './pages/health.ts';
 import { profilesPage } from './pages/profiles.ts';
+import { exercisePage } from './pages/exercise.ts';
 import { voiceControls } from './components/voice-controls.ts';
 import { walkthrough } from './components/walkthrough.ts';
 import './styles/review-tools.css';
 import { clock, currentPerson, pageNames, type Page, type ViewModel } from './view-model.ts';
 
-const views = { health: healthPage, assist: assistPage, profiles: profilesPage };
+const views = { health: healthPage, assist: assistPage, exercise: exercisePage, profiles: profilesPage };
 const navigation = [
   { page: 'health', icon: 'activity' },
   { page: 'assist', icon: 'assist' },
+  { page: 'exercise', icon: 'activity' },
   { page: 'profiles', icon: 'users' },
 ] as const;
 
@@ -80,5 +82,5 @@ export function loadingPage(message: string, error = false) {
 }
 
 export function isPage(value: string | null | undefined): value is Page {
-  return value === 'health' || value === 'assist' || value === 'profiles';
+  return value === 'health' || value === 'assist' || value === 'profiles' || value === 'exercise';
 }

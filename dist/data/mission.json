@@ -14,7 +14,7 @@
     { "id": "leila", "name": "Leila Duarte", "role": "Flight engineer", "tone": "sage", "buddyId": "yoe", "reference": { "restingHeartRate": 63, "basis": "Fictional preflight seated readings" } }
   ],
   "zones": [
-    { "id": "orbiter", "name": "Orbital cabin", "kind": "Spacecraft", "equipment": ["Cabin monitor", "Wrist monitor", "Crew terminal"] },
+    { "id": "orbiter", "name": "Orbital cabin", "kind": "Spacecraft", "equipment": ["Cabin monitor", "Wrist monitor", "Chest heart-rate sensor", "Cycle ergometer", "Crew terminal"] },
     { "id": "lander", "name": "Descent cabin", "kind": "Lander", "equipment": ["Cabin monitor", "Wrist monitor", "Crew terminal"] },
     { "id": "habitat", "name": "Surface habitat", "kind": "Lunar base", "equipment": ["Habitat air monitor", "Wrist monitor", "Crew terminal"] },
     { "id": "airlock", "name": "Habitat airlock", "kind": "Transition zone", "equipment": ["Wrist monitor", "Crew terminal"] },
@@ -27,7 +27,8 @@
     { "id": "wrist-alex", "name": "Alex’s wrist monitor", "subject": { "type": "crew", "id": "alex" }, "metrics": ["heart_rate", "skin_temperature", "activity"], "maxAgeS": 18 },
     { "id": "wrist-maya", "name": "Maya’s wrist monitor", "subject": { "type": "crew", "id": "maya" }, "metrics": ["heart_rate", "skin_temperature", "activity"], "maxAgeS": 18 },
     { "id": "wrist-noah", "name": "Noah’s wrist monitor", "subject": { "type": "crew", "id": "noah" }, "metrics": ["heart_rate", "skin_temperature", "activity"], "maxAgeS": 18 },
-    { "id": "wrist-yoe", "name": "Yoe’s wrist monitor", "subject": { "type": "crew", "id": "yoe" }, "metrics": ["heart_rate", "skin_temperature", "activity"], "maxAgeS": 18 },
+    { "id": "wrist-yoe", "name": "Yoe’s wrist monitor", "subject": { "type": "crew", "id": "yoe" }, "metrics": ["skin_temperature", "activity"], "maxAgeS": 18 },
+    { "id": "chest-yoe", "name": "Yoe’s chest heart-rate sensor", "subject": { "type": "crew", "id": "yoe" }, "metrics": ["heart_rate"], "maxAgeS": 18 },
     { "id": "wrist-samira", "name": "Samira’s wrist monitor", "subject": { "type": "crew", "id": "samira" }, "metrics": ["heart_rate", "skin_temperature", "activity"], "maxAgeS": 18 },
     { "id": "wrist-leila", "name": "Leila’s wrist monitor", "subject": { "type": "crew", "id": "leila" }, "metrics": ["heart_rate", "skin_temperature", "activity"], "maxAgeS": 18 },
     { "id": "air-orbiter", "name": "Orbital cabin monitor", "subject": { "type": "zone", "id": "orbiter" }, "metrics": ["oxygen", "carbon_dioxide", "pressure"], "maxAgeS": 24 },
@@ -97,6 +98,10 @@
   ],
   "rules": { "version": "Demo 1", "co2RiseKpa": 0.12, "co2WindowS": 40, "restingPulseDeltaBpm": 15 },
   "sources": [
+    { "id": "exercise", "title": "NASA · Astronaut exercise", "description": "ISS reference equipment: ARED resistance, T2 treadmill and CEVIS cycle ergometer. The lunar demo uses a fictional cycle and plan.", "url": "https://www.nasa.gov/general/astronaut-exercise/" },
+    { "id": "exercise-monitoring", "title": "NASA · Exercise overview technical brief", "description": "Equipment-specific monitoring: CEVIS workload in watts, cadence, heart rate and duration; T2 speed and body loading; resistance exercise records.", "url": "https://www.nasa.gov/wp-content/uploads/2023/12/ochmo-tb-031-exercise-overview.pdf" },
+    { "id": "exercise-heart-rate", "title": "NASA · ISS exercise heart-rate monitoring", "description": "An ISS report documents chest-strap heart-rate monitoring and wireless receiver interference testing. The demo does not connect to this hardware.", "url": "https://www.nasa.gov/blogs/stationreport/2015/09/08/iss-daily-summary-report-09-8-15/" },
+    { "id": "body-mass", "title": "NASA · SLAMMD body mass measurement", "description": "Body mass in microgravity from known force and measured acceleration. A mass reading does not determine muscle mass.", "url": "https://www.nasa.gov/image-article/astronaut-shannon-walker-works-columbus-laboratory-module/" },
     { "id": "environment", "title": "NASA · Major Constituent Analyzer", "description": "Basis for distinguishing oxygen fraction, pressure and carbon dioxide measurements in the habitat.", "url": "https://ntrs.nasa.gov/citations/20120010634" },
     { "id": "eva", "title": "NASA · Extravehicular activity risks", "description": "Informs the separation of preparation, work, return and follow-up.", "url": "https://www.nasa.gov/reference/risk-of-injury-and-compromised-performance-from-extravehicular-activity-eva/" },
     { "id": "wearables", "title": "NASA · Wearable technology on the ISS", "description": "Examples of research using personal sensors during activity and rest.", "url": "https://www.nasa.gov/missions/station/iss-research/wearable-tech-for-space-station-research/" },

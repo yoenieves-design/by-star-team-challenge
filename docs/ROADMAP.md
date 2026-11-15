@@ -30,6 +30,12 @@ The stages explain where to go; they do not perform medical actions or automatic
 | Restart an independent replay and advance through early checkpoints | The selected crew member moves from the descent cabin to the suit breathing loop, airlock and habitat. Restart asks before clearing recorded work. |
 | Open Profiles → Mission & schedule → NASA data & references | The historical ISS radiation sample has its own source and dates, separate from synthetic mission readings. |
 
+## Exercise demonstration
+
+Open **Exercise → Open Yoe’s session**. At the initial 01:48 replay time, the cycle signal is stale while the independent chest heart-rate source is current. Inspect the measured and received times, then use **Review reading issue** to record the equipment check in Assist. The core body, environment and exercise feeds share the mission clock.
+
+Select perceived effort and **Stopped early**, then **Save workout record** to preserve a partial observation. Advance with **Next event** to 03:30 (06:43:30 UTC), select **Excerpt completed**, and save a new revision. Earlier records remain inspectable. Review the saved evidence in Assist or download its JSON. **Report discomfort** pauses the replay and opens a concern tied to the active profile and exercise session. See [EXERCISE-DATA.md](EXERCISE-DATA.md) for source variables and NASA evidence.
+
 ## Follow-on work
 
 Operational integration would require device authentication, continuous onboard processing, authenticated roles, protected medical records, mission-approved clinical procedures, and communication delivery across real endpoints. A flight-ready voice interface would need validation for noise, recognition accuracy, accessibility and offline operation on the selected hardware. Additional clinical tests would require their own instruments, specimen contracts, authorized orders and review procedures.

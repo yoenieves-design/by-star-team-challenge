@@ -4,6 +4,7 @@ import { metrics } from '../../domain/metrics.ts';
 import { isWorkPending, type WorkItem } from '../../services/follow-up.ts';
 import { clinicalChecks, clinicalNextTask } from '../components/clinical-checks.ts';
 import { quickCheckIn } from '../components/quick-check-in.ts';
+import { exerciseSummary } from '../components/exercise-summary.ts';
 import { alertLabels, avatar, localLinkTag, measurementDetail, measurementValue, readingTag, tag, workTag } from '../components/common.ts';
 import { bodyTelemetry } from '../components/body-telemetry.ts';
 import { icon } from '../components/icons.ts';
@@ -161,6 +162,7 @@ export function healthPage(vm: ViewModel) {
         ${alertsList(vm, related, open.length)}
         ${environment(vm, context.breathingZoneId)}
         ${nextTask(vm)}
+        ${exerciseSummary(vm, !personal)}
         ${quickCheckIn(vm)}
       </div>
     </div>

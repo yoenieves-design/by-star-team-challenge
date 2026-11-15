@@ -7,6 +7,7 @@ import { deviceReadingTag, localLinkTag, tag } from './common.ts';
 import { icon } from './icons.ts';
 import { replayControls } from './replay-controls.ts';
 import { telemetryReadings } from './telemetry-readings.ts';
+import { exerciseSummary } from './exercise-summary.ts';
 
 function sensorCard(vm: ViewModel, device: Device, readings: ReturnType<typeof deviceReadings>) {
   const packet = vm.snapshot.latestPackets.get(device.id);
@@ -54,6 +55,7 @@ export function sensorsPanel(vm: ViewModel) {
       <p>Wearables could use Bluetooth to reach a local gateway. Approved onboard networks could carry data over Wi-Fi or mission-specific links. Suit and cabin equipment would share telemetry through read-only mission interfaces.</p>
       <p>The replay buffers packets during a local link interruption and preserves their measurement times. An onboard system could use an independent link or backup monitor where mission hardware supports it.</p>
     </details>
+    ${exerciseSummary(vm, true)}
     ${groups.filter(group => group.devices.length).map(group => html`<div class="bs-sensor-group">
       <h3>${group.label}</h3>
       <div class="bs-sensor-grid">

@@ -1,0 +1,35 @@
+{
+  "schemaVersion": 1,
+  "origin": "synthetic",
+  "equipment": [
+    {
+      "id": "cevis-orbiter", "name": "CEVIS-inspired cycle ergometer", "kind": "cycle", "maxAgeS": 12,
+      "description": "SELENE-06 orbital cabin cycle. The replay supplies separate power and cadence packets.",
+      "sourceUrl": "https://www.nasa.gov/general/astronaut-exercise/"
+    },
+    {
+      "id": "t2-reference", "name": "T2 treadmill", "kind": "treadmill",
+      "description": "ISS aerobic exercise equipment reference.",
+      "sourceUrl": "https://www.nasa.gov/general/astronaut-exercise/"
+    },
+    {
+      "id": "ared-reference", "name": "Advanced Resistive Exercise Device (ARED)", "kind": "resistance",
+      "description": "ISS resistance exercise equipment reference.",
+      "sourceUrl": "https://www.nasa.gov/general/astronaut-exercise/"
+    }
+  ],
+  "sessions": [
+    {
+      "id": "yoe-cevis-replay", "crewId": "yoe", "equipmentId": "cevis-orbiter", "zoneId": "orbiter",
+      "plannedDurationMin": 25, "startAtS": 30, "warmupEndsAtS": 60, "steadyEndsAtS": 150, "endAtS": 210,
+      "samplePeriodS": 6, "heartRateDeviceIds": ["chest-yoe"]
+    }
+  ],
+  "bodyMassSamples": [
+    {
+      "id": "yoe-inertial-mass-038", "crewId": "yoe", "instrumentId": "mass-orbiter", "instrumentName": "Orbital inertial mass instrument",
+      "value": 78.4, "unit": "kg", "method": "inertial-measurement",
+      "measuredAtS": 20, "receivedAtS": 21, "origin": "synthetic"
+    }
+  ]
+}

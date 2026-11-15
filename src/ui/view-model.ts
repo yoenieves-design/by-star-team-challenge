@@ -1,9 +1,10 @@
 import type { Metric, Mission, Scenario, Session, Snapshot } from '../domain/types.ts';
 import type { WorkItem } from '../services/follow-up.ts';
 import type { ClinicalData } from '../domain/clinical.ts';
+import type { ExerciseData } from '../domain/exercise.ts';
 import type { VoiceState } from '../adapters/voice.ts';
 
-export const pageNames = { health: 'Health', assist: 'Assist', profiles: 'Profiles' };
+export const pageNames = { health: 'Health', assist: 'Assist', exercise: 'Exercise', profiles: 'Profiles' };
 export type Page = keyof typeof pageNames;
 
 export const concerns = [
@@ -39,6 +40,8 @@ export interface ViewModel {
   persistent: boolean;
   clinical: ClinicalData | null;
   clinicalError: string;
+  exercise: ExerciseData | null;
+  exerciseError: string;
   guided: boolean;
   tourStep: number;
   nextEvent?: Scenario['milestones'][number];

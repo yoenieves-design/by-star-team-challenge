@@ -22,6 +22,7 @@ export interface WorkItem {
   task?: Task;
   condition?: AlertCondition;
   clinical?: boolean;
+  exercise?: boolean;
   requiredReviewerId?: string;
 }
 

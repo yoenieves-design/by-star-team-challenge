@@ -18,6 +18,7 @@ if ( ! function_exists( 'by_star_demo_config' ) ) {
             'paths'      => array(
                 'health'   => 'mission-health/health',
                 'assist'   => 'mission-health/assist',
+                'exercise' => 'mission-health/exercise',
                 'profiles' => 'mission-health/profiles',
             ),
         );
