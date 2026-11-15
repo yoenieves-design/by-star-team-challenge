@@ -1,6 +1,6 @@
 # BY STAR · Project submission material
 
-This document provides English text for the project submission and a short demonstration script. The description reflects the implemented browser prototype. Complete the team-specific fields at the end before publishing.
+This document provides English text for the project submission and an extended walkthrough. The description reflects the implemented browser prototype. Complete the team-specific fields at the end before publishing. The required Project Demo is a separate video of no more than 30 seconds or a deck of no more than seven slides, including title and introduction. Use the [presentation outline](PRESENTATION-OUTLINE.md) and [verified submission checklist](SUBMISSION-GUIDE.md).
 
 ## Project title
 
@@ -9,6 +9,21 @@ BY STAR — Mission Health
 ## Short summary
 
 BY STAR helps astronauts understand health observations and record the next action when support from Earth is limited. Its interactive lunar-mission demo combines personal sensors, breathing-environment readings, exercise equipment, clinical reports and crew self-reports. Each observation retains its source, timing and quality. Guided reviews, explicit outcomes and acknowledged handoffs keep unresolved work visible. NASA evidence informs the design, while clearly labeled synthetic data makes the scenarios reproducible and safe to explore publicly.
+
+## Portal field map
+
+These field names are visible on page 3 of the supplied November 13, 2026 Project Submission Guide. Their detailed instructions were collapsed in the supplied capture, so verify character limits and required-field markers in the actual portal.
+
+| Portal field | Material to use |
+| --- | --- |
+| Project Name | BY STAR - Mission Health. |
+| High-Level Project Summary | The short summary above, adapted to the portal's limit. |
+| Link to Project Demo | **Pending:** a public link to the final video of at most 30 seconds OR deck of at most seven slides. The live application does not replace this required presentation. |
+| Link to Final Project | https://by-star-team-challenge.pages.dev/ ; include the source repository in the description and references. |
+| Detailed Project Description | The description, distinctive features, implementation and limitations below. |
+| Use of Super Intelligence (SI) | The development-assistance disclosure below; follow the portal's expanded instructions. |
+| NASA Data | The NASA dataset paragraph and source table below. Distinguish historical reference data from simulated telemetry. |
+| Space Agency Partner Data and Other References | The external-resource list below, plus the NASA and asset credits where requested. |
 
 ## Detailed project description
 
@@ -82,6 +97,31 @@ The app is written in TypeScript, uses Lit templates for rendering, Vite for bui
 
 The interface provides keyboard navigation, visible focus, text and icons alongside color, readable labels with units, chart tables, a responsive layout and a simplified presentation. Automated accessibility tests support verification, but do not establish universal usability or formal certification. Voice uses the browser’s optional Web Speech API and may depend on the vendor’s internet service. Every supported voice action has an on-screen control.
 
+## Use of Super Intelligence (SI)
+
+The heading follows the visible portal field name. This is a factual disclosure draft, not a substitute for its expanded instructions.
+
+OpenAI Codex was used as an AI coding assistant during development. It assisted with background research, interface and architecture proposals, source-code generation and revision, deterministic synthetic data generators, test development, debugging, documentation and submission drafts. The project owner directed the product scope, requested and reviewed changes to the demo, and configured its public hosting. Automated unit, browser and accessibility checks were run against the implementation. These checks do not establish clinical validity.
+
+The fictional crew, mission, measurements, clinical reports and exercise scenario are illustrative fixtures, not observed astronaut data. The historical NASA RadLab values are preserved separately with their provenance. Scientific claims are supported by the cited primary sources, not by AI output. The deployed app uses deterministic rules and replay; it does not call a generative AI model to diagnose a crew member or produce treatment recommendations.
+
+## Space Agency Partner Data and Other References
+
+No separate Space Agency Partner dataset is bundled in this release. The NASA dataset and design references are listed above. Other resources used include:
+
+- [OpenAI Codex](https://openai.com/codex/): development assistance described above.
+- [Inter Variable](https://fontsource.org/fonts/inter): interface font, SIL Open Font License 1.1.
+- [Lit / lit-html](https://lit.dev/): interface rendering, BSD 3-Clause License.
+- [Ajv](https://ajv.js.org/) and [fast-deep-equal](https://github.com/epoberezkin/fast-deep-equal): JSON validation runtime and helper, MIT licenses.
+- [TypeScript](https://www.typescriptlang.org/): source language and type checking, Apache 2.0.
+- [Vite](https://vite.dev/): development and build tooling, MIT.
+- [Playwright](https://playwright.dev/): browser workflow tests, Apache 2.0.
+- [axe-core](https://github.com/dequelabs/axe-core) and its [Playwright integration](https://github.com/dequelabs/axe-core-npm): automated accessibility checks, MPL 2.0.
+- [Cloudflare Pages](https://developers.cloudflare.com/pages/): public static hosting, connected to the [GitHub source repository](https://github.com/yoenieves-design/by-star-team-challenge).
+- [NASA Scientific Visualization Studio, The Moon's Far Side](https://svs.gsfc.nasa.gov/11747/): packaged lunar image, credited separately from original code.
+
+Copy the applicable sources into the portal's reference fields. Open-source and freely available resources still need attribution. Exact installed versions are in `package-lock.json`; distributed notices and credits are in [THIRD-PARTY-NOTICES.md](../THIRD-PARTY-NOTICES.md).
+
 ## Intended users and future deployment
 
 The primary intended user is a crew member reviewing a change or completing a mission health routine. The crew medical officer can inspect source evidence, review clinical reports and acknowledge assigned follow-up. Mission planners would configure authorized equipment, routines and procedures before flight.
@@ -94,13 +134,15 @@ The demo implements interactive monitoring, source-quality checks, context-aware
 
 All crew identities and medical values are fictional. Profile selection demonstrates roles without authenticating a user. The app has no autonomous diagnosis, prescription, clinical clearance, personal radiation-dose assessment, infection model, live hardware connection or external message delivery. Blood and stool tests are not implemented. The cycle excerpt does not change machine settings or automatically adjust training. A simulated link outage illustrates workflow behavior; it does not demonstrate a fully offline web application.
 
-OpenAI Codex assisted with coding, documentation drafting and automated test development. AI-produced material is not used as scientific evidence; the project cites the relevant primary sources separately.
+Development assistance is disclosed in **Use of Super Intelligence (SI)** above. The team must review the final text and the portal's declarations before submitting.
 
 The original project code is released under the [MIT License](../LICENSE). NASA materials, the Inter font and bundled dependencies retain their applicable attribution and licensing terms, documented in [third-party notices](../THIRD-PARTY-NOTICES.md).
 
 The [data behavior and repository audit](DATA-AND-SECURITY.md) explains bundled public data, local browser storage, exports and the scope of the credential review.
 
-## Suggested demonstration script
+## Extended walkthrough for the live app
+
+This sequence is supplemental guidance for exploring the app. It is longer than the required short Project Demo. Use the [seven-slide outline or concise narration](PRESENTATION-OUTLINE.md) for that separate deliverable.
 
 1. **Opening:** “BY STAR helps a crew member understand whether a reading is usable, what context it belongs to, and what follow-up remains.” Open Health and select Maya.
 2. **Verify the evidence:** Inspect the wrist sample’s time and source. Show the separate breathing environment and open the cabin incident in Assist.
@@ -109,7 +151,7 @@ The [data behavior and repository audit](DATA-AND-SECURITY.md) explains bundled 
 5. **Exercise continuity:** Open Exercise and Yoe’s session. Show machine W/rpm beside chest bpm, the data gap and the dated mass record. Save or inspect a workout record and its source coverage.
 6. **Close:** Open the historical NASA sample and explain that these real ISS records are separate from the synthetic mission. Show the guide or a JSON export as time allows.
 
-Use the current submission portal’s time and format limits when recording a presentation. The complete [walkthrough](ROADMAP.md) can also be followed without a video.
+The required Project Demo is a video of at most 30 seconds or a deck of at most seven slides, including title and introduction. The complete [walkthrough](ROADMAP.md) can also be followed separately without a video.
 
 ## Links and team fields to complete
 
@@ -121,8 +163,8 @@ Use the current submission portal’s time and format limits when recording a pr
 | Team name | by-star |
 | Registered challenge and project page | **Copy the exact title and URL from the submission portal.** |
 | Team members and contributions | **Enter the actual participants and their contributions.** |
-| Local event / location | **Enter the registered event information, if requested.** |
-| Presentation or video | **Add the final public link, if required.** |
+| Local event / location | Local Event participation confirmed by the project owner. **Enter the actual registered event and its time zone; neither has been supplied here.** |
+| Project Demo | **Required and still pending:** public link to the final video of at most 30 seconds OR deck of at most seven slides. |
 | Original code license | MIT; see the [LICENSE](../LICENSE) and [third-party notices](../THIRD-PARTY-NOTICES.md). |
 
 The team-specific fields marked above are intentionally incomplete. They are not claims about participants, competition eligibility, submission status or a deadline. No project submission has been made by preparing this document. Follow the [submission checklist](SUBMISSION-GUIDE.md) for verified organizer instructions and the remaining rules to check in the current official guides.
