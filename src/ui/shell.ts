@@ -56,8 +56,7 @@ export function shell(vm: ViewModel) {
         ${vm.state.error ? html`<p class="bs-error-note" role="alert">${vm.state.error}</p>` : ''}
         ${!vm.persistent ? html`<p class="bs-warning-note">${icon('info', 18)} Browser storage is unavailable. Progress will reset on navigation.</p>` : ''}
         ${views[vm.page](vm)}
-        <footer class="bs-footer"><span>BY STAR · Fictional mission simulation</span>
-          <span>Moon imagery: NASA Scientific Visualization Studio</span></footer>
+        <footer class="bs-footer">BY STAR · Fictional mission simulation</footer>
       </div>
     </div>
   </div>`;

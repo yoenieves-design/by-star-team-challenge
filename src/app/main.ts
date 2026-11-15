@@ -68,7 +68,7 @@ async function mount(root: HTMLElement) {
   }
 
   function focus(selector: string) {
-    root.querySelector<HTMLElement>(selector)?.focus({ preventScroll: true });
+    root.querySelector<HTMLElement>(selector)?.focus();
   }
 
   async function update(change: (current: Session, now: number) => Session, notice: string, onSave?: () => void) {
@@ -106,10 +106,10 @@ async function mount(root: HTMLElement) {
     );
   }
 
-  async function selectCrew(crewId: string) {
+  async function selectCrew(crewId: string, onSave?: () => void) {
     if (!mission.crew.some(member => member.id === crewId)) return;
     stopSpeech();
-    await update(current => ({ ...current, crewId }), 'Active crew member updated.');
+    await update(current => ({ ...current, crewId }), 'Active crew member updated.', onSave);
   }
 
   root.addEventListener('click', async event => {
@@ -139,12 +139,22 @@ async function mount(root: HTMLElement) {
       case 'select-crew':
         await selectCrew(button.dataset.crew ?? '');
         break;
+      case 'open-crew-profile':
+        await selectCrew(button.dataset.crew ?? '', () => {
+          state.profileTab = 'crew';
+          requestAnimationFrame(() => focus('#bs-profile-name'));
+        });
+        break;
       case 'health-mode':
         state.healthMode = button.dataset.mode === 'personal' ? 'personal' : 'crew';
         paint(true);
         break;
       case 'profile-tab':
-        state.profileTab = button.dataset.tab === 'mission' || button.dataset.tab === 'evidence' ? button.dataset.tab : 'crew';
+        if (button.dataset.tab === 'overview' || button.dataset.tab === 'mission' || button.dataset.tab === 'evidence') {
+          state.profileTab = button.dataset.tab;
+        } else {
+          state.profileTab = 'crew';
+        }
         paint(true);
         break;
       case 'simple':
@@ -183,7 +193,7 @@ async function mount(root: HTMLElement) {
         const step = Number(button.dataset.step);
         const total = view.work.find(item => item.id === targetId)?.procedure.steps.length;
         const isFinal = step + 1 === total;
-        await record({ type: 'step', targetId, step }, isFinal ? 'Follow-up complete.' : 'Step recorded.', isFinal ? '#bs-work-title' : '#bs-step-title');
+        await record({ type: 'step', targetId, step }, isFinal ? '' : 'Step recorded.', isFinal ? '#bs-work-complete' : '#bs-step-title');
         break;
       }
       case 'request-support':

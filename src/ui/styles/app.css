@@ -214,8 +214,6 @@
 }
 .bs-app .bs-tag[data-tone="green"] { color: #234f40; background: #e7f1e5; }
 .bs-app .bs-tag[data-tone="amber"] { color: #6b410b; background: #f8eacb; }
-.bs-app .bs-tag[data-tone="hero"] { background: #293f36; color: #e1efe3; border: 1px solid #456154; }
-.bs-app .bs-tag[data-tone="hero-alert"] { background: #48361f; color: #ffe4b2; border: 1px solid #8b6c40; }
 .bs-app .bs-avatar {
   flex: none;
   width: 40px;
@@ -236,30 +234,14 @@
 .bs-app .bs-avatar[data-tone="sage"] { color: #375247; background: #e5ede6; }
 .bs-app .bs-avatar-large { width: 60px; height: 60px; font-size: 1.16em; }
 
-.bs-app .bs-hero {
-  position: relative;
-  overflow: hidden;
-  border-radius: 16px;
-  padding: 24px 28px;
-  min-height: 197px;
-  background: #162b22;
-  color: #fff;
-  isolation: isolate;
+.bs-app .bs-health-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px 16px;
 }
-.bs-app .bs-hero-image {
-  display: block;
-  position: absolute;
-  z-index: -1;
-  right: 0;
-  top: 0;
-  width: 61%;
-  height: 100%;
-  object-fit: cover;
-  object-position: center 52%;
-  filter: saturate(.38) brightness(.84);
-  mask-image: linear-gradient(90deg, transparent 5%, #000 56%);
-}
-.bs-app .bs-hero-text { position: relative; max-width: 69%; }
+.bs-app .bs-health-heading h1 { margin-top: 3px; font-size: clamp(2rem, 3vw, 2.45rem); }
 .bs-app .bs-overline {
   display: flex;
   align-items: center;
@@ -270,10 +252,6 @@
   letter-spacing: .075em;
   text-transform: uppercase;
 }
-.bs-app .bs-hero .bs-overline { color: #cbebd3; }
-.bs-app .bs-hero h1 { margin: 7px 0 6px; line-height: 1.05; }
-.bs-app .bs-hero-text > p:not(.bs-overline) { color: #e2eee5; }
-.bs-app .bs-hero-links { display: flex; align-items: center; flex-wrap: wrap; gap: 7px; margin-top: 15px; }
 
 .bs-app .bs-replay {
   display: grid;
@@ -499,6 +477,7 @@
 .bs-app .bs-step-counter progress { width: 96px; }
 .bs-app .bs-step > p { margin: 7px 0 12px; }
 .bs-app .bs-handoff { margin-top: 17px; }
+.bs-app .bs-step .bs-handoff { margin: 10px 0 15px; }
 .bs-app .bs-handoff h3 { margin-bottom: 8px; }
 .bs-app .bs-handoff p { color: var(--bs-muted); font-size: .87em; margin-top: 5px; }
 .bs-app .bs-handoff .bs-inline-label { flex-wrap: wrap; font-size: .88em; font-weight: 600; }
@@ -509,7 +488,7 @@
   background: var(--bs-warning);
   color: var(--bs-amber);
 }
-.bs-app .bs-positive-note { color: #2e5643; background: #e8f2e8; }
+.bs-app .bs-positive-note { color: #2e5643; background: #e8f2e8; justify-content: space-between; }
 .bs-app .bs-error-note { color: #781f29; background: #fff0f0; }
 .bs-app .bs-details { margin-top: 8px; color: var(--bs-muted); }
 .bs-app .bs-details summary { color: var(--bs-brand-dark); font-weight: 650; min-height: 32px; padding: 6px 2px; }
@@ -529,6 +508,53 @@
 .bs-app .bs-profile-card > p { color: var(--bs-muted); margin: 6px 0 10px; }
 .bs-app .bs-profile-identity { display: flex; align-items: center; gap: 13px; }
 .bs-app .bs-profile-identity p { color: var(--bs-muted); }
+.bs-app .bs-profile-telemetry, .bs-app .bs-crew-telemetry-grid {
+  --bs-signal-current: #357361;
+  --bs-signal-stale: #a57033;
+  --bs-signal-degraded: #a54d35;
+  --bs-signal-unavailable: #a6b1ab;
+}
+.bs-app .bs-crew-telemetry-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr)); gap: 14px; }
+.bs-app .bs-crew-telemetry-card { min-width: 0; display: flex; flex-direction: column; gap: 10px; }
+.bs-app .bs-crew-telemetry-card > .bs-button { align-self: start; margin-top: auto; }
+.bs-app .bs-crew-signal { display: flex; align-items: center; gap: 16px; }
+.bs-app .bs-crew-signal p { color: var(--bs-muted); font-size: .85em; }
+.bs-app .bs-crew-signal .bs-tag { margin-top: 5px; }
+.bs-app .bs-profile-telemetry { display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: center; gap: clamp(12px, 3vw, 30px); }
+.bs-app .bs-telemetry-ring {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 80px;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: conic-gradient(var(--bs-ring-segments));
+}
+.bs-app .bs-telemetry-ring > span {
+  display: grid;
+  place-content: center;
+  width: 83%;
+  aspect-ratio: 1;
+  background: #fff;
+  border-radius: 50%;
+  text-align: center;
+  line-height: 1.2;
+}
+.bs-app .bs-telemetry-ring strong { font-size: 1.18em; font-variant-numeric: tabular-nums; }
+.bs-app .bs-telemetry-ring small { color: var(--bs-muted); font-size: .7em; }
+.bs-app .bs-profile-telemetry .bs-telemetry-ring { width: clamp(88px, 12vw, 122px); }
+.bs-app .bs-telemetry-readings { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 14px; margin: 0; }
+.bs-app .bs-telemetry-readings > div { padding: 6px 0; border-bottom: 1px solid #e6ece4; }
+.bs-app .bs-telemetry-readings dt { display: flex; align-items: center; gap: 6px; color: var(--bs-muted); font-size: .84em; }
+.bs-app .bs-telemetry-readings dd { margin: 2px 0 0; font-size: .9em; font-weight: 650; overflow-wrap: anywhere; }
+.bs-app .bs-telemetry-readings dd small { display: block; color: var(--bs-muted); font-size: .77em; font-weight: 400; }
+.bs-app .bs-telemetry-compact { grid-template-columns: 1fr; }
+.bs-app .bs-telemetry-compact > div { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+.bs-app .bs-telemetry-compact dd { text-align: right; font-size: .81em; }
+.bs-app .bs-signal-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--bs-signal-unavailable); flex: none; }
+.bs-app .bs-signal-dot[data-status="fresh"] { background: var(--bs-signal-current); }
+.bs-app .bs-signal-dot[data-status="stale"] { background: var(--bs-signal-stale); }
+.bs-app .bs-signal-dot[data-status="degraded"] { background: var(--bs-signal-degraded); }
 .bs-app .bs-definition-list { margin-top: 13px; }
 .bs-app .bs-definition-list > div { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; padding: 8px 0; border-bottom: 1px solid #e6ece4; }
 .bs-app .bs-definition-list dt { color: var(--bs-muted); font-size: .86em; }
@@ -545,12 +571,10 @@
 .bs-app .bs-source-list li { padding: 10px 0; border-top: 1px solid #e6ece4; }
 .bs-app .bs-source-list p { color: var(--bs-muted); font-size: .86em; margin-top: 5px; }
 .bs-app .bs-source-list a { font-weight: 620; }
-.bs-app .bs-footer { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px; margin-top: 24px; color: var(--bs-muted); font-size: .73em; }
+.bs-app .bs-footer { margin-top: 24px; color: var(--bs-muted); font-size: .73em; }
 .bs-app .bs-load { min-height: 280px; padding: 24px; display: grid; gap: 9px; place-content: center; justify-items: center; text-align: center; }
 
 .bs-app .bs-simple { font-size: 1.13em; }
-.bs-app .bs-simple .bs-hero-image { display: none; }
-.bs-app .bs-simple .bs-hero-text { max-width: 100%; }
 .bs-app .bs-simple .bs-dashboard-grid { grid-template-columns: 1fr; }
 .bs-app .bs-simple .bs-button { min-height: 48px; }
 
@@ -598,9 +622,6 @@
   .bs-app .bs-topbar .bs-simple-toggle { padding-inline: 6px; min-width: 44px; }
   .bs-app .bs-crew-menu .bs-avatar { display: none; }
   .bs-app .bs-content { padding: 12px 12px 16px; }
-  .bs-app .bs-hero { padding: 17px; min-height: 175px; }
-  .bs-app .bs-hero-text { max-width: 100%; }
-  .bs-app .bs-hero-image { width: 100%; opacity: .42; mask-image: linear-gradient(90deg, transparent, #000 90%); }
   .bs-app .bs-replay { grid-template-columns: minmax(0, 1fr); }
   .bs-app .bs-replay-actions { grid-row: 3; }
   .bs-app .bs-incident { grid-template-columns: 36px minmax(0, 1fr); padding: 11px; }
@@ -610,6 +631,7 @@
   .bs-app .bs-crew-card-top { flex-wrap: wrap; gap: 5px; }
   .bs-app .bs-crew-card-top .bs-avatar { width: 32px; height: 32px; }
   .bs-app .bs-card, .bs-app .bs-assist-work, .bs-app .bs-profile-card { padding: 12px; }
+  .bs-app .bs-profile-telemetry { grid-template-columns: 1fr; }
   .bs-app .bs-person-heading > .bs-tag { margin-left: 0; }
   .bs-app .bs-chart-svg text { font-size: 18px; }
 }

@@ -14,7 +14,7 @@ export const concerns = [
 
 export interface ViewState {
   healthMode: 'crew' | 'personal';
-  profileTab: 'crew' | 'mission' | 'evidence';
+  profileTab: 'overview' | 'crew' | 'mission' | 'evidence';
   trendMetric: Metric;
   trendWindow: 'recent' | 'full';
   workId: string | null;

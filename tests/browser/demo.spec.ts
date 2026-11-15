@@ -20,6 +20,7 @@ test('The lunar replay changes context, distinguishes stale data and preserves a
   page.on('pageerror', error => errors.push(error.message));
   await page.goto('/');
   await expect(page.getByRole('heading', { name: 'Crew health', exact: true })).toBeVisible();
+  await expect(page.getByRole('navigation').getByRole('link', { name: 'Health' })).toHaveAttribute('aria-current', 'page');
   await expect(page.getByText('Loading BY STAR. JavaScript is required.')).toHaveCount(0);
   await expect(page.getByRole('button', { name: /Alex Morgan EVA team lead/ })).toHaveAttribute('aria-pressed', 'true');
   await expect(page.locator('.bs-crew-card')).toHaveCount(6);
@@ -28,7 +29,7 @@ test('The lunar replay changes context, distinguishes stale data and preserves a
   await expect(page.getByRole('heading', { name: 'Assist', exact: true })).toBeVisible();
   await page.getByText('Evidence and timing').click();
   await expect(page.getByText('Observations attached when the alert opened')).toBeVisible();
-  await expect(page.getByText(/Dizziness reported after return/)).toBeVisible();
+  await expect(page.getByText(/Other reports from this zone.*Dizziness reported after return/)).toBeVisible();
   await page.getByRole('button', { name: 'Acknowledge alert' }).click();
   await page.getByRole('button', { name: 'Start guided check' }).click();
   await page.getByRole('button', { name: 'Done · next step' }).click();
@@ -82,6 +83,40 @@ test('Keyboard path, narrow layout and simplified mode keep controls usable', as
   await expect(page.getByRole('heading', { name: 'Crew concern reported' })).toBeVisible();
   await expect(page.getByRole('button', { name: 'Simplified view' })).toHaveAttribute('aria-pressed', 'true');
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(390);
+
+  await page.getByRole('navigation').getByRole('link', { name: 'Health' }).click();
+  const alerts = page.getByRole('region', { name: 'Alerts & follow-up' });
+  const report = alerts.getByRole('link', { name: /Vision or balance concern/ });
+  await expect(report).toContainText('Alex Morgan');
+  await expect(report).toContainText('New');
+  await report.click();
+  await page.getByRole('button', { name: 'Start guided check' }).click();
+  await page.getByRole('button', { name: 'Done · next step' }).click();
+  await page.getByRole('button', { name: 'Done · next step' }).click();
+  await expect(page.getByRole('heading', { name: 'Arrange follow-up' })).toBeVisible();
+  await expect(page.getByLabel('Assigned crew member', { exact: true })).toHaveValue('');
+  await page.getByRole('button', { name: 'Complete follow-up' }).click();
+  await expect(page.getByText('Follow-up recorded as complete.')).toBeFocused();
+  await page.getByRole('link', { name: 'Back to Health' }).click();
+  await expect(report.getByText('Complete', { exact: true })).toBeVisible();
+  await page.reload();
+  await expect(report.getByText('Complete', { exact: true })).toBeVisible();
+  await expect(alerts.getByRole('link', { name: /Cabin CO₂ change needs review/ })).toContainText('New');
+});
+
+test('Profiles shows all six crew and opens the selected telemetry snapshot', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto('/?page=profiles');
+  await page.getByRole('button', { name: 'Crew overview' }).click();
+  await expect(page.getByRole('article')).toHaveCount(6);
+  const maya = page.getByRole('article', { name: 'Maya Torres' });
+  await expect(maya.getByText('Reading out of date').first()).toBeVisible();
+  await expect(maya.getByText('3/6', { exact: true })).toBeVisible();
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(390);
+  await maya.getByRole('button', { name: 'View profile for Maya Torres' }).click();
+  await expect(page.getByRole('heading', { name: 'Maya Torres' })).toBeFocused();
+  await expect(page.getByRole('heading', { name: 'Telemetry snapshot' })).toBeVisible();
+  await expect(page.getByText('3/6', { exact: true })).toBeVisible();
 });
 
 test('Core routes pass automated accessibility checks', async ({ page }) => {
@@ -91,6 +126,9 @@ test('Core routes pass automated accessibility checks', async ({ page }) => {
     const result = await new AxeBuilder({ page }).include('.bs-app').withTags(['wcag2a', 'wcag2aa', 'wcag21aa', 'wcag22aa']).analyze();
     expect(result.violations.map(violation => ({ id: violation.id, nodes: violation.nodes.map(node => node.target) }))).toEqual([]);
   }
+  await page.getByRole('button', { name: 'Crew overview' }).click();
+  const overview = await new AxeBuilder({ page }).include('.bs-app').withTags(['wcag2a', 'wcag2aa', 'wcag21aa', 'wcag22aa']).analyze();
+  expect(overview.violations.map(violation => violation.id)).toEqual([]);
 });
 
 test('A running replay advances and keeps its paused position after navigation', async ({ page }) => {

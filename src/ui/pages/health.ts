@@ -3,26 +3,24 @@ import { repeat } from 'lit-html/directives/repeat.js';
 import { latestReading, metrics } from '../../domain/metrics.ts';
 import type { Metric, Subject } from '../../domain/types.ts';
 import { canSpeak } from '../../adapters/voice.ts';
+import type { WorkItem } from '../../services/follow-up.ts';
 import { alertLabels, avatar, measurementDetail, measurementValue, readingTag, tag, workTag } from '../components/common.ts';
 import { icon, type Icon } from '../components/icons.ts';
 import { trendChart } from '../components/trend-chart.ts';
-import { clock, currentPerson, elapsed, zoneName, type ViewModel } from '../view-model.ts';
+import { clock, currentPerson, elapsed, personName, zoneName, type ViewModel } from '../view-model.ts';
 
-function hero(vm: ViewModel) {
+function healthHeading(vm: ViewModel) {
   const { mission, snapshot } = vm;
-  const places = new Set(Object.values(snapshot.context).map(context => context.zoneId)).size;
-  return html`<section class="bs-hero" aria-labelledby="bs-health-title">
-    <img class="bs-hero-image" src=${vm.asset('media/lunar-far-side.jpg')} alt="" width="1280" height="720">
-    <div class="bs-hero-text">
-      <p class="bs-overline">${icon('moon', 16)} ${mission.code} <span aria-hidden="true">/</span> ${mission.location}</p>
-      <h1 id="bs-health-title">Crew health</h1>
-      <p>${mission.crew.length} crew members across ${places} mission locations.</p>
-      <div class="bs-hero-links">
-        ${tag(snapshot.links.local ? 'Local link available' : 'Local link interrupted', snapshot.links.local ? 'hero' : 'hero-alert', 'signal')}
-        ${tag(snapshot.links.earth ? 'Earth relay available' : 'Earth relay unavailable', snapshot.links.earth ? 'hero' : 'hero-alert', 'link')}
-      </div>
+  return html`<div class="bs-health-heading">
+    <div>
+      <p class="bs-overline">${icon('moon', 16)} Day ${mission.missionDay} · ${mission.location}</p>
+      <h1>Crew health</h1>
     </div>
-  </section>`;
+    <div class="bs-inline bs-wrap">
+      ${tag(snapshot.links.local ? 'Local link available' : 'Local link interrupted', snapshot.links.local ? 'green' : 'amber', 'signal')}
+      ${tag(snapshot.links.earth ? 'Earth relay available' : 'Earth relay unavailable', snapshot.links.earth ? 'green' : 'amber', 'link')}
+    </div>
+  </div>`;
 }
 
 function replayControls(vm: ViewModel) {
@@ -138,18 +136,36 @@ function nextTask(vm: ViewModel) {
   </section>`;
 }
 
+function alertsList(vm: ViewModel, alerts: WorkItem[], openCount: number) {
+  return html`<section class="bs-card bs-alert-list" aria-labelledby="bs-alerts-title">
+    <div class="bs-card-heading"><div><h2 id="bs-alerts-title">Alerts &amp; follow-up</h2>
+      <p>${openCount} open · ${alerts.length - openCount} completed</p></div></div>
+    ${alerts.length ? repeat(alerts, item => item.id, item => {
+      const alert = item.alert!;
+      const concern = alert.kind === 'concern';
+      const context = concern ? personName(vm, item.crewIds[0]) : alertLabels[alert.kind];
+      return html`<a href=${vm.href('assist', item.id)} class="bs-alert-row">
+        ${icon(alert.kind === 'sensor' ? 'sensor' : alert.kind === 'environment' ? 'wind' : 'assist', 18)}
+        <span><strong>${concern ? item.detail : item.title}</strong><small>${context} · ${clock(vm.mission, alert.atS)} UTC</small></span>
+        ${workTag(item.progress.status)}
+      </a>`;
+    }) : html`<p>No alerts have been recorded for this view.</p>`}
+  </section>`;
+}
+
 export function healthPage(vm: ViewModel) {
   const person = currentPerson(vm);
   const context = vm.snapshot.context[person.id];
   const personal = vm.state.healthMode === 'personal';
-  const related = vm.work.filter(item => item.alert && (!personal || item.crewIds.includes(person.id)));
+  const related = vm.work.filter(item => item.alert && (!personal || item.crewIds.includes(person.id)))
+    .sort((a, b) => Number(a.progress.status === 'complete') - Number(b.progress.status === 'complete')
+      || b.alert!.atS - a.alert!.atS);
   const open = related.filter(item => item.progress.status !== 'complete');
   const lead = open.find(item => item.alert?.kind === 'environment') ?? open[0];
   const pulse = latestReading(vm.snapshot, vm.mission.devices, { type: 'crew', id: person.id }, 'heart_rate');
 
   return html`
-    ${hero(vm)}
-    ${replayControls(vm)}
+    ${healthHeading(vm)}
     ${lead ? html`<section class="bs-incident" aria-labelledby="bs-incident-title">
       <span class="bs-incident-icon">${icon('warning', 23)}</span>
       <div>
@@ -157,8 +173,11 @@ export function healthPage(vm: ViewModel) {
         <h2 id="bs-incident-title">${lead.title}</h2>
         <p>${lead.detail}</p>
       </div>
-      <a class="bs-button bs-button-warning" href=${vm.href('assist', lead.id)}>Review incident ${icon('arrow', 16)}</a>
+      <a class="bs-button bs-button-warning" href=${vm.href('assist', lead.id)}>
+        ${lead.progress.status === 'in-progress' || lead.progress.status === 'paused' ? 'Continue review' : 'Review incident'} ${icon('arrow', 16)}
+      </a>
     </section>` : ''}
+    ${replayControls(vm)}
     <div class="bs-section-heading bs-wrap">
       <div><h2>${personal ? 'My health' : 'Crew overview'}</h2><p>${personal ? 'Current readings and follow-up for ' + person.name + '.' : 'Select a crew member to view their readings and surroundings.'}</p></div>
       <div class="bs-segments" role="group" aria-label="Health view">
@@ -178,17 +197,9 @@ export function healthPage(vm: ViewModel) {
         ${vm.session.simple ? '' : trendChart(vm, person.id, context.breathingZoneId)}
       </div>
       <div class="bs-column">
+        ${alertsList(vm, related, open.length)}
         ${environment(vm, context.breathingZoneId)}
         ${nextTask(vm)}
-        <section class="bs-card bs-alert-list" aria-labelledby="bs-alerts-title">
-          <div class="bs-card-heading"><div><h2 id="bs-alerts-title">Alerts &amp; follow-up</h2>
-            <p>${open.length} open · ${related.length - open.length} completed</p></div></div>
-          ${related.length ? repeat(related, item => item.id, item => html`<a href=${vm.href('assist', item.id)} class="bs-alert-row">
-            ${icon(item.alert!.kind === 'sensor' ? 'sensor' : item.alert!.kind === 'environment' ? 'wind' : 'assist', 18)}
-            <span><strong>${item.title}</strong><small>${alertLabels[item.alert!.kind]} · ${clock(vm.mission, item.alert!.atS)} UTC</small></span>
-            ${icon('chevron', 16)}
-          </a>`) : html`<p>No alerts have been recorded for this view.</p>`}
-        </section>
       </div>
     </div>
   `;

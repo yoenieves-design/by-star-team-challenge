@@ -72,7 +72,7 @@
       "steps": [
         { "title": "Review the report", "instruction": "Confirm the crew member, time and stated concern." },
         { "title": "Review recent context", "instruction": "Look at the available personal readings, activity and breathing environment. Flag any missing information." },
-        { "title": "Arrange follow-up", "instruction": "Assign a reviewer or use Request support. Record this review so the next crew member can pick it up." }
+        { "title": "Arrange follow-up", "instruction": "Record the review when the information is ready. You can assign a reviewer and request support if needed." }
       ]
     },
     {

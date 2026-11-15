@@ -34,8 +34,8 @@ function queue(vm: ViewModel, selected: WorkItem | undefined) {
     ${groups.map(({ work, label }) => html`<h3>${label}</h3>
       ${work.length ? repeat(work, item => item.id, item => html`<button type="button" class="bs-queue-item" data-action="select-work"
         data-work=${item.id} aria-pressed=${selected?.id === item.id && !vm.state.reportOpen} ?disabled=${vm.state.saving}>
-        <span><strong>${item.title}</strong>
-          <small>${item.alert?.zoneId ? zoneName(vm, item.alert.zoneId) : item.crewIds.map(id => personName(vm, id)).join(', ')}</small>
+        <span><strong>${item.alert?.kind === 'concern' ? item.detail : item.title}</strong>
+          <small>${item.alert?.zoneId && item.alert.kind !== 'concern' ? zoneName(vm, item.alert.zoneId) : item.crewIds.map(id => personName(vm, id)).join(', ')}</small>
         </span>${workTag(item.progress.status)}
       </button>`) : html`<p class="bs-muted">No items in this view.</p>`}`)}
   </aside>`;
@@ -106,7 +106,9 @@ function procedure(vm: ViewModel, item: WorkItem) {
   const missing = guide.requiredEquipment.filter(tool => !zone.equipment.includes(tool));
   const active = progress.status === 'in-progress' || progress.status === 'paused';
   const started = active || progress.status === 'complete';
+  const finalStep = progress.step + 1 === guide.steps.length;
   const assignFirst = !!step?.requiresAssignee && !progress.assigneeId;
+  const handoffInStep = active && !!step && (progress.status === 'paused' || step.requiresAssignee || (finalStep && !!item.alert));
 
   return html`<section class="bs-card bs-assist-work" aria-labelledby="bs-work-title">
     <div class="bs-card-heading">
@@ -121,7 +123,10 @@ function procedure(vm: ViewModel, item: WorkItem) {
       <h3>${guide.title}</h3>
       <p>${guide.purpose}</p>
       ${missing.length ? html`<p class="bs-warning-note">${icon('warning', 17)} Equipment unavailable in ${zone.name}: ${missing.join(', ')}.</p>` : ''}
-      ${progress.status === 'complete' ? html`<p class="bs-positive-note">${icon('check', 18)} Follow-up recorded as complete.</p>` : ''}
+      ${progress.status === 'complete' ? html`<div class="bs-inline bs-wrap bs-positive-note">
+        <p id="bs-work-complete" tabindex="-1">${icon('check', 18)} Follow-up recorded as complete.</p>
+        <a href=${vm.href('health')}>Back to Health</a>
+      </div>` : ''}
       ${!started ? html`<div class="bs-inline bs-wrap">
         <button type="button" class="bs-button bs-button-primary" data-action="open" data-work=${item.id}
           ?disabled=${!item.available || vm.state.saving}>Start guided check ${icon('arrow', 16)}</button>
@@ -133,16 +138,17 @@ function procedure(vm: ViewModel, item: WorkItem) {
           <progress aria-label="Procedure progress" value=${progress.step} max=${guide.steps.length}></progress></div>
         <h4 id="bs-step-title" tabindex="-1">${step.title}</h4>
         <p>${step.instruction}</p>
-        ${assignFirst ? html`<p class="bs-muted">Select an assigned crew member in Crew handoff to continue.</p>` : ''}
+        ${assignFirst ? html`<p class="bs-muted">Choose a crew member to unlock this step.</p>` : ''}
+        ${progress.status === 'paused' ? html`<p class="bs-muted">Progress saved. You can assign support before resuming.</p>` : ''}
+        ${handoffInStep ? handoff(vm, item) : ''}
         <div class="bs-inline bs-wrap">
           ${progress.status === 'paused' ? action(vm, 'resume', 'Resume check', item.id, true) : html`
             <button type="button" class="bs-button bs-button-primary" data-action="step" data-work=${item.id} data-step=${progress.step}
-              ?disabled=${!!missing.length || assignFirst || vm.state.saving}>${progress.step + 1 === guide.steps.length ? 'Complete follow-up' : 'Done · next step'} ${icon('arrow', 16)}</button>
+              ?disabled=${!!missing.length || assignFirst || vm.state.saving}>${finalStep ? 'Complete follow-up' : 'Done · next step'} ${icon(finalStep ? 'check' : 'arrow', 16)}</button>
             ${action(vm, 'pause', 'I can’t do this now', item.id)}`}
           ${canSpeak() ? html`<button type="button" class="bs-button bs-button-plain" data-action="listen" data-work=${item.id}>${icon('volume', 18)} Listen</button>
             <button type="button" class="bs-button bs-button-plain" data-action="stop-reading">Stop audio</button>` : ''}
         </div>
-        ${progress.status === 'paused' ? html`<p class="bs-muted">Progress saved. Use the handoff below to assign support.</p>` : ''}
       </div>` : ''}
       <details class="bs-details"><summary>Procedure sources</summary>
         <ul>${vm.mission.sources.filter(source => guide.sourceIds.includes(source.id)).map(source =>
@@ -150,7 +156,7 @@ function procedure(vm: ViewModel, item: WorkItem) {
         <p>These references inform the demo workflow. The steps above are fictional mission content.</p>
       </details>
     </div>
-    ${handoff(vm, item)}
+    ${handoffInStep ? '' : handoff(vm, item)}
     ${progress.log.length ? html`<details class="bs-details"><summary>Follow-up history</summary>
       <ol class="bs-history">${progress.log.map(event => html`<li><time>${clock(vm.mission, event.atS)} UTC</time>
         <span>${personName(vm, event.actorId)} · ${event.type === 'step' ? 'Step ' + (event.step + 1) + ' recorded'

@@ -1,18 +1,57 @@
 import { html } from 'lit-html';
-import { latestReading, metrics } from '../../domain/metrics.ts';
+import { metrics, stateFor, subjectKey } from '../../domain/metrics.ts';
 import { avatar, readingTag, tag, workTag } from '../components/common.ts';
 import { icon } from '../components/icons.ts';
+import { crewTelemetry, telemetryReadings, telemetryRing } from '../components/telemetry-ring.ts';
 import { clock, currentPerson, personName, zoneName, type ViewModel } from '../view-model.ts';
+
+function crewOverview(vm: ViewModel) {
+  const crew = vm.mission.crew.map(person => ({ person, readings: crewTelemetry(vm, person) }));
+  const fullyCurrent = crew.filter(({ readings }) => readings.every(({ current }) => current.status === 'fresh')).length;
+  const alerts = vm.work.filter(item => item.alert && item.progress.status !== 'complete');
+  return html`<section aria-labelledby="bs-crew-overview">
+    <div class="bs-card-heading bs-wrap">
+      <div><h2 id="bs-crew-overview">Crew overview</h2><p>Personal and breathing environment readings at ${clock(vm.mission, vm.snapshot.atS)} UTC</p></div>
+      <div class="bs-inline bs-wrap">
+        ${tag(fullyCurrent + ' of ' + crew.length + ' crew with all readings current', 'muted', 'sensor')}
+        ${tag(alerts.length + ' open ' + (alerts.length === 1 ? 'alert' : 'alerts'), alerts.length ? 'amber' : 'muted')}
+      </div>
+    </div>
+    <div class="bs-crew-telemetry-grid">
+      ${crew.map(({ person, readings }) => {
+        const context = vm.snapshot.context[person.id];
+        const alertCount = alerts.filter(item => item.crewIds.includes(person.id)).length;
+        return html`<article class="bs-card bs-profile-card bs-crew-telemetry-card" aria-label=${person.name}>
+          <div class="bs-card-heading">
+            <div><h3>${person.name}</h3><p>${person.role}</p></div>
+            ${avatar(person)}
+          </div>
+          <div class="bs-crew-signal">
+            ${telemetryRing(readings)}
+            <div><strong>${zoneName(vm, context.zoneId)}</strong>
+              <p>${context.activity}</p>
+              ${alertCount ? tag(alertCount + ' open ' + (alertCount === 1 ? 'alert' : 'alerts'), 'amber', 'warning') : ''}
+            </div>
+          </div>
+          ${telemetryReadings(vm, readings, true)}
+          <button class="bs-button bs-button-line" data-action="open-crew-profile" data-crew=${person.id}
+            aria-label=${'View profile for ' + person.name} ?disabled=${vm.state.saving}>View profile</button>
+        </article>`;
+      })}
+    </div>
+  </section>`;
+}
 
 function crewProfile(vm: ViewModel) {
   const person = currentPerson(vm);
   const context = vm.snapshot.context[person.id];
+  const readings = crewTelemetry(vm, person);
   const devices = vm.mission.devices.filter(device =>
     (device.subject.type === 'crew' && device.subject.id === person.id)
     || device.assignedCrewId === person.id);
   return html`<div class="bs-profile-grid">
     <section class="bs-card bs-profile-card">
-      <div class="bs-profile-identity">${avatar(person, true)}<div><h2>${person.name}</h2><p>${person.role}</p></div></div>
+      <div class="bs-profile-identity">${avatar(person, true)}<div><h2 id="bs-profile-name" tabindex="-1">${person.name}</h2><p>${person.role}</p></div></div>
       <dl class="bs-definition-list">
         <div><dt>Mission</dt><dd>${vm.mission.code}</dd></div>
         <div><dt>Current location</dt><dd>${zoneName(vm, context.zoneId)}</dd></div>
@@ -29,12 +68,24 @@ function crewProfile(vm: ViewModel) {
       <p>${person.reference.basis}. Used for the illustration of comparable resting observations.</p>
     </section>
     <section class="bs-card bs-profile-card bs-full">
+      <div class="bs-card-heading">
+        <div><h2>Telemetry snapshot</h2><p>Body readings and air in ${zoneName(vm, context.breathingZoneId)} · ${clock(vm.mission, vm.snapshot.atS)} UTC</p></div>
+        <span class="bs-card-icon">${icon('sensor', 22)}</span>
+      </div>
+      <div class="bs-profile-telemetry">${telemetryRing(readings)}${telemetryReadings(vm, readings)}</div>
+    </section>
+    <section class="bs-card bs-profile-card bs-full">
       <div class="bs-card-heading"><div><h2>Assigned equipment</h2><p>Configured sources and latest signal</p></div></div>
       ${devices.map(device => {
-        const current = latestReading(vm.snapshot, vm.mission.devices, device.subject, device.metrics[0]);
+        const statuses = device.metrics.map(metric => stateFor(
+          vm.snapshot.readings.get(subjectKey(device.subject, metric))?.findLast(reading => reading.deviceId === device.id),
+          device, vm.snapshot.atS,
+        ).status);
+        const current = statuses.filter(status => status === 'fresh').length;
         return html`<div class="bs-device-row">${icon('sensor', 22)}
           <div><strong>${device.name}</strong><p>${device.metrics.map(metric => metrics[metric].label).join(' · ')}</p></div>
-          ${readingTag(current.status)}
+          ${statuses.every(status => status === statuses[0])
+            ? readingTag(statuses[0]) : tag(current + ' of ' + statuses.length + ' readings current')}
         </div>`;
       })}
     </section>
@@ -106,14 +157,15 @@ function evidenceProfile(vm: ViewModel) {
 
 export function profilesPage(vm: ViewModel) {
   const active = vm.state.profileTab;
-  const tabs = [{ id: 'crew', label: 'Crew member' }, { id: 'mission', label: 'Mission & schedule' }, { id: 'evidence', label: 'Sources & data' }];
+  const tabs = [{ id: 'overview', label: 'Crew overview' }, { id: 'crew', label: 'Crew member' }, { id: 'mission', label: 'Mission & schedule' }, { id: 'evidence', label: 'Sources & data' }];
+  const pages = { overview: crewOverview, crew: crewProfile, mission: missionProfile, evidence: evidenceProfile };
   return html`<div class="bs-page-heading">
     <p class="bs-overline">${icon('users', 17)} ${vm.mission.code}</p>
-    <h1>Profiles</h1><p>Review crew assignments, mission context and planned health checks.</p>
+    <h1>Profiles</h1><p>Review crew telemetry, assignments and planned health checks.</p>
   </div>
   <div class="bs-segments bs-profile-tabs" role="group" aria-label="Profile sections">
     ${tabs.map(tab => html`<button type="button" data-action="profile-tab" data-tab=${tab.id}
       aria-pressed=${active === tab.id}>${tab.label}</button>`)}
   </div>
-  ${active === 'crew' ? crewProfile(vm) : active === 'mission' ? missionProfile(vm) : evidenceProfile(vm)}`;
+  ${pages[active](vm)}`;
 }
