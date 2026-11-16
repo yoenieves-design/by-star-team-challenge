@@ -42,7 +42,7 @@ The **App guide** is available on every page. Status text and icons accompany co
 | Clinical results | Urine specific gravity, specimen/order IDs, instrument quality, timestamps and revisions | Synthetic post-EVA urinalysis reports for Alex and Maya. |
 | Exercise | Cycle power in W, cadence in rpm, timing, perceived effort, source coverage and heart-rate sample statistics | Dedicated synthetic machine stream and independently identified body observations. |
 | Body mass | Dated mass in kg, instrument, inertial measurement method and reception time | One synthetic measurement; no body-composition estimate is inferred. |
-| Historical radiation reference | 16 absorbed dose-rate measurements in µGy/h from DosTel1 and DosTel2 on the ISS, April 1, 2022 | Real historical [NASA OSDR RadLab sample](public/data/radlab-iss-sample.json), kept separate from the lunar replay and its rules. |
+| Historical radiation reference | 16 absorbed dose-rate measurements in µGy/h from DosTel1 and DosTel2 on the ISS, April 1, 2022 | Real historical data from [NASA OSDR RadLab](https://visualization.osdr.nasa.gov/radlab/gui/data-api/). The [included sample](public/data/radlab-iss-sample.json) preserves the query and original measurements, kept separate from the lunar replay and its rules. |
 
 NASA’s [Earth-Independent Medical Operations concept](https://ntrs.nasa.gov/citations/20250000009) informs the integration of onboard information for crew review. [NASA-STD-3001 crew-interface guidance](https://www.nasa.gov/reference/10-0-crew-interfaces-vol-2/) informs visible data status, units and redundant status cues. These are design references; the prototype has not been certified against a NASA standard.
 

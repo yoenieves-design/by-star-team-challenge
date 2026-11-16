@@ -19,7 +19,7 @@ Page references below refer to these supplied captures. The PDFs are not redistr
 | Event details | The event name, assigned time zone, team/project URL and complete member roster have not been supplied or independently checked. |
 | Working application | Public at [by-star-team-challenge.pages.dev](https://by-star-team-challenge.pages.dev/), deployed from `main`. |
 | Source and documentation | [Public repository](https://github.com/yoenieves-design/by-star-team-challenge), README, project description and source references prepared. The tested application release is tagged `v0.2.0`. |
-| Verification | Type checking, 30 unit tests, 17 browser cases, GitHub verification and Cloudflare deployment passed during release review. See [Verification](VERIFICATION.md). |
+| Verification | Type checking, 30 unit tests, 16 browser cases, GitHub verification and Cloudflare deployment passed after the repository cleanup. See [Verification](VERIFICATION.md). |
 | Licensing | Original code uses the owner-approved MIT license. Third-party materials retain their licenses and credits. MIT is the team's choice, not a license mandated by these captured guides. |
 | Required Project Demo | **Pending:** a public video of at most 30 seconds or a slide presentation of at most seven slides. The live app alone does not replace this required presentation. |
 | Competition submission | **Not verified:** preparing or publishing this repository does not submit the project. The team must complete the portal process and check its confirmation. |
@@ -86,6 +86,8 @@ Project Submission Guide, page 3:
 Judging & Awards Guide, page 2, requires the team to confirm original work, permission to use copyrighted material, and listing **all external resources in the form's References field**, including code, text and images even when open source or freely available. Repository credits alone do not replace completing that portal field.
 
 For BY STAR, use the NASA source explanations in [PROJECT-SUBMISSION.md](PROJECT-SUBMISSION.md), the [third-party notices](../THIRD-PARTY-NOTICES.md), the original [MIT license](../LICENSE), and the bundled dependency licenses when assembling references. Distinguish the real historical RadLab sample from synthetic mission telemetry, and retain the NASA imagery credit. Do not claim that the application is clinically validated, NASA-endorsed or connected to actual spacecraft sensors.
+
+Include [NASA OSDR RadLab — Historical ISS radiation measurements](https://visualization.osdr.nasa.gov/radlab/gui/data-api/) alongside the other ten NASA source links in the project description. It is the source of the 16 historical ISS measurements bundled with BY STAR. Describe its use in **NASA Data** and retain its link when copying the source list into the form.
 
 ## Save, submit and confirm
 
