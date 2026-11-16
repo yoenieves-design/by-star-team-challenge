@@ -56,6 +56,8 @@ The JSON streams are generated deterministically before deployment. **Play** adv
 
 The replay validates inputs, removes duplicates and preserves late samples without replacing newer observations. Monitoring rules derive review items from the evidence. User actions change the follow-up record; they do not change scripted physiological values or control equipment. All comparison and recovery thresholds are illustrative demo rules, not NASA clinical limits.
 
+Replay position, profile selection, check-ins, follow-up actions and workout records are stored in IndexedDB in the visitor's browser. They persist across navigation on the same site and browser; the app does not upload them to a shared medical database. The guided case uses a separate session. Clearing site storage removes the saved local records, and downloaded review or workout JSON files remain on the visitor's device.
+
 ## Run locally
 
 Use **Node.js 24.13.0**, as pinned in [.node-version](.node-version). The package supports Node.js 22.18 or newer.
@@ -107,11 +109,9 @@ Operational use would require authenticated device gateways, a continuously runn
 ## Project material and attribution
 
 - [Submission-ready project description](docs/PROJECT-SUBMISSION.md)
-- [Submission checklist and verified organizer instructions](docs/SUBMISSION-GUIDE.md)
 - [Seven-slide Project Demo PDF](https://by-star-team-challenge.pages.dev/presentation/by-star-project-demo.pdf) and [presentation content summary](docs/PRESENTATION-OUTLINE.md)
 - [Product brief and design rationale](docs/PRODUCT-BRIEF.md)
 - [Guided demonstration and exercise walkthrough](docs/ROADMAP.md)
-- [Data behavior, local storage and repository audit](docs/DATA-AND-SECURITY.md)
 - [NASA historical sample and original API query](public/data/radlab-iss-sample.json)
 - [Third-party attribution](THIRD-PARTY-NOTICES.md) and [bundled licenses](https://by-star-team-challenge.pages.dev/THIRD-PARTY-NOTICES.txt)
 

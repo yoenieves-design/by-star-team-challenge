@@ -1,6 +1,6 @@
 # BY STAR · Project submission material
 
-This document provides English text for the project submission and an extended walkthrough. The description reflects the implemented browser prototype. Complete the team-specific fields at the end before submitting. Use the [seven-slide Project Demo PDF](https://by-star-team-challenge.pages.dev/presentation/by-star-project-demo.pdf) for the presentation field, and follow the [verified submission checklist](SUBMISSION-GUIDE.md).
+This document describes the implemented browser prototype, its data sources and an extended walkthrough. The [seven-slide Project Demo PDF](https://by-star-team-challenge.pages.dev/presentation/by-star-project-demo.pdf) presents the team and the application.
 
 > **Demo disclosure:** All astronaut names, profiles and medical records shown in the demo are fictional. Mission data is simulated. These fictional identities are separate from the real members of Team by-star. The historical NASA RadLab sample is real reference data, kept separate from the simulated mission.
 
@@ -141,7 +141,7 @@ Development assistance is disclosed in **Use of Super Intelligence (SI)** above.
 
 The original project code is released under the [MIT License](../LICENSE). NASA materials, the Inter font and bundled dependencies retain their applicable attribution and licensing terms, documented in [third-party notices](../THIRD-PARTY-NOTICES.md).
 
-The [data behavior and repository audit](DATA-AND-SECURITY.md) explains bundled public data, local browser storage, exports and the scope of the credential review.
+The [README](../README.md#how-playback-works) explains the reproducible replay, local browser storage and JSON exports. The static application requires no API key or server credentials; hosting authorization is managed outside the repository.
 
 ## Extended walkthrough for the live app
 
@@ -156,7 +156,7 @@ This sequence is supplemental guidance for exploring the app. It is longer than 
 
 The required Project Demo is a video of at most 30 seconds or a deck of at most seven slides, including title and introduction. The complete [walkthrough](ROADMAP.md) can also be followed separately without a video.
 
-## Links and team fields to complete
+## Project links and team
 
 | Field | Value |
 | --- | --- |
@@ -164,10 +164,7 @@ The required Project Demo is a video of at most 30 seconds or a deck of at most 
 | Source repository | https://github.com/yoenieves-design/by-star-team-challenge |
 | Project name | BY STAR · Mission Health |
 | Team name | by-star |
-| Registered challenge and project page | **Copy the exact title and URL from the submission portal.** |
-| Team members and contributions | **Enter the actual participants and their contributions.** |
-| Local event / location | Local Event participation confirmed by the project owner. **Enter the actual registered event and its time zone; neither has been supplied here.** |
+| Challenge | [Create Health Monitoring Software for Astronauts on Space Missions](https://www.spaceappschallenge.org/2026/challenges/health-monitoring-software/) |
+| Team members | Yoelvis Hernandez Brito; Blanca Nieves Sosa. |
 | Project Demo | https://by-star-team-challenge.pages.dev/presentation/by-star-project-demo.pdf — seven English slides, including the title and team introduction. |
 | Original code license | MIT; see the [LICENSE](../LICENSE) and [third-party notices](../THIRD-PARTY-NOTICES.md). |
-
-The team-specific fields marked above are intentionally incomplete. They are not claims about participants, competition eligibility, submission status or a deadline. No project submission has been made by preparing this document. Follow the [submission checklist](SUBMISSION-GUIDE.md) for verified organizer instructions and the remaining rules to check in the current official guides.

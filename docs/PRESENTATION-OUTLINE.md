@@ -34,11 +34,8 @@ Shows machine workload and cadence alongside independently sourced chest heart r
 
 Shows the App guide and explains the separate historical NASA reference: 16 ISS absorbed dose-rate records from [NASA OSDR RadLab](https://visualization.osdr.nasa.gov/radlab/gui/data-api/). Lunar telemetry and crew records are synthetic. Links identify NASA interface and exercise references, the public application and source repository. Future operational use requires authenticated sensors, protected medical records and validated mission procedures. The original code uses MIT, and OpenAI Codex development assistance is disclosed.
 
-## Before submitting
+## Access and credits
 
 - Open the [PDF](https://by-star-team-challenge.pages.dev/presentation/by-star-project-demo.pdf) without signing in and confirm all seven pages are available.
 - Keep the fictional crew disclosure and the distinction between historical NASA data and simulated telemetry in the submission text.
 - Include the full source list from [Project submission material](PROJECT-SUBMISSION.md#nasa-data-and-resources-used) and the [third-party credits](../THIRD-PARTY-NOTICES.md) in the appropriate form fields.
-- Review the team-specific fields and required declarations, select **Submit for Judging**, and verify the portal's confirmation before the applicable deadline.
-
-See [Submission preparation](SUBMISSION-GUIDE.md) for the guide requirements and the account-specific details that remain to be confirmed by the team.
