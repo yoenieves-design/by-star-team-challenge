@@ -1,6 +1,6 @@
 # BY STAR · Project submission material
 
-This document provides English text for the project submission and an extended walkthrough. The description reflects the implemented browser prototype. Complete the team-specific fields at the end before publishing. The required Project Demo is a separate video of no more than 30 seconds or a deck of no more than seven slides, including title and introduction. Use the [presentation outline](PRESENTATION-OUTLINE.md) and [verified submission checklist](SUBMISSION-GUIDE.md).
+This document provides English text for the project submission and an extended walkthrough. The description reflects the implemented browser prototype. Complete the team-specific fields at the end before submitting. Use the [seven-slide Project Demo PDF](https://by-star-team-challenge.pages.dev/presentation/by-star-project-demo.pdf) for the presentation field, and follow the [verified submission checklist](SUBMISSION-GUIDE.md).
 
 > **Demo disclosure:** All astronaut names, profiles and medical records shown in the demo are fictional. Mission data is simulated. These fictional identities are separate from the real members of Team by-star. The historical NASA RadLab sample is real reference data, kept separate from the simulated mission.
 
@@ -20,7 +20,7 @@ These field names are visible on page 3 of the supplied November 13, 2026 Projec
 | --- | --- |
 | Project Name | BY STAR - Mission Health. |
 | High-Level Project Summary | The short summary above, adapted to the portal's limit. |
-| Link to Project Demo | **Pending:** a public link to the final video of at most 30 seconds OR deck of at most seven slides. The live application does not replace this required presentation. |
+| Link to Project Demo | [Seven-slide English presentation (PDF)](https://by-star-team-challenge.pages.dev/presentation/by-star-project-demo.pdf). This is the presentation link; the application link belongs in Final Project. |
 | Link to Final Project | https://by-star-team-challenge.pages.dev/ ; include the source repository in the description and references. |
 | Detailed Project Description | The description, distinctive features, implementation and limitations below. |
 | Use of Super Intelligence (SI) | The development-assistance disclosure below; follow the portal's expanded instructions. |
@@ -145,7 +145,7 @@ The [data behavior and repository audit](DATA-AND-SECURITY.md) explains bundled 
 
 ## Extended walkthrough for the live app
 
-This sequence is supplemental guidance for exploring the app. It is longer than the required short Project Demo. Use the [seven-slide outline or concise narration](PRESENTATION-OUTLINE.md) for that separate deliverable.
+This sequence is supplemental guidance for exploring the app. It is longer than the required short Project Demo. The [seven-slide PDF](https://by-star-team-challenge.pages.dev/presentation/by-star-project-demo.pdf) is the separate presentation deliverable; its [content summary](PRESENTATION-OUTLINE.md) lists the seven slides.
 
 1. **Opening:** “BY STAR helps a crew member understand whether a reading is usable, what context it belongs to, and what follow-up remains.” Open Health and select Maya.
 2. **Verify the evidence:** Inspect the wrist sample’s time and source. Show the separate breathing environment and open the cabin incident in Assist.
@@ -167,7 +167,7 @@ The required Project Demo is a video of at most 30 seconds or a deck of at most 
 | Registered challenge and project page | **Copy the exact title and URL from the submission portal.** |
 | Team members and contributions | **Enter the actual participants and their contributions.** |
 | Local event / location | Local Event participation confirmed by the project owner. **Enter the actual registered event and its time zone; neither has been supplied here.** |
-| Project Demo | **Required and still pending:** public link to the final video of at most 30 seconds OR deck of at most seven slides. |
+| Project Demo | https://by-star-team-challenge.pages.dev/presentation/by-star-project-demo.pdf — seven English slides, including the title and team introduction. |
 | Original code license | MIT; see the [LICENSE](../LICENSE) and [third-party notices](../THIRD-PARTY-NOTICES.md). |
 
 The team-specific fields marked above are intentionally incomplete. They are not claims about participants, competition eligibility, submission status or a deadline. No project submission has been made by preparing this document. Follow the [submission checklist](SUBMISSION-GUIDE.md) for verified organizer instructions and the remaining rules to check in the current official guides.

@@ -4,7 +4,7 @@
 
 BY STAR is an English-language astronaut health-monitoring prototype by team **by-star** for the NASA Space Apps health-monitoring challenge. It follows six fictional crew members on SELENE-06, a lunar far-side construction mission, and shows how personal sensors, breathing-environment data, exercise equipment, clinical reports and crew observations can support a traceable medical review.
 
-**[Open the live demo](https://by-star-team-challenge.pages.dev/)** · **[Project description](docs/PROJECT-SUBMISSION.md)** · **[Demonstration walkthrough](docs/ROADMAP.md)**
+**[Open the live demo](https://by-star-team-challenge.pages.dev/)** · **[Seven-slide presentation (PDF)](https://by-star-team-challenge.pages.dev/presentation/by-star-project-demo.pdf)** · **[Project description](docs/PROJECT-SUBMISSION.md)** · **[Demonstration walkthrough](docs/ROADMAP.md)**
 
 The public demo uses synthetic crew records and illustrative procedures. Its purpose is to demonstrate monitoring and follow-up; it does not diagnose, prescribe treatment or grant medical clearance. NASA references inform the design, and a separate historical NASA dataset demonstrates source provenance.
 
@@ -108,7 +108,7 @@ Operational use would require authenticated device gateways, a continuously runn
 
 - [Submission-ready project description](docs/PROJECT-SUBMISSION.md)
 - [Submission checklist and verified organizer instructions](docs/SUBMISSION-GUIDE.md)
-- [Seven-slide Project Demo outline and short narration draft](docs/PRESENTATION-OUTLINE.md)
+- [Seven-slide Project Demo PDF](https://by-star-team-challenge.pages.dev/presentation/by-star-project-demo.pdf) and [presentation content summary](docs/PRESENTATION-OUTLINE.md)
 - [Product brief and design rationale](docs/PRODUCT-BRIEF.md)
 - [Guided demonstration and exercise walkthrough](docs/ROADMAP.md)
 - [Data behavior, local storage and repository audit](docs/DATA-AND-SECURITY.md)

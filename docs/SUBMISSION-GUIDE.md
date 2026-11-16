@@ -21,7 +21,7 @@ Page references below refer to these supplied captures. The PDFs are not redistr
 | Source and documentation | [Public repository](https://github.com/yoenieves-design/by-star-team-challenge), README, project description and source references prepared. The tested application release is tagged `v0.2.0`. |
 | Verification | Type checking, 30 unit tests, 16 browser cases, GitHub verification and Cloudflare deployment passed after the repository cleanup. See [Verification](VERIFICATION.md). |
 | Licensing | Original code uses the owner-approved MIT license. Third-party materials retain their licenses and credits. MIT is the team's choice, not a license mandated by these captured guides. |
-| Required Project Demo | **Pending:** a public video of at most 30 seconds or a slide presentation of at most seven slides. The live app alone does not replace this required presentation. |
+| Required Project Demo | [Seven-slide English PDF](https://by-star-team-challenge.pages.dev/presentation/by-star-project-demo.pdf), including the title and team introduction. Use this URL in **Link to Project Demo**. |
 | Competition submission | **Not verified:** preparing or publishing this repository does not submit the project. The team must complete the portal process and check its confirmation. |
 
 ## Deadline and event eligibility
@@ -53,7 +53,7 @@ Both guides confirm the presentation requirement: Judging & Awards, page 2; Proj
 | Limits | Projects exceeding the 30-second or seven-slide limit are not eligible for Global Judging. |
 | Minors' likeness | The Project Submission Guide, page 4, says project demonstrations and final projects may not contain images, video, audio or other likeness of persons under 18. |
 
-Keep the required **Project Demo** link distinct from the **Final Project** link. For BY STAR, the live application is the working project; the short video or slide deck still needs to be completed and published. The longer [walkthrough](ROADMAP.md) supports exploration but is not automatically a compliant 30-second presentation.
+Keep the required **Project Demo** link distinct from the **Final Project** link. For BY STAR, use the [seven-slide PDF](https://by-star-team-challenge.pages.dev/presentation/by-star-project-demo.pdf) as Project Demo and the [live application](https://by-star-team-challenge.pages.dev/) as Final Project. The longer [walkthrough](ROADMAP.md) supports exploration separately.
 
 The submission guide recommends readable slides, strong visuals, a view of the prototype and user experience, and an explanation of how NASA and space-agency resources support the solution. It also asks that the slide content include the team name, team members' names and selected challenge. These recommendations should fit within the seven-slide limit.
 
@@ -129,7 +129,7 @@ Honorable Mentions do not advance to Executive Judging or become eligible for aw
 ## Final BY STAR checklist
 
 - [ ] Confirm the Local Event's name and time zone, exact challenge, project URL and accepted member roster in the portal.
-- [ ] Publish the required video of at most 30 seconds or deck of at most seven slides, in the permitted language format.
+- [x] Publish the [seven-slide English presentation](https://by-star-team-challenge.pages.dev/presentation/by-star-project-demo.pdf), including title and introduction.
 - [ ] Check the live form's expanded instructions and numeric limits, including its AI/SI disclosure field.
 - [ ] Fill every required field with the English project draft and real team details.
 - [ ] Include all external sources and materials in the form's References field, with permissions and credits checked.
